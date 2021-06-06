@@ -1,0 +1,17 @@
+Package: linkET
+Type: Package
+Title: What the Package Does (Title Case)
+Version: 0.0.0.1
+Author: Houyun Huang <houyunhuang@163.com>
+Maintainer: Houyun Huang <houyunhuang@163.com>
+Description: More about what it does (maybe more than one line)
+    Use four spaces when indenting paragraphs within the Description.
+License: GPL-2
+URL: https://github.com/Hy4m/linkET
+BugReports: https://github.com/Hy4m/linkET/issues
+LazyData: TRUE
+Encoding: UTF-8
+Depends: R (>= 3.5.0)
+Imports: dplyr, ggplot2 (>= 3.0.0), rlang, purrr, tibble, utils
+Suggests: knitr, rmarkdown
+RoxygenNote: 7.1.1
