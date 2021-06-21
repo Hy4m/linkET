@@ -1,0 +1,40 @@
+#' Add diagonal label on hyplot
+#' @description \code{geom_panel_grid} is mainly used with \code{hyplot()}.
+#'     function to add a panel grid line on plot region.
+#' Add diagnoal labels on correlation plot
+#' @description \code{geom_diag_label} is mainly used with \code{hyplot()} and
+#'     \code{qcorrplot()} functions to add diagnoal labels on correct position
+#'     base on different type of cor_tbl object.
+#' @param geom one of "text", "label".
+#' @param ... extra parameters.
+#' @importFrom ggplot2 aes_ geom_label
+#' @rdname geom_diag_label
+#' @author Hou Yun
+#' @export
+geom_diag_label <- function(..., geom = "text")
+{
+  structure(.Data = list(geom = geom, params = list(...)),
+            class = "geom_diag_label")
+}
+
+#' @importFrom ggplot2 ggplot_add
+#' @export
+ggplot_add.geom_diag_label <- function(object, plot, object_name) {
+  stopifnot(is_hyplot(plot))
+  md <- plot$data
+  row_names <- row_names(md)
+  col_names <- col_names(md)
+  if(!identical(row_names, col_names)) {
+    stop("`geom_diag_label()` just support for symmetric matrices.", call. = FALSE)
+  }
+  data <- tibble::tibble(x = seq_along(col_names),
+                         y = rev(seq_along(row_names)),
+                         label = col_names)
+  params <- object$params
+  params$data <- data
+  params$mapping <- aes_(x = ~x, y = ~y, label = ~label)
+  params$inherit.aes <- FALSE
+  geom <- paste0("geom_", object$geom)
+  object <- do.call(geom, params)
+  ggplot_add(object, plot, object_name)
+}

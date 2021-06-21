@@ -12,6 +12,26 @@ BugReports: https://github.com/Hy4m/linkET/issues
 LazyData: TRUE
 Encoding: UTF-8
 Depends: R (>= 3.5.0)
-Imports: dplyr, ggplot2 (>= 3.0.0), rlang, purrr, tibble, utils
-Suggests: knitr, rmarkdown
+Imports: 
+    dplyr, 
+    ggplot2 (>= 3.0.0), 
+    glue, 
+    magrittr, 
+    rlang, 
+    purrr, 
+    tibble, 
+    stats, 
+    utils
+Suggests: 
+    ade4, 
+    ambient,
+    ggraph,
+    Hmisc,
+    knitr,
+    latex2exp,
+    picante,
+    psych,
+    relaimpo, 
+    rfPermute, 
+    WGCNA
 RoxygenNote: 7.1.1
