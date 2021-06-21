@@ -45,12 +45,12 @@ hyplot <- function(md,
 
   if(isTRUE(drop)) {
     if(type == "upper" && isFALSE(diag)) {
-      xbreaks <- xlabels <- col_names[-ncols(md)]
-      ybreaks <- ylabels <- row_names[-nrows(md)]
-    }
-    if(type == "lower" && isFALSE(diag)) {
       xbreaks <- xlabels <- col_names[-1]
       ybreaks <- ylabels <- row_names[-1]
+    }
+    if(type == "lower" && isFALSE(diag)) {
+      xbreaks <- xlabels <- col_names[-ncols(md)]
+      ybreaks <- ylabels <- row_names[-nrows(md)]
     }
   } else {
     xbreaks <- xlabels <- col_names
