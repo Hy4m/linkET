@@ -14,7 +14,7 @@ as_matrix_data(x, ...)
 
 \method{as_matrix_data}{data.frame}(x, name = NULL, include = "numeric", ...)
 
-\method{as_matrix_data}{correlate}(x, ...)
+\method{as_matrix_data}{correlate}(x, extra_mat = list(), ...)
 
 \method{as_matrix_data}{default}(x, ...)
 }
@@ -26,6 +26,8 @@ as_matrix_data(x, ...)
 \item{name}{variable name.}
 
 \item{include}{one of "numeric" (default), "character" or "factor".}
+
+\item{extra_mat}{a list of matrix.}
 }
 \value{
 a matrix_data object.

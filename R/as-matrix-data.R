@@ -2,6 +2,7 @@
 #' @title as_matrix_data
 #' @param x any \code{R} object.
 #' @param name variable name.
+#' @param extra_mat a list of matrix.
 #' @param ... ignore.
 #' @return a matrix_data object.
 #' @rdname as_matrix_data
@@ -49,9 +50,15 @@ as_matrix_data.data.frame <- function(x,
 #' @rdname as_matrix_data
 #' @export
 #' @method as_matrix_data correlate
-as_matrix_data.correlate <- function(x, ...) {
+as_matrix_data.correlate <- function(x, extra_mat = list(), ...) {
   id <- vapply(x, is.null, logical(1))
   x <- x[!id]
+  if(length(extra_mat) > 0) {
+    if(any(names(extra_mat) %in% names(x))) {
+      stop("`extra_mat` contains invalid name.", call. = FALSE)
+    }
+    x <- c(x, extra_mat)
+  }
   matrix_data(x, ...)
 }
 
