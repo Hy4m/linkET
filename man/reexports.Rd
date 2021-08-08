@@ -5,6 +5,7 @@
 \alias{reexports}
 \alias{aes}
 \alias{\%>\%}
+\alias{as_tibble}
 \title{Objects exported from other packages}
 \keyword{internal}
 \description{
@@ -15,5 +16,7 @@ below to see their documentation.
   \item{ggplot2}{\code{\link[ggplot2]{aes}}}
 
   \item{magrittr}{\code{\link[magrittr:pipe]{\%>\%}}}
+
+  \item{tibble}{\code{\link[tibble]{as_tibble}}}
 }}
 
