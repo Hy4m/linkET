@@ -11,7 +11,7 @@
 #' @export
 fortify.matrix_data <- function(model, data, ...)
 {
-  as_tibble(model, ...)
+  as_md_tbl(model, ...)
 }
 
 #' @method fortify md_tbl

@@ -2,17 +2,29 @@
 % Please edit documentation in R/qcorrplot.R
 \name{qcorrplot}
 \alias{qcorrplot}
+\alias{qcorrplot.cor_md_tbl}
 \alias{qcorrplot.correlate}
 \alias{qcorrplot.rcorr}
 \alias{qcorrplot.corr.test}
 \alias{qcorrplot.mantel_tbl}
 \alias{qcorrplot.pro_tbl}
+\alias{qcorrplot.easycorrelation}
 \alias{qcorrplot.matrix}
 \alias{qcorrplot.data.frame}
 \title{Correlation Plot
 These functions can be used to visualize simply and directly a correlation matrix.}
 \usage{
 qcorrplot(data, ...)
+
+\method{qcorrplot}{cor_md_tbl}(
+  data,
+  mapping = NULL,
+  drop = FALSE,
+  grid_col = "grey50",
+  grid_size = 0.25,
+  fixed = TRUE,
+  ...
+)
 
 \method{qcorrplot}{correlate}(
   data,
@@ -47,7 +59,6 @@ qcorrplot(data, ...)
 \method{qcorrplot}{mantel_tbl}(
   data,
   mapping = NULL,
-  byrow = TRUE,
   drop = FALSE,
   grid_col = "grey50",
   grid_size = 0.25,
@@ -58,7 +69,16 @@ qcorrplot(data, ...)
 \method{qcorrplot}{pro_tbl}(
   data,
   mapping = NULL,
-  byrow = TRUE,
+  drop = FALSE,
+  grid_col = "grey50",
+  grid_size = 0.25,
+  fixed = TRUE,
+  ...
+)
+
+\method{qcorrplot}{easycorrelation}(
+  data,
+  mapping = NULL,
   drop = FALSE,
   grid_col = "grey50",
   grid_size = 0.25,
@@ -72,7 +92,6 @@ qcorrplot(data, ...)
   drop = FALSE,
   grid_col = "grey50",
   grid_size = 0.25,
-  is_corr = NULL,
   fixed = TRUE,
   ...
 )
@@ -83,7 +102,6 @@ qcorrplot(data, ...)
   drop = FALSE,
   grid_col = "grey50",
   grid_size = 0.25,
-  is_corr = NULL,
   fixed = TRUE,
   ...
 )
@@ -91,7 +109,7 @@ qcorrplot(data, ...)
 \arguments{
 \item{data}{one of 'correlate', 'rcorr' or 'corr.test' object.}
 
-\item{...}{passing to \code{\link{as_matrix_data}}.}
+\item{...}{other parameters.}
 
 \item{mapping}{default list of aesthetic mappings to use for plot.}
 
@@ -102,11 +120,6 @@ qcorrplot(data, ...)
 \item{grid_size}{size of panel grid.}
 
 \item{fixed}{if TRUE (default), the coordinates will have a fixed aspect ratio.}
-
-\item{byrow}{a logical value indicating whether arrange the 'spec' columns on y axis.}
-
-\item{is_corr}{if TRUE (default), the data will be regarded as the correlation
-coefficient matrix.}
 }
 \value{
 a gg object.
