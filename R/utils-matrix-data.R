@@ -128,6 +128,8 @@ extract_upper <- function(md, diag = TRUE)
     }
     md <- dplyr::filter(md, row_id)
   }
+  attr(md, "type") <- "upper"
+  attr(md, "diag") <- diag
   md
 }
 
@@ -155,6 +157,8 @@ extract_lower <- function(md, diag = TRUE)
     }
     md <- dplyr::filter(md, row_id)
   }
+  attr(md, "type") <- "lower"
+  attr(md, "diag") <- diag
   md
 }
 
