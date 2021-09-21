@@ -13,6 +13,8 @@
 \alias{extract_lower}
 \alias{extract_diag}
 \alias{trim_diag}
+\alias{t.matrix_data}
+\alias{t.md_tbl}
 \title{Helper function}
 \usage{
 row_names(md)
@@ -38,6 +40,10 @@ extract_lower(md, diag = TRUE)
 extract_diag(md)
 
 trim_diag(md)
+
+\method{t}{matrix_data}(x, ...)
+
+\method{t}{md_tbl}(x, ...)
 }
 \arguments{
 \item{md}{a matrix_data object.}

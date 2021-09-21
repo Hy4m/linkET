@@ -38,7 +38,10 @@ matrix_data <- function(x,
       diag <- TRUE
     }
   }
-  md <- structure(.Data = mat, type = type, diag = diag, class = "matrix_data")
+  md <- structure(.Data = mat,
+                  type = type,
+                  diag = diag,
+                  class = "matrix_data")
   make_cluster(md, ...)
 }
 

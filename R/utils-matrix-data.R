@@ -201,3 +201,31 @@ trim_diag <- function(md)
   }
   md
 }
+
+#' @rdname Helper_function
+#' @export
+t.matrix_data <- function(x, ...) {
+  type <- attr(x, "type")
+  diag <- attr(x, "diag")
+  structure(.Data = lapply(x, t),
+            type = type,
+            diag = diag,
+            class = "matrix_data")
+}
+
+#' @rdname Helper_function
+#' @export
+t.md_tbl <- function(x, ...) {
+  row_name <- attr(x, "row_names")
+  col_name <- attr(x, "col_names")
+  nm <- names(x)
+  rid <- which(nm == ".rownames")
+  cid <- which(nm == ".colnames")
+  nm[rid] <- ".colnames"
+  nm[cid] <- ".rownames"
+  names(x) <- nm
+  attr(x, "row_names") <- col_name
+  attr(x, "col_names") <- row_name
+
+  x
+}
