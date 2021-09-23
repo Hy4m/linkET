@@ -13,7 +13,7 @@
 \alias{as_md_tbl.matrix}
 \title{Coerce matrix_data to data frames}
 \usage{
-as_md_tbl(x)
+as_md_tbl(x, ...)
 
 \method{as_md_tbl}{matrix_data}(x, ...)
 

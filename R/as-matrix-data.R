@@ -64,6 +64,22 @@ as_matrix_data.correlate <- function(x, extra_mat = list(), ...) {
 
 #' @rdname as_matrix_data
 #' @export
+#' @method as_matrix_data rcorr
+as_matrix_data.rcorr <- function(x, extra_mat = list(), ...) {
+  x <- as_correlate(x)
+  as_matrix_data(x, extra_mat = extra_mat, ...)
+}
+
+#' @rdname as_matrix_data
+#' @export
+#' @method as_matrix_data corr.test
+as_matrix_data.corr.test <- function(x, extra_mat = list(), ...) {
+  x <- as_correlate(x)
+  as_matrix_data(x, extra_mat = extra_mat, ...)
+}
+
+#' @rdname as_matrix_data
+#' @export
 #' @method as_matrix_data default
 as_matrix_data.default <- function(x, ...)
 {

@@ -15,7 +15,7 @@
 #' @rdname as_md_tbl
 #' @author Hou Yun
 #' @export
-as_md_tbl <- function(x) {
+as_md_tbl <- function(x, ...) {
   UseMethod("as_md_tbl")
 }
 

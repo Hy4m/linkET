@@ -5,6 +5,8 @@
 \alias{as_matrix_data.matrix}
 \alias{as_matrix_data.data.frame}
 \alias{as_matrix_data.correlate}
+\alias{as_matrix_data.rcorr}
+\alias{as_matrix_data.corr.test}
 \alias{as_matrix_data.default}
 \title{as_matrix_data}
 \usage{
@@ -15,6 +17,10 @@ as_matrix_data(x, ...)
 \method{as_matrix_data}{data.frame}(x, name = NULL, include = "numeric", ...)
 
 \method{as_matrix_data}{correlate}(x, extra_mat = list(), ...)
+
+\method{as_matrix_data}{rcorr}(x, extra_mat = list(), ...)
+
+\method{as_matrix_data}{corr.test}(x, extra_mat = list(), ...)
 
 \method{as_matrix_data}{default}(x, ...)
 }
