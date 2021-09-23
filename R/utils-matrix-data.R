@@ -1,8 +1,9 @@
 #' Helper function for matrix_data object
 #' @title Helper function
-#' @param md a matrix_data object.
+#' @param md,x a matrix_data object.
 #' @param value a valid value for dimension names.
 #' @param diag logical, if TRUE (default) will keep the diagonal of matrix data.
+#' @param ... other parameters.
 #' @rdname Helper_function
 #' @author Hou Yun
 #' @export

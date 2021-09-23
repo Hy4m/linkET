@@ -46,11 +46,13 @@ trim_diag(md)
 \method{t}{md_tbl}(x, ...)
 }
 \arguments{
-\item{md}{a matrix_data object.}
+\item{md, x}{a matrix_data object.}
 
 \item{value}{a valid value for dimension names.}
 
 \item{diag}{logical, if TRUE (default) will keep the diagonal of matrix data.}
+
+\item{...}{other parameters.}
 }
 \description{
 Helper function for matrix_data object
