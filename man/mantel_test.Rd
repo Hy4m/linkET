@@ -13,9 +13,12 @@ mantel_test(
   spec_select = NULL,
   env_select = NULL,
   use = "everything",
-  spec_dist_method = "bray",
-  env_dist_method = "euclidean",
+  spec_dist = NULL,
+  env_dist = NULL,
+  env_ctrl_dist = NULL,
   seed = 123,
+  spec_dist_method,
+  env_dist_method,
   ...
 )
 }
@@ -38,13 +41,17 @@ mantel_test(
 
 \item{use}{one of "everything", "complete" or "pairwise".}
 
-\item{spec_dist_method}{dissimilarity index (default is 'bray'), passing to \code{method}
-params of \code{vegan::vegdist}.}
+\item{spec_dist}{NULL (default) or \code{dist_func()}.}
 
-\item{env_dist_method}{dissimilarity index (default is euclidean'), passing to \code{method}
-params of \code{vegan::vegdist()}.}
+\item{env_dist}{NULL (default) or \code{dist_func()}.}
+
+\item{env_ctrl_dist}{NULL (default) or \code{dist_func()}.}
 
 \item{seed}{a integer value.}
+
+\item{spec_dist_method}{has been droped.}
+
+\item{env_dist_method}{has been droped.}
 
 \item{...}{extra params passing to \code{mantel_fun}.}
 }

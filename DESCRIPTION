@@ -25,6 +25,7 @@ Imports:
 Suggests: 
     ade4, 
     ambient,
+    FD,
     ggraph,
     Hmisc,
     knitr,
