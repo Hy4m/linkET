@@ -1,7 +1,7 @@
 Package: linkET
 Type: Package
 Title: Everything is Linkable
-Version: 0.0.1.5
+Version: 0.0.1.6
 Author: Houyun Huang <houyunhuang@163.com>
 Maintainer: Houyun Huang <houyunhuang@163.com>
 Description: More about what it does (maybe more than one line)
@@ -25,6 +25,7 @@ Imports:
 Suggests: 
     ade4, 
     ambient,
+    FD,
     ggraph,
     Hmisc,
     knitr,

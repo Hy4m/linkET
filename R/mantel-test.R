@@ -12,11 +12,13 @@
 #'   }
 #' @param spec_select,env_select NULL (default), numeric or character vector index of columns.
 #' @param use one of "everything", "complete" or "pairwise".
-#' @param spec_dist_method dissimilarity index (default is 'bray'), passing to \code{method}
-#'     params of \code{vegan::vegdist}.
-#' @param env_dist_method dissimilarity index (default is euclidean'), passing to \code{method}
-#'     params of \code{vegan::vegdist()}.
+#' @param spec_dist NULL (default) or \code{dist_func()}.
+#' @param env_dist NULL (default) or \code{dist_func()}.
+#' @param env_ctrl_dist NULL (default) or \code{dist_func()}.
+#' @param env_dist_method has been droped.
 #' @param seed a integer value.
+#' @param spec_dist_method has been droped.
+#' @param env_dist_method has been droped.
 #' @param ... extra params passing to \code{mantel_fun}.
 #' @return a data.frame.
 #' @importFrom dplyr mutate
@@ -47,9 +49,12 @@ mantel_test <- function(spec,
                         spec_select = NULL, # a list of index vector
                         env_select = NULL,
                         use = "everything",
-                        spec_dist_method = "bray",
-                        env_dist_method = "euclidean",
+                        spec_dist = NULL,
+                        env_dist = NULL,
+                        env_ctrl_dist = NULL,
                         seed = 123,
+                        spec_dist_method,
+                        env_dist_method,
                         ...)
 {
   if(!is.data.frame(spec))
@@ -72,29 +77,49 @@ mantel_test <- function(spec,
     env <- split(env, group, drop = FALSE)
     if(mantel_fun == "mantel.partial") {
       if(is.data.frame(env_ctrl)) {
-        env_ctrl <- rep_len(list(env_ctrl), length(names(spec)))
+        env_ctrl <- rep_len(list(env_ctrl), length(spec))
       } else {
         env_ctrl <- env_ctrl[names(spec)]
       }
     } else {
-      env_ctrl <- as.list(rep(NA, length(names(spec))))
+      env_ctrl <- as.list(rep(NA, length(spec)))
     }
     df <- suppressMessages(
       purrr::pmap_dfr(
         list(spec, env, env_ctrl, as.list(names(spec))),
         function(.spec, .env, .env_ctrl, .group) {
-          .mantel_test(spec = .spec, env = .env, env_ctrl = .env_ctrl,
-                       mantel_fun = mantel_fun, spec_select = spec_select,
-                       env_select = env_select, spec_dist_method = spec_dist_method,
-                       env_dist_method = env_dist_method, use = use, seed = seed, ...) %>%
+          .mantel_test(spec = .spec,
+                       env = .env,
+                       env_ctrl = .env_ctrl,
+                       mantel_fun = mantel_fun,
+                       spec_select = spec_select,
+                       env_select = env_select,
+                       spec_dist = spec_dist,
+                       env_dist = env_dist,
+                       env_ctrl_dist = env_ctrl_dist,
+                       use = use,
+                       seed = seed,
+                       spec_dist_method = spec_dist_method,
+                       env_dist_method = env_dist_method,
+                       ...) %>%
             dplyr::mutate(.group = .group)
           })
       )
   } else {
-    df <- .mantel_test(spec = spec, env = env, env_ctrl = env_ctrl,
-                       mantel_fun = mantel_fun, spec_select = spec_select,
-                       env_select = env_select, spec_dist_method = spec_dist_method,
-                       env_dist_method = env_dist_method, use = use, seed = seed, ...)
+    df <- .mantel_test(spec = spec,
+                       env = env,
+                       env_ctrl = env_ctrl,
+                       mantel_fun = mantel_fun,
+                       spec_select = spec_select,
+                       env_select = env_select,
+                       spec_dist = spec_dist,
+                       env_dist = env_dist,
+                       env_ctrl_dist = env_ctrl_dist,
+                       use = use,
+                       seed = seed,
+                       spec_dist_method = spec_dist_method,
+                       env_dist_method = env_dist_method,
+                       ...)
   }
   grouped <- if(!is.null(group)) TRUE else FALSE
   attr(df, "grouped") <- grouped
@@ -103,26 +128,28 @@ mantel_test <- function(spec,
 
 #' @noRd
 .mantel_test <- function(spec,
-                        env,
-                        env_ctrl = NULL, # named list if grouped
-                        mantel_fun = "mantel",
-                        spec_select = NULL, # a list of index vector
-                        env_select = NULL,
-                        use = "everything",
-                        spec_dist_method = "bray",
-                        env_dist_method = "euclidean",
-                        seed = 123,
-                        ...)
+                         env,
+                         env_ctrl = NULL, # named list if grouped
+                         mantel_fun = "mantel",
+                         spec_select = NULL, # a list of index vector
+                         env_select = NULL,
+                         use = "everything",
+                         spec_dist = NULL,
+                         env_dist = NULL,
+                         env_ctrl_dist = NULL,
+                         seed = 123,
+                         spec_dist_method,
+                         env_dist_method,
+                         ...)
 {
   .FUN <- switch (mantel_fun,
-    mantel = get_function("vegan", "mantel"),
-    mantel.partial = get_function("vegan", "mantel.partial"),
-    mantel.randtest = get_function("ade4", "mantel.randtest"),
-    mantel.rtest = get_function("ade4", "mantel.rtest"),
-    stop("Invalid 'mantel_fun' parameter.", call. = FALSE)
+                  mantel = get_function("vegan", "mantel"),
+                  mantel.partial = get_function("vegan", "mantel.partial"),
+                  mantel.randtest = get_function("ade4", "mantel.randtest"),
+                  mantel.rtest = get_function("ade4", "mantel.rtest"),
+                  stop("Invalid 'mantel_fun' parameter.", call. = FALSE)
   )
 
-  vegdist <- get_function("vegan", "vegdist")
   use <- match.arg(use, c("everything", "complete", "pairwise"))
 
   if(!is.data.frame(spec))
@@ -150,15 +177,23 @@ mantel_test <- function(spec,
   }
 
   if(use == "complete") {
-    non.na <- complete.cases(spec) & complete.cases(env)
+    non_na <- complete.cases(spec) & complete.cases(env)
     if(mantel_fun == "mantel.partial") {
-      non.na <- non.na & complete.cases(env_ctrl)
+      non_na <- non_na & complete.cases(env_ctrl)
     }
-    spec <- spec[non.na, , drop = FALSE]
-    env <- env[non.na, , drop = FALSE]
+    spec <- spec[non_na, , drop = FALSE]
+    env <- env[non_na, , drop = FALSE]
     if(mantel_fun == "mantel.partial") {
-      env_ctrl <- env_ctrl[non.na, , drop = FALSE]
+      env_ctrl <- env_ctrl[non_na, , drop = FALSE]
     }
+  }
+
+  if(is.null(spec_dist) && all(vapply(spec, is.numeric, logical(1)))) {
+    spec_dist <- dist_func(.FUN = "vegdist", method = "bray")
+  }
+
+  if(is.null(env_dist) && all(vapply(env, is.numeric, logical(1)))) {
+    env_dist <- dist_func(.FUN = "vegdist", method = "euclidean")
   }
 
   spec_select <- make_list_names(spec_select, "spec")
@@ -178,34 +213,38 @@ mantel_test <- function(spec,
     .spec <- spec[[.x]]
     .env <- env[[.y]]
     if(use == "pairwise") {
-      .non.na <- complete.cases(.spec) & complete.cases(.env)
+      non_na <- complete.cases(.spec) & complete.cases(.env)
       if(mantel_fun == "mantel.partial") {
-        .non.na <- .non.na & complete.cases(env_ctrl)
+        non_na <- non_na & complete.cases(env_ctrl)
       }
-      .spec <- .spec[.non.na, , drop = FALSE]
-      .env <- .env[.non.na, , drop = FALSE]
+      .spec <- .spec[non_na, , drop = FALSE]
+      .env <- .env[non_na, , drop = FALSE]
       if(mantel_fun == "mantel.partial") {
-        env_ctrl <- env_ctrl[.non.na, , drop = FALSE]
+        env_ctrl <- env_ctrl[non_na, , drop = FALSE]
       }
     }
-    spec.dist <- vegdist(.spec, method = spec_dist_method)
-    env.dist <- vegdist(.env, method = env_dist_method)
+
+    spec_dist <- spec_dist(.spec)
+    env_dist <- env_dist(.env)
 
     set.seed(.seed)
     if(mantel_fun == "mantel.partial") {
-      env_ctrl.dist <- vegdist(env_ctrl, method = env_dist_method)
-      .FUN(spec.dist, env.dist, env_ctrl.dist, ...)
+      if(is.null(env_ctrl_dist) && all(vapply(env, is.numeric, logical(1)))) {
+        env_ctrl_dist <- dist_func(.FUN = "vegdist", method = "euclidean")
+      }
+      env_ctrl_dist <- env_ctrl_dist(env_ctrl)
+      .FUN(spec_dist, env_dist, env_ctrl_dist, ...)
     } else {
-      .FUN(spec.dist, env.dist, ...)
+      .FUN(spec_dist, env_dist, ...)
     }
   }) %>% extract_mantel(mantel_fun)
 
-    structure(.Data = tibble::tibble(spec = spec_name,
-                                     env = env_name,
-                                     r = rp$r,
-                                     p = rp$p),
-              grouped = FALSE,
-              class = c("mantel_tbl", "tbl_df", "tbl", "data.frame"))
+  structure(.Data = tibble::tibble(spec = spec_name,
+                                   env = env_name,
+                                   r = rp$r,
+                                   p = rp$p),
+            grouped = FALSE,
+            class = c("mantel_tbl", "tbl_df", "tbl", "data.frame"))
 }
 
 #' @importFrom purrr map_dbl
