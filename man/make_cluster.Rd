@@ -25,7 +25,7 @@ make_cluster(
 
 \item{row_dist, col_dist}{dist function, see details.}
 
-\item{...}{extra parameters for dist.}
+\item{...}{extra parameters for gdist.}
 }
 \value{
 a modified matrix_data object.

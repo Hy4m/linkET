@@ -5,7 +5,7 @@
 #' @param cluster one of "all", "row", "col" or "none".
 #' @param cluster_method the clustering agglomeration method to be used.
 #' @param row_dist,col_dist dist function, see details.
-#' @param ... extra parameters for dist.
+#' @param ... extra parameters for gdist.
 #' @return a modified matrix_data object.
 #' @rdname make_cluster
 #' @author Hou Yun
@@ -33,26 +33,28 @@ make_cluster <- function(md,
   col_dist <- if (is.null(col_dist)) substitute(x)
 
   if (cluster == "all") {
-    row_hc <- hclust(dist(eval(row_dist), ...), method = cluster_method)
-    col_hc <- hclust(dist(t(eval(col_dist)), ...), method = cluster_method)
+    row_hc <- hclust(gdist(eval(row_dist), ...), method = cluster_method)
+    col_hc <- hclust(gdist(t(eval(col_dist)), ...), method = cluster_method)
 
     md <- lapply(md, function(.md) {
       .md[get_order(row_hc), get_order(col_hc)]
     })
   } else if (cluster == "row") {
-    row_hc <- hclust(dist(eval(row_dist), ...), method = cluster_method)
+    row_hc <- hclust(gdist(eval(row_dist), ...), method = cluster_method)
     md <- lapply(md, function(.md) {
       .md[get_order(row_hc), , drop = FALSE]
     })
   } else {
-    col_hc <- hclust(dist(t(eval(col_dist)), ...), method = cluster_method)
+    col_hc <- hclust(gdist(t(eval(col_dist)), ...), method = cluster_method)
     md <- lapply(md, function(.md) {
       .md[get_order(row_hc), , drop = FALSE]
     })
   }
 
-  md <- do.call("set_attrs", c(x = md, attrs))
-  structure(.Data = md, class = "matrix_data")
+  structure(.Data = md,
+            type = attrs$type,
+            diag = attrs$diag,
+            class = "matrix_data")
 }
 
 
