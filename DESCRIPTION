@@ -4,8 +4,12 @@ Title: Everything is Linkable
 Version: 0.0.1.7
 Author: Houyun Huang <houyunhuang@163.com>
 Maintainer: Houyun Huang <houyunhuang@163.com>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
+Description: The 'linkET' package can be used to visualize simply and directly a
+    matrix heatmap based on 'ggplot2'. It provides a solution for reordering the 
+    correlation matrix, displaying the different significance level on the plot and 
+    other details. The most important parts, it also provides a graphical display of 
+    any correlation analysis and their combination (such as Mantel test, Partial 
+    correlation analysis, and so on).
 License: GPL-2
 URL: https://github.com/Hy4m/linkET
 BugReports: https://github.com/Hy4m/linkET/issues

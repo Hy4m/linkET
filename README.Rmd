@@ -1,0 +1,121 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+# linkET
+
+<!-- badges: start -->
+<!-- badges: end -->
+
+The goal of `linkET` is to visualize simply and directly a matrix heatmap based
+on 'ggplot2'.
+
+## Installation
+
+You can install the released version of `linkET` from [GitHub](https://github.com/) with:
+
+``` r
+# install.packages("devtools")
+devtools::install_github("Hy4m/linkET")
+```
+## Example
+
+This is a basic example which shows you how to solve a common problem:
+
+### Data processing
+
+```{r data_processing}
+library(linkET)
+## matrix_data
+matrix_data(list(mtcars = mtcars))
+
+## md_tbl
+matrix_data(list(mtcars = mtcars)) %>% 
+  as_md_tbl()
+
+## as method
+as_matrix_data(mtcars)
+
+as_md_tbl(mtcars)
+
+## special function for correlation matrix
+correlate(mtcars) %>% 
+  as_matrix_data()
+
+correlate(mtcars) %>% 
+  as_md_tbl()
+```
+
+### Heatmap
+
+```{r heatmap}
+library(ggplot2)
+matrix_data(list(mtcars = mtcars)) %>% 
+  hyplot(aes(fill = mtcars)) +
+  geom_tile()
+
+as_md_tbl(mtcars) %>% 
+  hyplot(aes(size = mtcars)) +
+  geom_point(shape = 21, fill = NA)
+
+correlate(mtcars) %>% 
+  as_md_tbl() %>% 
+  qcorrplot() +
+  geom_square()
+
+library(vegan)
+data("varespec")
+data("varechem")
+correlate(varespec[1:30], varechem) %>% 
+  qcorrplot() +
+  geom_square() +
+  scale_fill_gradientn(colours = RColorBrewer::brewer.pal(11, "RdBu"))
+
+qcorrplot(varespec[1:30], type = "lower") +
+  geom_square() +
+  scale_fill_gradientn(colours = RColorBrewer::brewer.pal(11, "RdBu"))
+```
+
+## mantel test
+
+```{r mantel}
+library(dplyr)
+data("varechem", package = "vegan")
+data("varespec", package = "vegan")
+
+mantel <- mantel_test(varespec, varechem,
+                      spec_select = list(Spec01 = 1:7,
+                                         Spec02 = 8:18,
+                                         Spec03 = 19:37,
+                                         Spec04 = 38:44)) %>% 
+  mutate(rd = cut(r, breaks = c(-Inf, 0.2, 0.4, Inf),
+                  labels = c("< 0.2", "0.2 - 0.4", ">= 0.4")),
+         pd = cut(p, breaks = c(-Inf, 0.01, 0.05, Inf),
+                  labels = c("< 0.01", "0.01 - 0.05", ">= 0.05")))
+
+qcorrplot(correlate(varechem), type = "lower", diag = FALSE) +
+  geom_square() +
+  anno_link(aes(colour = pd, size = rd), data = mantel, curvature = 0.05) +
+  scale_fill_gradientn(colours = RColorBrewer::brewer.pal(11, "RdBu")) +
+  scale_size_manual(values = c(0.5, 1, 2)) +
+  scale_colour_manual(values = c("#D95F02", "#1B9E77", "#A2A2A288")) +
+  guides(size = guide_legend(title = "Mantel's r",
+                             override.aes = list(colour = "grey35"), 
+                             order = 2),
+         colour = guide_legend(title = "Mantel's p", 
+                               override.aes = list(size = 3), 
+                               order = 1),
+         fill = guide_colorbar(title = "Pearson's r", order = 3))
+```
+
