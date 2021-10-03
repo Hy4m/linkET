@@ -5,7 +5,7 @@
 \alias{dist_func}
 \title{Distance Matrix Computation}
 \usage{
-gdist(.data, .FUN = NULL, ...)
+gdist(.data, .FUN = NULL, .formula = NULL, ...)
 
 dist_func(...)
 }
@@ -13,6 +13,8 @@ dist_func(...)
 \item{.data}{a data frame object.}
 
 \item{.FUN}{the name of dist function.}
+
+\item{.formula}{lambda function.}
 
 \item{...}{other parameters passing to dist function.}
 }

@@ -3,6 +3,7 @@
 #' based on the data type.
 #' @param .data a data frame object.
 #' @param .FUN the name of dist function.
+#' @param .formula lambda function.
 #' @param ... other parameters passing to dist function.
 #' @return dist matrix.
 #' @rdname gdist
@@ -16,6 +17,7 @@
 #' gdist(m)
 gdist <- function(.data,
                   .FUN = NULL,
+                  .formula = NULL,
                   ...) {
   if(!is.data.frame(.data)) {
     .data <- as.data.frame(.data)
@@ -36,11 +38,11 @@ gdist <- function(.data,
   if(any_factor) {
     if(is.null(.FUN)) .FUN <- "gowdis"
     if(.FUN != "gowdis") {
-      message("Since the data contains factors, I recommend setting:\n",
+      message("The data contains factors, I recommend setting:\n",
               "`.FUN = \"gowdis\"`\n")
     }
   } else {
-    if(is.null(.FUN)) .FUN <- "vegdist"
+    if(is.null(.FUN)) .FUN <- "dist"
   }
   .FUN <- switch (.FUN,
     "dist" = get_function("stats", "dist"),
@@ -48,6 +50,11 @@ gdist <- function(.data,
     "gowdis" = get_function("FD", "gowdis"),
     match.fun(.FUN)
   )
+
+  if(!is.null(.formula)) {
+    trans <- rlang::as_function(.formula)
+    .data <- trans(.data)
+  }
   .FUN(.data, ...)
 }
 

@@ -84,27 +84,25 @@ mantel_test <- function(spec,
     } else {
       env_ctrl <- as.list(rep(NA, length(spec)))
     }
-    df <- suppressMessages(
-      purrr::pmap_dfr(
-        list(spec, env, env_ctrl, as.list(names(spec))),
-        function(.spec, .env, .env_ctrl, .group) {
-          .mantel_test(spec = .spec,
-                       env = .env,
-                       env_ctrl = .env_ctrl,
-                       mantel_fun = mantel_fun,
-                       spec_select = spec_select,
-                       env_select = env_select,
-                       spec_dist = spec_dist,
-                       env_dist = env_dist,
-                       env_ctrl_dist = env_ctrl_dist,
-                       use = use,
-                       seed = seed,
-                       spec_dist_method = spec_dist_method,
-                       env_dist_method = env_dist_method,
-                       ...) %>%
-            dplyr::mutate(.group = .group)
-          })
-      )
+    df <- purrr::pmap_dfr(
+      list(spec, env, env_ctrl, as.list(names(spec))),
+      function(.spec, .env, .env_ctrl, .group) {
+        .mantel_test(spec = .spec,
+                     env = .env,
+                     env_ctrl = .env_ctrl,
+                     mantel_fun = mantel_fun,
+                     spec_select = spec_select,
+                     env_select = env_select,
+                     spec_dist = spec_dist,
+                     env_dist = env_dist,
+                     env_ctrl_dist = env_ctrl_dist,
+                     use = use,
+                     seed = seed,
+                     spec_dist_method = spec_dist_method,
+                     env_dist_method = env_dist_method,
+                     ...) %>%
+          dplyr::mutate(.group = .group)
+      })
   } else {
     df <- .mantel_test(spec = spec,
                        env = env,
@@ -188,12 +186,24 @@ mantel_test <- function(spec,
     }
   }
 
-  if(is.null(spec_dist) && all(vapply(spec, is.numeric, logical(1)))) {
-    spec_dist <- dist_func(.FUN = "vegdist", method = "bray")
+  if(is.null(spec_dist)) {
+    if(all(vapply(spec, is.numeric, logical(1)))) {
+      message("`mantel_test()` using 'bray' method for 'spec'.")
+      spec_dist <- dist_func(.FUN = "vegdist", method = "bray")
+    } else {
+      message("`mantel_test()` using 'gower' method for 'spec'.")
+      spec_dist <- dist_func(.FUN = "gowdis")
+    }
   }
 
-  if(is.null(env_dist) && all(vapply(env, is.numeric, logical(1)))) {
-    env_dist <- dist_func(.FUN = "vegdist", method = "euclidean")
+  if(is.null(env_dist)) {
+    if(all(vapply(env, is.numeric, logical(1)))) {
+      message("`mantel_test()` using 'euclidean' method for 'env'.")
+      env_dist <- dist_func(.FUN = "vegdist", method = "euclidean")
+    } else {
+      message("`mantel_test()` using 'gower' method for 'env'.")
+      env_dist <- dist_func(.FUN = "gowdis")
+    }
   }
 
   spec_select <- make_list_names(spec_select, "spec")
@@ -229,9 +239,16 @@ mantel_test <- function(spec,
 
     set.seed(.seed)
     if(mantel_fun == "mantel.partial") {
-      if(is.null(env_ctrl_dist) && all(vapply(env, is.numeric, logical(1)))) {
-        env_ctrl_dist <- dist_func(.FUN = "vegdist", method = "euclidean")
+      if(is.null(env_ctrl_dist)) {
+        if(all(vapply(env_ctrl, is.numeric, logical(1)))) {
+          message("`mantel_test()` using 'euclidean' method for 'env_ctrl'.")
+          env_ctrl_dist <- dist_func(.FUN = "vegdist", method = "euclidean")
+        } else {
+          message("`mantel_test()` using 'gower' method for 'env_ctrl'.")
+          env_ctrl_dist <- dist_func(.FUN = "gowdis")
+        }
       }
+
       env_ctrl_dist <- env_ctrl_dist(env_ctrl)
       .FUN(spec_dist, env_dist, env_ctrl_dist, ...)
     } else {

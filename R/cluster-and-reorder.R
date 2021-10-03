@@ -4,8 +4,7 @@
 #' @param index a integer or character index, specifying which matrix to cluster by.
 #' @param cluster one of "all", "row", "col" or "none".
 #' @param cluster_method the clustering agglomeration method to be used.
-#' @param row_dist,col_dist dist function, see details.
-#' @param ... extra parameters for gdist.
+#' @param row_dist,col_dist NULL (default) or \code{dist_func()}.
 #' @return a modified matrix_data object.
 #' @rdname make_cluster
 #' @author Hou Yun
@@ -15,8 +14,7 @@ make_cluster <- function(md,
                          cluster = "none",
                          cluster_method = "complete",
                          row_dist = NULL,
-                         col_dist = NULL,
-                         ...)
+                         col_dist = NULL)
 {
   stopifnot(is_matrix_data(md))
   cluster <- match.arg(cluster, c("all", "row", "col", "none"))
@@ -27,25 +25,28 @@ make_cluster <- function(md,
   x <- md[[index]]
   attrs <- attributes(md)
 
-  row_dist <- substitute(row_dist)
-  col_dist <- substitute(col_dist)
-  row_dist <- if (is.null(row_dist)) substitute(x)
-  col_dist <- if (is.null(col_dist)) substitute(x)
+  if(is.null(row_dist)) {
+    row_dist <- dist_func()
+  }
+
+  if(is.null(col_dist)) {
+    col_dist <- dist_func()
+  }
 
   if (cluster == "all") {
-    row_hc <- hclust(gdist(eval(row_dist), ...), method = cluster_method)
-    col_hc <- hclust(gdist(t(eval(col_dist)), ...), method = cluster_method)
+    row_hc <- hclust(row_dist(x), method = cluster_method)
+    col_hc <- hclust(gdist(t(x)), method = cluster_method)
 
     md <- lapply(md, function(.md) {
       .md[get_order(row_hc), get_order(col_hc)]
     })
   } else if (cluster == "row") {
-    row_hc <- hclust(gdist(eval(row_dist), ...), method = cluster_method)
+    row_hc <- hclust(row_dist(x), method = cluster_method)
     md <- lapply(md, function(.md) {
       .md[get_order(row_hc), , drop = FALSE]
     })
   } else {
-    col_hc <- hclust(gdist(t(eval(col_dist)), ...), method = cluster_method)
+    col_hc <- hclust(gdist(t(x)), method = cluster_method)
     md <- lapply(md, function(.md) {
       .md[get_order(row_hc), , drop = FALSE]
     })

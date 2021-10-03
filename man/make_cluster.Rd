@@ -10,8 +10,7 @@ make_cluster(
   cluster = "none",
   cluster_method = "complete",
   row_dist = NULL,
-  col_dist = NULL,
-  ...
+  col_dist = NULL
 )
 }
 \arguments{
@@ -23,9 +22,7 @@ make_cluster(
 
 \item{cluster_method}{the clustering agglomeration method to be used.}
 
-\item{row_dist, col_dist}{dist function, see details.}
-
-\item{...}{extra parameters for gdist.}
+\item{row_dist, col_dist}{NULL (default) or \code{dist_func()}.}
 }
 \value{
 a modified matrix_data object.
