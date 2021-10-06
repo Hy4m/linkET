@@ -48,20 +48,12 @@
 \arguments{
 \item{x}{any \code{R} object.}
 
-<<<<<<< HEAD
 \item{...}{other parameters.}
 
-=======
->>>>>>> 21a59166a117db1fbdad679ac309f3dc074258f0
 \item{simplify}{if TRUE, Simple graphs are graphs which do not contain loop
 and multiple edges.}
 
 \item{directed}{whether or not to create a directed graph.}
-<<<<<<< HEAD
-=======
-
-\item{...}{other parameters.}
->>>>>>> 21a59166a117db1fbdad679ac309f3dc074258f0
 }
 \value{
 a graph object.
