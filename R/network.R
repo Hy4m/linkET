@@ -16,7 +16,6 @@ as.igraph.cor_md_tbl <- function(x,
                                  ...,
                                  simplify = TRUE,
                                  directed = FALSE) {
-
   x <- dplyr::filter(x, ...)
 
   if(isFALSE(simplify)) {
