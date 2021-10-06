@@ -6,6 +6,8 @@
 \alias{aes}
 \alias{\%>\%}
 \alias{as_tibble}
+\alias{as.igraph}
+\alias{as_tbl_graph}
 \title{Objects exported from other packages}
 \keyword{internal}
 \description{
@@ -15,8 +17,12 @@ below to see their documentation.
 \describe{
   \item{ggplot2}{\code{\link[ggplot2]{aes}}}
 
+  \item{igraph}{\code{\link[igraph]{as.igraph}}}
+
   \item{magrittr}{\code{\link[magrittr:pipe]{\%>\%}}}
 
   \item{tibble}{\code{\link[tibble]{as_tibble}}}
+
+  \item{tidygraph}{\code{\link[tidygraph:tbl_graph]{as_tbl_graph}}}
 }}
 
