@@ -181,7 +181,7 @@ mantel <- mantel_test(varespec, varechem,
 
 qcorrplot(correlate(varechem), type = "lower", diag = FALSE) +
   geom_square() +
-  anno_link(aes(colour = pd, size = rd), data = mantel, curvature = 0.05) +
+  anno_link(aes(colour = pd, size = rd), data = mantel, curvature = 0.1) +
   scale_fill_gradientn(colours = RColorBrewer::brewer.pal(11, "RdBu")) +
   scale_size_manual(values = c(0.5, 1, 2)) +
   scale_colour_manual(values = c("#D95F02", "#1B9E77", "#A2A2A288")) +

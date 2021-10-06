@@ -1,7 +1,7 @@
 Package: linkET
 Type: Package
 Title: Everything is Linkable
-Version: 0.0.1.7
+Version: 0.0.2
 Author: Houyun Huang <houyunhuang@163.com>
 Maintainer: Houyun Huang <houyunhuang@163.com>
 Description: The 'linkET' package can be used to visualize simply and directly a
@@ -20,10 +20,13 @@ Imports:
     dplyr, 
     ggplot2 (>= 3.0.0), 
     glue, 
+    igraph,
     magrittr, 
     rlang, 
     purrr, 
     tibble, 
+    tidygraph,
+    scales,
     stats, 
     utils
 Suggests: 
