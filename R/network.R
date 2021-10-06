@@ -6,7 +6,6 @@
 #' @param directed whether or not to create a directed graph.
 #' @param ... other parameters.
 #' @return  a graph object.
-#' @importFrom igraph simplify
 #' @importFrom igraph graph_from_data_frame
 #' @importFrom igraph as.igraph
 #' @importFrom tidygraph as_tbl_graph
@@ -16,39 +15,40 @@ as.igraph.cor_md_tbl <- function(x,
                                  ...,
                                  simplify = TRUE,
                                  directed = FALSE) {
+  rnm <- row_names(x)
+  cnm <- col_names(x)
   x <- dplyr::filter(x, ...)
 
-  if(isFALSE(simplify)) {
-    nodes <- unique(row_names(x), col_names(x))
-  } else {
-    nodes <- unique(c(x$.rownames, x$.colnames))
-  }
-  g <- graph_from_data_frame(x, directed = directed, vertices = nodes)
-
   if(isTRUE(simplify)) {
-    g <- simplify(g)
+    if(identical(rnm, cnm)) {
+      x <- extract_upper(x, FALSE)
+    }
+    nodes <- unique(c(x$.rownames, x$.colnames))
+
+  } else {
+    nodes <- unique(c(rnm, cnm))
   }
-  g
+  graph_from_data_frame(x, directed = directed, vertices = nodes)
 }
 
 #' @rdname network
 as.igraph.correlate <- function(x, ...) {
-  as.igraph.cor_md_tbl(as_md_tbl(x), ...)
+  as.igraph(as_md_tbl(x), ...)
 }
 
 #' @rdname network
 as.igraph.mantel_tbl <- function(x, ...) {
-  as.igraph.cor_md_tbl(as_md_tbl(x), ...)
+  as.igraph(as_md_tbl(x), ...)
 }
 
 #' @rdname network
 as.igraph.pro_tbl <- function(x, ...) {
-  as.igraph.cor_md_tbl(as_md_tbl(x), ...)
+  as.igraph(as_md_tbl(x), ...)
 }
 
 #' @rdname network
 as.igraph.easycorrelation <- function(x, ...) {
-  as.igraph.cor_md_tbl(as_md_tbl(x), ...)
+  as.igraph(as_md_tbl(x), ...)
 }
 
 #' @rdname network
