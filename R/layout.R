@@ -81,21 +81,5 @@ gen_circle <- function(nodes, group, zoom = 0.618) {
                     })
   }
   xy <- xy[get_order(nodes, xy$node), ]
-  xdiff <- diff(range(xy$x, na.rm = TRUE))
-  ydiff <- diff(range(xy$y, na.rm = TRUE))
-  if(xdiff > ydiff) {
-    xrng <- c(-1, 1)
-    yrng <- xrng * ydiff / xdiff
-  } else {
-    yrng <- c(-1, 1)
-    if(ydiff == 0) {
-      xrng <- c(0, 0)
-    } else {
-      xrng <- yrng * xdiff / ydiff
-    }
-  }
-
-  xy$x <- scales::rescale(xy$x, xrng, range(xy$x, na.rm = TRUE))
-  xy$y <- scales::rescale(xy$y, yrng, range(xy$y, na.rm = TRUE))
   xy
 }
