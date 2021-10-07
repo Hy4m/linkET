@@ -6,12 +6,14 @@
 #' @param ... others parameters.
 #' @return a correlate object.
 #' @rdname as_correlate
+#' @export
 as_correlate <- function(x) {
   UseMethod("as_correlate")
 }
 
 #' @method as_correlate rcorr
 #' @rdname as_correlate
+#' @export
 as_correlate.rcorr <- function(x, ...) {
   p <- x$P
   diag(p) <- 0
@@ -20,12 +22,14 @@ as_correlate.rcorr <- function(x, ...) {
 
 #' @method as_correlate corr.test
 #' @rdname as_correlate
+#' @export
 as_correlate.corr.test <- function(x, ...) {
   structure(.Data = list(r = x$r, p = x$p), class = "correlate")
 }
 
 #' @method as_correlate matrix
 #' @rdname as_correlate
+#' @export
 as_correlate.matrix <- function(x,
                                 is_corr = NULL,
                                 ...) {
@@ -39,6 +43,7 @@ as_correlate.matrix <- function(x,
 
 #' @method as_correlate data.frame
 #' @rdname as_correlate
+#' @export
 as_correlate.data.frame <- function(x, ...) {
   as_correlate(as.matrix(x), ...)
 }
