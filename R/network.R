@@ -20,11 +20,10 @@ as.igraph.cor_md_tbl <- function(x,
   x <- dplyr::filter(x, ...)
 
   if(isTRUE(simplify)) {
-    if(identical(rnm, cnm)) {
+    if(identical(rnm, cnm) && isFALSE(directed)) {
       x <- extract_upper(x, FALSE)
     }
     nodes <- unique(c(x$.rownames, x$.colnames))
-
   } else {
     nodes <- unique(c(rnm, cnm))
   }
