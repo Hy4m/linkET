@@ -7,7 +7,7 @@
 #' @return a correlate object.
 #' @rdname as_correlate
 #' @export
-as_correlate <- function(x) {
+as_correlate <- function(x, ...) {
   UseMethod("as_correlate")
 }
 

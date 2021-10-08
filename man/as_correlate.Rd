@@ -8,7 +8,7 @@
 \alias{as_correlate.data.frame}
 \title{Coerce a object to correlate}
 \usage{
-as_correlate(x)
+as_correlate(x, ...)
 
 \method{as_correlate}{rcorr}(x, ...)
 
