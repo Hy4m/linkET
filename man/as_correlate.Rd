@@ -14,7 +14,7 @@ as_correlate(x, ...)
 
 \method{as_correlate}{corr.test}(x, ...)
 
-\method{as_correlate}{matrix}(x, is_corr = NULL, ...)
+\method{as_correlate}{matrix}(x, is_corr = NULL, p = NULL, ...)
 
 \method{as_correlate}{data.frame}(x, ...)
 }
@@ -25,6 +25,8 @@ as_correlate(x, ...)
 
 \item{is_corr}{if TRUE (default), the data will be regarded as the correlation
 coefficient matrix.}
+
+\item{p}{p value matrix.}
 }
 \value{
 a correlate object.

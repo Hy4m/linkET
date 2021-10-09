@@ -3,6 +3,7 @@
 #' @param x any \code{R} object can convert to correlate.
 #' @param is_corr if TRUE (default), the data will be regarded as the correlation
 #' coefficient matrix.
+#' @param p p value matrix.
 #' @param ... others parameters.
 #' @return a correlate object.
 #' @rdname as_correlate
@@ -32,13 +33,24 @@ as_correlate.corr.test <- function(x, ...) {
 #' @export
 as_correlate.matrix <- function(x,
                                 is_corr = NULL,
+                                p = NULL,
                                 ...) {
   is_corr <- is_corr %||% check_corr(x)
 
   if(isFALSE(is_corr)) {
-    x <- cor(x)
+    x <- correlate(x, ...)
+  } else {
+    if(is.null(p)) {
+      x <- structure(.Data = list(r = x), class = "correlate")
+    } else {
+      p <- as.matrix(p)
+      if(!identical(dim(x), dim(p))) {
+        stop("'p' should have same dimension as 'x'.", call. = FALSE)
+      }
+      x <- structure(.Data = list(r = x, p = p), class = "correlate")
+    }
   }
-  structure(.Data = list(r = x), class = "correlate")
+  x
 }
 
 #' @method as_correlate data.frame
