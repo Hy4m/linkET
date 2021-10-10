@@ -8,8 +8,8 @@
 DoughnutGrob(
   x = 0.5,
   y = 0.5,
-  r0 = 5,
-  r1 = 8,
+  r0 = 4,
+  r1 = 5,
   value = runif(5),
   label = NULL,
   units = "mm",
