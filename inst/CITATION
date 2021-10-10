@@ -1,0 +1,13 @@
+citHeader("To cite linkET in publications use:")
+citEntry(
+  entry    = "manual",
+  title    = paste("linkET:", meta$Title),
+  author   = "Houyun Huang",
+  year     = "2021",
+  note     = paste("R package version", meta$Version),
+  url      = meta$URL,
+  textVersion = paste("Houyun Huang(2021).",
+                      paste0(paste("linkET:", meta$Title), "."),
+                      paste0(paste("R package version", meta$Version), ".")
+                      )
+)
