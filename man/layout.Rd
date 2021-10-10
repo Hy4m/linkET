@@ -12,8 +12,7 @@ layout_tbl_graph_circular(g, group = NULL, zoom = 0.618, circular)
 \arguments{
 \item{g}{graph.}
 
-\item{group}{if NULL (default), will compute the position according to group
-attributes of `g`.}
+\item{group}{if NULL (default), will use group attributes of `g`.}
 
 \item{zoom}{numeric, range in [0, 1].}
 

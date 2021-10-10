@@ -1,8 +1,7 @@
 #' @title Circular Layout
 #' @description arranges nodes in circles according to group information.
 #' @param g graph.
-#' @param group if NULL (default), will compute the position according to group
-#' attributes of `g`.
+#' @param group if NULL (default), will use group attributes of `g`.
 #' @param zoom numeric, range in [0, 1].
 #' @param circular not used.
 #' @return a two-columns matrix.
