@@ -35,6 +35,10 @@ a ggplot layer.
 \description{
 Function to draw mantel test plot on a correlation matrix heatmap.
 }
+\note{
+`anno_link()` have been soft deprecated, please use `geom_couple()`
+instead.
+}
 \author{
 Hou Yun
 }

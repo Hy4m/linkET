@@ -6,6 +6,8 @@
 #' @param nudge_x horizonal justification of label.
 #' @param ... extra parameters passing to layer function.
 #' @return a ggplot layer.
+#' @note `anno_link()` have been soft deprecated, please use `geom_couple()`
+#' instead.
 #' @importFrom ggplot2 geom_segment
 #' @importFrom ggplot2 geom_text
 #' @importFrom rlang eval_tidy
