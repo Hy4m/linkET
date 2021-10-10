@@ -1,5 +1,5 @@
-#' Link annotation
-#' @title Link Annotation
+#' @title Link Layer
+#' @description  Function to draw mantel test plot on a correlation matrix heatmap.
 #' @param data a data frame.
 #' @param mapping aesthetic mappings parameters.
 #' @param label.size,label.colour,label.family,label.fontface parameters for label.
@@ -9,17 +9,17 @@
 #' @importFrom ggplot2 geom_segment
 #' @importFrom ggplot2 geom_text
 #' @importFrom rlang eval_tidy
-#' @rdname anno_link
+#' @rdname geom_couple
 #' @author Hou Yun
 #' @export
-anno_link <- function(data,
-                      mapping = NULL,
-                      label.size = 3.88,
-                      label.colour = "black",
-                      label.family = "",
-                      label.fontface = 1,
-                      nudge_x = 0.1,
-                      ...)
+geom_couple <- function(data,
+                        mapping = NULL,
+                        label.size = 3.88,
+                        label.colour = "black",
+                        label.family = "",
+                        label.fontface = 1,
+                        nudge_x = 0.1,
+                        ...)
 {
   structure(.Data = list(mapping = mapping,
                          data = data,
@@ -29,7 +29,15 @@ anno_link <- function(data,
                          label.fontface = label.fontface,
                          nudge_x = nudge_x,
                          params = list(...)),
-            class = "anno_link")
+            class = "geom_couple")
+}
+
+#' @rdname geom_couple
+#' @export
+anno_link <- function(...) {
+  warning("`anno_link()` have been soft deprecated,\n",
+          "please use `geom_couple()` instead.", call. = FALSE)
+  geom_couple(...)
 }
 
 #' @importFrom ggplot2 aes_
@@ -37,12 +45,12 @@ anno_link <- function(data,
 #' @importFrom ggplot2 expand_limits
 #' @importFrom rlang set_names
 #' @export
-ggplot_add.anno_link <- function(object, plot, object_name) {
+ggplot_add.geom_couple <- function(object, plot, object_name) {
   stopifnot(is_hyplot(plot))
   md <- plot$data
   type <- attr(md, "type")
   if(type == "full") {
-    stop("`anno_link()` just support for triangle corrplot.")
+    stop("`geom_couple()` just support for triangle corrplot.")
   }
 
   diag <- attr(md, "diag")
