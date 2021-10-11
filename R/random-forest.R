@@ -36,42 +36,38 @@ random_forest <- function(spec,
   }
 
   rfPermute <- get_function("rfPermute", "rfPermute")
-  rp.importance <- get_function("rfPermute", "rp.importance")
+  importance <- get_function("rfPermute", "importance")
   set.seed(seed)
   seeds <- as.integer(stats::runif(n) * 10000)
 
   explained <- vector(length = n)
-  importance <- matrix(NA, nrow = n, ncol = m, dimnames = list(names(spec), names(env)))
+  imp <- matrix(NA, nrow = n, ncol = m, dimnames = list(names(spec), names(env)))
   p <- matrix(NA, nrow = n, ncol = m, dimnames = list(names(spec), names(env)))
 
   for (i in seq_len(n)) {
     set.seed(seeds[i])
-    rf <- rfPermute(spec[[i]] ~ ., data = env, importance = TRUE, ...)
-
-    type <- rf$type
-    imp <- rp.importance(rf, scale = TRUE)[names(env), , drop = FALSE]
+    rf <- rfPermute(spec[[i]] ~ ., data = env, ...)
+    type <- rf$rf$type
+    imp_mat <- importance(rf, scale = TRUE)[names(env), , drop = FALSE]
     if(type == "classification") {
-      explained[i] <- 100 - 100 * rf$err.rate[rf$ntree, "OOB"]
+      explained[i] <- 100 - 100 * rf$rf$err.rate[rf$rf$ntree, "OOB"]
+      imp[i, ] <- imp_mat[, "MeanDecreaseAccuracy"]
+      p[i, ] <- imp_mat[, "MeanDecreaseAccuracy.pval"]
     } else {
-      explained[i] <- 100 * rf$rsq[length(rf$rsq)]
-    }
-    if(type == "classification") {
-      importance[i, ] <- imp[, "MeanDecreaseAccuracy"]
-      p[i, ] <- imp[, "MeanDecreaseAccuracy.pval"]
-    } else {
-      importance[i, ] <- imp[, "%IncMSE"]
-      p[i, ] <- imp[, "%IncMSE.pval"]
+      explained[i] <- 100 * rf$rf$rsq[length(rf$rf$rsq)]
+      imp[i, ] <- imp_mat[, "%IncMSE"]
+      p[i, ] <- imp_mat[, "%IncMSE.pval"]
     }
   }
 
   if(isFALSE(byrow)) {
-    importance <- t(importance)
+    imp <- t(imp)
     p <- t(p)
   }
   structure(.Data = list(explained = data.frame(name = names(spec),
                                                 explained = explained,
                                                 stringsAsFactors = FALSE),
-                         importance = as.data.frame(importance),
+                         importance = as.data.frame(imp),
                          p = as.data.frame(p)),
             byrow = byrow,
             class = "random_forest")
