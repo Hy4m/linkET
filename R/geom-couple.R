@@ -6,7 +6,7 @@
 #' @param nudge_x horizonal justification of label.
 #' @param ... extra parameters passing to layer function.
 #' @return a ggplot layer.
-#' @note `anno_link()` have been soft deprecated, please use `geom_couple()`
+#' @note `anno_link()` has been soft deprecated, please use `geom_couple()`
 #' instead.
 #' @importFrom ggplot2 geom_segment
 #' @importFrom ggplot2 geom_text
@@ -37,7 +37,7 @@ geom_couple <- function(data,
 #' @rdname geom_couple
 #' @export
 anno_link <- function(...) {
-  warning("`anno_link()` have been soft deprecated,\n",
+  warning("`anno_link()` has been deprecated,\n",
           "please use `geom_couple()` instead.", call. = FALSE)
   geom_couple(...)
 }
