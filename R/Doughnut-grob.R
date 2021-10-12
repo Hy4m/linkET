@@ -75,7 +75,7 @@ DoughnutGrob <- function(x = 0.5,
                          })
   poly <- polygonGrob(pxy$x, pxy$y, pxy$group, gp = gp)
 
-  if(!is.null(label)) {
+  if(!is.null(label) && !all(is.na(label))) {
     tt <- (s + e) / 2
     rr <- (r0 + r1) / 2
     lab <- textGrob(label, rr * cos(tt) + 0.5, rr * sin(tt) + 0.5, gp = gp)
