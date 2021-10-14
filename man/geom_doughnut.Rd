@@ -13,6 +13,8 @@ geom_doughnut(
   position = "identity",
   ...,
   units = "mm",
+  label_size = 7.5,
+  label_col = "black",
   na.rm = FALSE,
   show.legend = NA,
   inherit.aes = TRUE

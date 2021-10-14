@@ -25,15 +25,17 @@
 #' @rdname geom_doughnut
 #' @author Hou Yun
 #' @export
-geom_doughnut <- function(mapping = NULL,
-                          data = NULL,
-                          stat = "identity",
-                          position = "identity",
-                          ...,
-                          units = "mm",
-                          na.rm = FALSE,
-                          show.legend = NA,
-                          inherit.aes = TRUE) {
+geom_doughnut_temp <- function(mapping = NULL,
+                               data = NULL,
+                               stat = "identity",
+                               position = "identity",
+                               ...,
+                               units = "mm",
+                               label_size = 7.5,
+                               label_col = "black",
+                               na.rm = FALSE,
+                               show.legend = NA,
+                               inherit.aes = TRUE) {
   layer(
     data = data,
     mapping = mapping,
@@ -44,6 +46,8 @@ geom_doughnut <- function(mapping = NULL,
     inherit.aes = inherit.aes,
     params = list(
       units = units,
+      label_size = label_size,
+      label_col = label_col,
       na.rm = na.rm,
       ...
     )
@@ -61,7 +65,7 @@ GeomDoughnut <- ggproto(
   required_aes = c("x", "y"),
 
   draw_panel = function(self, data, panel_params, coord, units = "mm",
-                        na.rm = FALSE) {
+                        label_size = 7.5, label_col = "black", na.rm = FALSE) {
     if(empty(data)) {
       return(ggplot2::zeroGrob())
     }
@@ -75,6 +79,8 @@ GeomDoughnut <- ggproto(
                    r1 = first_row$r1,
                    value = .data$value,
                    label = .data$label,
+                   label_size = label_size,
+                   label_col = label_col,
                    units = units,
                    default.units = "native",
                    gp = gpar(col  = scales::alpha(.data$colour,

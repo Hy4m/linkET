@@ -4,6 +4,8 @@
 #' @param r0,r1 a non-negtive numeric value.
 #' @param value a numeric vector.
 #' @param label NULL or character vector with the same length as 'value'.
+#' @param label_size size of labels.
+#' @param label_col color of labels.
 #' @param units unit of the piechart size.
 #' @param default.units a string indicating the default units to use if x or y
 #' are only given as numeric vectors.
@@ -30,6 +32,8 @@ DoughnutGrob <- function(x = 0.5,
                          r1 = 5,
                          value = runif(5),
                          label = NULL,
+                         label_size = 7.5,
+                         label_col = "black",
                          units = "mm",
                          default.units = "npc",
                          name = NULL,
@@ -52,11 +56,15 @@ DoughnutGrob <- function(x = 0.5,
     r1 <- temp
   }
 
-  vp <- viewport(x = x,
-                 y = y,
-                 width = unit(2 * r1, units),
-                 height = unit(2 * r1, units),
-                 clip = "off")
+  if(!units %in% c("npc", "native")) {
+    vp <- viewport(x = x,
+                   y = y,
+                   width = unit(2 * r1, units),
+                   height = unit(2 * r1, units),
+                   clip = "off")
+  } else {
+    vp <- NULL
+  }
   ratio <- value / sum(value, na.rm = TRUE)
   ratio[is.na(ratio)] <- 0
   n <- length(ratio)
@@ -78,7 +86,9 @@ DoughnutGrob <- function(x = 0.5,
   if(!is.null(label) && !all(is.na(label))) {
     tt <- (s + e) / 2
     rr <- (r0 + r1) / 2
-    lab <- textGrob(label, rr * cos(tt) + 0.5, rr * sin(tt) + 0.5, gp = gp)
+    lab <- textGrob(label, rr * cos(tt) + 0.5, rr * sin(tt) + 0.5,
+                    gp = gpar(fontsize = label_size,
+                              col = label_col))
   } else {
     lab <- nullGrob()
   }
