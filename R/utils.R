@@ -32,61 +32,12 @@ set_attrs <- function(x, ...) {
 new_data_frame <- getFromNamespace("new_data_frame", "ggplot2")
 
 #' @noRd
-na_or_value <- function(x, value = 0.2) {
-  if(is.null(x)) {
-    x <- 0.2
-  }
-  if(is.na(x)) value else x
-}
-
-#' @noRd
-get_mapping_vars <- function(mapping, ...) {
-  purrr::map_chr(list(...), function(.x) {
-    rlang::as_name(mapping[[.x]])
-  })
-}
-
-#' @noRd
-mapping_data <- function(data, mapping) {
-  nm <- names(mapping)
-  n <- nrow(data)
-  if(length(nm) == 0L) return(NULL)
-  dd <- purrr::map(mapping, function(.m) {
-    if(is.atomic(.m)) {
-      .m
-    } else {
-      rlang::eval_tidy(.m, data)
-    }
-  })
-  names(dd) <- nm
-  dd <- tibble::as_tibble(dd)
-  if(nrow(dd) != n) {
-    dd[rep_len(1L, n), ]
+aes_vars <- function(mapping, vars) {
+  if(vars %in% names(mapping)) {
+    rlang::as_name(mapping[[vars]])
   } else {
-    dd
+    NULL
   }
-}
-
-#' @noRd
-xlimits <- function(.plot) {
-  ggplot2::layer_scales(.plot)[["x"]]$limits
-}
-
-#' @noRd
-ylimits <- function(.plot) {
-  ggplot2::layer_scales(.plot)[["y"]]$limits
-}
-
-#' @noRd
-xrange <- function (.plot)
-{
-  ggplot2::ggplot_build(.plot)$layout$panel_params[[1]]$x.range
-}
-
-#' @noRd
-yrange <- function (.plot)
-{
-  ggplot2::ggplot_build(.plot)$layout$panel_params[[1]]$y.range
 }
 
 #' @noRd

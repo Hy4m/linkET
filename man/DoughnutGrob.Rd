@@ -8,9 +8,10 @@
 DoughnutGrob(
   x = 0.5,
   y = 0.5,
-  r0 = 4,
+  r0 = 0,
   r1 = 5,
   value = runif(5),
+  percent = FALSE,
   label = NULL,
   label_size = 7.5,
   label_col = "black",
@@ -29,6 +30,9 @@ grid.doughnut(...)
 \item{r0, r1}{a non-negtive numeric value.}
 
 \item{value}{a numeric vector.}
+
+\item{percent}{logical. If FALSE (the default) the value will be treated as
+source value.}
 
 \item{label}{NULL or character vector with the same length as 'value'.}
 

@@ -32,6 +32,7 @@ Imports:
 Suggests: 
     ade4, 
     ambient,
+    colorspace,
     FD,
     ggraph,
     Hmisc,

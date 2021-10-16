@@ -3,6 +3,8 @@
 #' @param x,y a numeric value or unit object.
 #' @param r0,r1 a non-negtive numeric value.
 #' @param value a numeric vector.
+#' @param percent logical. If FALSE (the default) the value will be treated as
+#' source value.
 #' @param label NULL or character vector with the same length as 'value'.
 #' @param label_size size of labels.
 #' @param label_col color of labels.
@@ -28,9 +30,10 @@
 #' @export
 DoughnutGrob <- function(x = 0.5,
                          y = 0.5,
-                         r0 = 4,
+                         r0 = 0,
                          r1 = 5,
                          value = runif(5),
+                         percent = FALSE,
                          label = NULL,
                          label_size = 7.5,
                          label_col = "black",
@@ -65,7 +68,11 @@ DoughnutGrob <- function(x = 0.5,
   } else {
     vp <- NULL
   }
-  ratio <- value / sum(value, na.rm = TRUE)
+  if(isTRUE(percent)) {
+    ratio <- value
+  } else {
+    ratio <- value / sum(value, na.rm = TRUE)
+  }
   ratio[is.na(ratio)] <- 0
   n <- length(ratio)
   s <- c(0, cumsum(ratio)[-n]) * 2 * pi

@@ -3,6 +3,7 @@
 \docType{data}
 \name{geom_doughnut}
 \alias{geom_doughnut}
+\alias{geom_node_doughnut}
 \alias{GeomDoughnut}
 \title{Doughnut Layer}
 \usage{
@@ -12,12 +13,21 @@ geom_doughnut(
   stat = "identity",
   position = "identity",
   ...,
+  percent = FALSE,
   units = "mm",
   label_size = 7.5,
   label_col = "black",
   na.rm = FALSE,
   show.legend = NA,
   inherit.aes = TRUE
+)
+
+geom_node_doughnut(
+  mapping = NULL,
+  data = NULL,
+  position = "identity",
+  show.legend = NA,
+  ...
 )
 }
 \arguments{
@@ -52,7 +62,14 @@ often aesthetics, used to set an aesthetic to a fixed value, like
 \code{colour = "red"} or \code{size = 3}. They may also be parameters
 to the paired geom/stat.}
 
+\item{percent}{logical. If FALSE (the default) the value will be treated as
+source value.}
+
 \item{units}{unit of the piechart size.}
+
+\item{label_size}{size of labels.}
+
+\item{label_col}{color of labels.}
 
 \item{na.rm}{If \code{FALSE}, the default, missing values are removed with
 a warning. If \code{TRUE}, missing values are silently removed.}
@@ -89,6 +106,16 @@ layer function to draw doughnut.
   }
 }
 
+\examples{
+library(ggplot2)
+dd <- tibble::tibble(x = runif(20, -180, 180),
+                     y = runif(20, -90, 90),
+                     value = purrr::map(sample(2:10, 20, TRUE), runif)
+                     )
+
+ggplot(dd, aes(x, y)) +
+  geom_doughnut(aes(value = value))
+}
 \author{
 Hou Yun
 }
