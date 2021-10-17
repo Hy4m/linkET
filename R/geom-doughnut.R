@@ -108,29 +108,31 @@ ggplot_add.doughnut <- function(object, plot, object_name) {
   fv <- aes_vars(mapping, "fill")
 
   if(is.null(vv)) {
-    data$value <- 1
+    data$.value <- 1
     mapping <- aes_modify(mapping, aes_(value = ~.value))
     vv <- ".value"
   }
   if(!is.list(data[[vv]])) {
     data[[vv]] <- as.list(data[[vv]])
   }
-  if(all(vapply(data[[vv]], is.character, logical(1))) ||
-     all(vapply(data[[vv]], is.factor, logical(1)))) {
-    value <- lapply(data[[vv]], function(.value) as.numeric(table(.value)))
+
+  value <- data[[vv]]
+  if(all(vapply(value, is.character, logical(1))) ||
+     all(vapply(value, is.factor, logical(1)))) {
 
     if(is.null(object$fill) && is.null(fv)) {
-      fill <- lapply(data[[vv]], function(.value) names(table(.value)))
+      fill <- lapply(value, function(.value) names(table(.value)))
       data$.fill <- fill
       mapping <- aes_modify(mapping, aes_(fill = ~.fill))
       fv <- ".fill"
     }
+    value <- lapply(value, function(.value) as.numeric(table(.value)))
+
     object$percent <- FALSE
   }
 
   data$.group <- seq_len(nn)
-  value <- unlist(data[[vv]])
-  ll <- vapply(data[[vv]], length, numeric(1))
+  ll <- vapply(value, length, numeric(1))
 
   if(is.null(fv)) {
     if(is.null(object$fill)) {
@@ -155,7 +157,7 @@ ggplot_add.doughnut <- function(object, plot, object_name) {
 
   ids <- rep(data$.group, ll)
   data <- data[ids, ]
-  data[[vv]] <- value
+  data[[vv]] <- unlist(value)
   if(!is.null(fv)) data[[fv]] <- fill
   mapping <- aes_modify(mapping, aes_(group = ~.group))
   object$data <- data
