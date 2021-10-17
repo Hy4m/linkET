@@ -71,7 +71,7 @@ geom_node_doughnut <- function(mapping = NULL,
   StatFilter <- get_function("ggraph", "StatFilter")
   aes_intersect <- utils::getFromNamespace("aes_intersect", "ggraph")
   mapping <- aes_intersect(mapping, aes_(x = ~x, y = ~y, ids = ~name))
-  print(mapping)
+
   layer(data = data,
         mapping = mapping,
         stat = StatFilter,
