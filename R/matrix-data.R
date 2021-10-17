@@ -48,11 +48,12 @@ matrix_data <- function(x,
 #' @method print matrix_data
 #' @export
 print.matrix_data <- function(x, ...) {
-  dims <- dim(x[[1]])
+  cat("A matrix data object:\n")
   cat("Number: ", length(x), "\n")
-  cat("Dimensions: ", paste0(dims[1], " rows, ", dims[2], " columns.\n"))
-  cat("Row names: ", glue::glue_collapse(rownames(x[[1]]), ", ", 60), "\n")
-  cat("Column names: ", glue::glue_collapse(colnames(x[[1]]), ", ", 60), "\n")
+  cat("Names: ", glue::glue_collapse(names(x), ", ", 60), "\n")
+  cat("Dimensions: ", paste0(nrows(x), " rows, ", ncols(x), " columns\n"))
+  cat("Row names: ", glue::glue_collapse(row_names(x), ", ", 60), "\n")
+  cat("Column names: ", glue::glue_collapse(col_names(x), ", ", 60), "\n")
 }
 
 check_matrix <- function(mat,
