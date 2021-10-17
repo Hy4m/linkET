@@ -70,7 +70,8 @@ geom_node_doughnut <- function(mapping = NULL,
                                ...) {
   StatFilter <- get_function("ggraph", "StatFilter")
   aes_intersect <- utils::getFromNamespace("aes_intersect", "ggraph")
-  mapping <- aes_intersect(mapping, aes_(x = ~x, y = ~y))
+  mapping <- aes_intersect(mapping, aes_(x = ~x, y = ~y, ids = ~name))
+  print(mapping)
   layer(data = data,
         mapping = mapping,
         stat = StatFilter,
@@ -131,7 +132,6 @@ ggplot_add.doughnut <- function(object, plot, object_name) {
     object$percent <- FALSE
   }
 
-  data$.group <- seq_len(nn)
   ll <- vapply(value, length, numeric(1))
 
   if(is.null(fv)) {
@@ -155,11 +155,12 @@ ggplot_add.doughnut <- function(object, plot, object_name) {
     fill <- unlist(data[[fv]])
   }
 
-  ids <- rep(data$.group, ll)
+  data$.ids <- seq_len(nn)
+  mapping <- aes_modify(mapping, aes_(ids = ~.ids))
+  ids <- rep(seq_len(nn), ll)
   data <- data[ids, ]
   data[[vv]] <- unlist(value)
   if(!is.null(fv)) data[[fv]] <- fill
-  mapping <- aes_modify(mapping, aes_(group = ~.group))
   object$data <- data
   object$mapping <- mapping
   object <- do.call(geom_doughnut_temp, object)
@@ -205,7 +206,7 @@ GeomDoughnut <- ggproto(
   "GeomDoughnut", GeomPolygon,
   default_aes = aes(r0 = 0, r1 = 5, value = 1, colour = "grey35", size = 0.5,
                     linetype = 1, fill = "grey50", alpha = NA),
-  required_aes = c("x", "y"),
+  required_aes = c("x", "y", "ids"),
 
   draw_panel = function(self, data, panel_params, coord, units = "mm",
                         percent = FALSE, rfill = "grey80", na.rm = FALSE) {
@@ -214,7 +215,7 @@ GeomDoughnut <- ggproto(
     }
 
     data <- coord$transform(data, panel_params)
-    grobs <- lapply(split(data, data$group), function(.data) {
+    grobs <- lapply(split(data, data$ids), function(.data) {
       first_row <- .data[1, , drop = FALSE]
       other <- grid::nullGrob()
       main <- DoughnutGrob(x = first_row$x,
