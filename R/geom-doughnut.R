@@ -42,7 +42,7 @@ geom_doughnut <- function(mapping = NULL,
                           position = "identity",
                           ...,
                           percent = FALSE,
-                          rfill = "grey90",
+                          rfill = "grey80",
                           units = "mm",
                           na.rm = FALSE,
                           show.legend = NA,
@@ -153,33 +153,6 @@ ggplot_add.doughnut <- function(object, plot, object_name) {
     fill <- unlist(data[[fv]])
   }
 
-  robj <- NULL
-  if(isTRUE(object$percent)) {
-    data2 <- data
-    object2 <- object
-    data2$.value <- vapply(value, function(.value) {
-      s <- sum(.value, na.rm = TRUE)
-      if(s >= 0) {
-        s - 1
-      } else {
-        1 - s
-      }
-    }, numeric(1))
-
-    data2 <- data2[!identical(data2$.value, 0), ]
-    if(nrow(data2) >= 1) {
-      athestic <- c("x", "y", "colour", "color", "linetype", "size", "group",
-                    "alpha", "r0", "r1")
-      mapping2 <- aes_modify(mapping[athestic],
-                             aes_(value = ~.value, group = ~.group))
-      object2$fill <- object2$rfill
-      object2$data <- data2
-      object2$mapping <- mapping2
-      object2 <- object2[setdiff(names(object2), "rfill")]
-      robj <- do.call(geom_doughnut_temp, object2)
-    }
-  }
-
   ids <- rep(data$.group, ll)
   data <- data[ids, ]
   data[[vv]] <- value
@@ -187,9 +160,9 @@ ggplot_add.doughnut <- function(object, plot, object_name) {
   mapping <- aes_modify(mapping, aes_(group = ~.group))
   object$data <- data
   object$mapping <- mapping
-  object <- do.call(geom_doughnut_temp, object[setdiff(names(object), "rfill")])
+  object <- do.call(geom_doughnut_temp, object)
 
-  ggplot_add(list(robj, object), plot, object_name)
+  ggplot_add(object, plot, object_name)
 }
 
 #' @noRd
@@ -198,6 +171,7 @@ geom_doughnut_temp <- function(mapping = NULL,
                                stat = "identity",
                                position = "identity",
                                ...,
+                               rfill = "grey80",
                                units = "mm",
                                percent = FALSE,
                                na.rm = FALSE,
@@ -212,6 +186,7 @@ geom_doughnut_temp <- function(mapping = NULL,
     show.legend = show.legend,
     inherit.aes = inherit.aes,
     params = list(
+      rfill = rfill,
       units = units,
       percent = percent,
       na.rm = na.rm,
@@ -227,11 +202,11 @@ geom_doughnut_temp <- function(mapping = NULL,
 GeomDoughnut <- ggproto(
   "GeomDoughnut", GeomPolygon,
   default_aes = aes(r0 = 0, r1 = 5, value = 1, colour = "grey35", size = 0.5,
-                    linetype = 1, fill = "grey50", alpha = NA, label = NA),
+                    linetype = 1, fill = "grey50", alpha = NA),
   required_aes = c("x", "y"),
 
   draw_panel = function(self, data, panel_params, coord, units = "mm",
-                        percent = FALSE, na.rm = FALSE) {
+                        percent = FALSE, rfill = "grey80", na.rm = FALSE) {
     if(empty(data)) {
       return(ggplot2::zeroGrob())
     }
@@ -239,20 +214,41 @@ GeomDoughnut <- ggproto(
     data <- coord$transform(data, panel_params)
     grobs <- lapply(split(data, data$group), function(.data) {
       first_row <- .data[1, , drop = FALSE]
-      DoughnutGrob(x = first_row$x,
-                   y = first_row$y,
-                   r0 = first_row$r0,
-                   r1 = first_row$r1,
-                   value = .data$value,
-                   percent = percent,
-                   units = units,
-                   default.units = "native",
-                   gp = gpar(col  = scales::alpha(.data$colour,
-                                                  .data$alpha),
-                             fill = scales::alpha(.data$fill,
-                                                  .data$alpha),
-                             lty  = .data$linetype,
-                             size = .data$size * ggplot2::.pt))
+      other <- grid::nullGrob()
+      main <- DoughnutGrob(x = first_row$x,
+                           y = first_row$y,
+                           r0 = first_row$r0,
+                           r1 = first_row$r1,
+                           value = .data$value,
+                           percent = percent,
+                           units = units,
+                           default.units = "native",
+                           gp = gpar(col  = scales::alpha(.data$colour,
+                                                          .data$alpha),
+                                     fill = scales::alpha(.data$fill,
+                                                          .data$alpha),
+                                     lty  = .data$linetype,
+                                     size = .data$size * ggplot2::.pt))
+
+      if(isTRUE(percent)) {
+        s <- sum(.data$value, na.rm = TRUE)
+        positive <- s >= 0
+        value <- if(positive) s - 1 else 1 + s
+        other <- DoughnutGrob(x = first_row$x,
+                              y = first_row$y,
+                              r0 = first_row$r0,
+                              r1 = first_row$r1,
+                              value = value,
+                              percent = percent,
+                              units = units,
+                              default.units = "native",
+                              gp = gpar(col  = scales::alpha(first_row$colour,
+                                                             first_row$alpha),
+                                        fill = scales::alpha(rfill, first_row$alpha),
+                                        lty  = first_row$linetype,
+                                        size = first_row$size * ggplot2::.pt))
+      }
+      grid::grobTree(other, main)
     })
 
     ggname("geom_doughnut", do.call("grobTree", grobs))

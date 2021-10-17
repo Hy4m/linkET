@@ -14,7 +14,7 @@ geom_doughnut(
   position = "identity",
   ...,
   percent = FALSE,
-  rfill = "grey90",
+  rfill = "grey80",
   units = "mm",
   na.rm = FALSE,
   show.legend = NA,
