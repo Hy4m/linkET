@@ -14,9 +14,8 @@ geom_doughnut(
   position = "identity",
   ...,
   percent = FALSE,
+  rfill = "grey90",
   units = "mm",
-  label_size = 7.5,
-  label_col = "black",
   na.rm = FALSE,
   show.legend = NA,
   inherit.aes = TRUE
@@ -65,11 +64,9 @@ to the paired geom/stat.}
 \item{percent}{logical. If FALSE (the default) the value will be treated as
 source value.}
 
+\item{rfill}{the fill colour of other area.}
+
 \item{units}{unit of the piechart size.}
-
-\item{label_size}{size of labels.}
-
-\item{label_col}{color of labels.}
 
 \item{na.rm}{If \code{FALSE}, the default, missing values are removed with
 a warning. If \code{TRUE}, missing values are silently removed.}
@@ -102,7 +99,6 @@ layer function to draw doughnut.
       \item \code{alpha}
       \item \code{size}
       \item \code{linetype}
-      \item \code{label}
   }
 }
 

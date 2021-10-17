@@ -1,10 +1,9 @@
 #' Doughnut Layer
 #' @description layer function to draw doughnut.
 #' @param units unit of the piechart size.
-#' @param label_size size of labels.
-#' @param label_col color of labels.
 #' @param percent logical. If FALSE (the default) the value will be treated as
 #' source value.
+#' @param rfill the fill colour of other area.
 #' @inheritParams ggplot2::layer
 #' @inheritParams ggplot2::geom_polygon
 #' @section Aesthetics:
@@ -20,7 +19,6 @@
 #'       \item \code{alpha}
 #'       \item \code{size}
 #'       \item \code{linetype}
-#'       \item \code{label}
 #'   }
 #' @importFrom ggplot2 GeomPolygon
 #' @importFrom ggplot2 draw_key_polygon
@@ -44,9 +42,8 @@ geom_doughnut <- function(mapping = NULL,
                           position = "identity",
                           ...,
                           percent = FALSE,
+                          rfill = "grey90",
                           units = "mm",
-                          label_size = 7.5,
-                          label_col = "black",
                           na.rm = FALSE,
                           show.legend = NA,
                           inherit.aes = TRUE) {
@@ -55,9 +52,8 @@ geom_doughnut <- function(mapping = NULL,
                  stat = stat,
                  position = position,
                  percent = percent,
+                 rfill = rfill,
                  units = units,
-                 label_size = label_size,
-                 label_col = label_col,
                  na.rm = na.rm,
                  show.legend = show.legend,
                  inherit.aes = inherit.aes,
@@ -92,6 +88,9 @@ geom_node_doughnut <- function(mapping = NULL,
 #' @export
 ggplot_add.doughnut <- function(object, plot, object_name) {
   data <- object$data %||% plot$data
+  if(!tibble::is_tibble(data)) {
+    data <- tibble::as_tibble(data)
+  }
   if(isTRUE(object$inherit.aes)) {
     mapping <- aes_modify(plot$mapping, object$mapping)
   } else {
@@ -106,53 +105,91 @@ ggplot_add.doughnut <- function(object, plot, object_name) {
   }
 
   vv <- aes_vars(mapping, "value")
-  lv <- aes_vars(mapping, "label")
-  gv <- aes_vars(mapping, "group")
   fv <- aes_vars(mapping, "fill")
 
-  value <- NULL
-  if(!is.null(vv) && is.list(data[[vv]])) {
-    value <- unlist(data[[vv]])
-    ll <- vapply(data[[vv]], length, numeric(1))
-    if(!is.null(lv)) {
-      label <- if(is.list(data[[lv]])) unlist(data[[lv]]) else rep(data[[lv]], ll)
-    } else {
-      label <- NULL
-    }
-    if(!is.null(fv)) {
-      fill <- if(is.list(data[[fv]])) unlist(data[[fv]]) else rep(data[[fv]], ll)
-    } else {
-      fill <- NULL
-    }
-
-    if(is.null(object$fill)) {
-      if(is.null(fill)) {
-        col <- colorspace::qualitative_hcl(max(ll), "Set 2")
-        object$fill <- unlist(lapply(ll, function(.n) rep_len(col, .n)))
-      } else {
-        data[[fv]] <- fill
-      }
-    } else {
-      if(length(object$fill) == nn) {
-        object$fill <- rep(object$fill, ll)
-      } else {
-        if(object$fill != sum(ll)) {
-          object$fill <- unlist(lapply(ll, function(.n) {
-            rep_len(object$fill, .n)
-            }))
-        }
-      }
-    }
-    data <- data[rep(seq_len(nn), ll), , drop = FALSE]
-    if(!is.null(value)) data[[vv]] <- value
-    if(!is.null(label)) data[[lv]] <- label
-    data[["group"]] <- rep(seq_len(nn), ll)
-    object$mapping <- aes_modify(object$mapping, aes_(group = ~group))
-
+  if(is.null(vv)) {
+    data$value <- 1
+    mapping <- aes_modify(mapping, aes_(value = ~.value))
+    vv <- ".value"
   }
+  if(!is.list(data[[vv]])) {
+    data[[vv]] <- as.list(data[[vv]])
+  }
+  if(all(vapply(data[[vv]], is.character, logical(1))) ||
+     all(vapply(data[[vv]], is.factor, logical(1)))) {
+    value <- lapply(data[[vv]], function(.value) as.numeric(table(.value)))
+
+    if(is.null(object$fill) && is.null(fv)) {
+      fill <- lapply(data[[vv]], function(.value) names(table(.value)))
+      data$.fill <- fill
+      mapping <- aes_modify(mapping, aes_(fill = ~.fill))
+      fv <- ".fill"
+    }
+    object$percent <- FALSE
+  }
+
+  data$.group <- seq_len(nn)
+  value <- unlist(data[[vv]])
+  ll <- vapply(data[[vv]], length, numeric(1))
+
+  if(is.null(fv)) {
+    if(is.null(object$fill)) {
+      object$fill <- colorspace::qualitative_hcl(max(ll), "Set 2")
+    }
+    if(is.list(object$fill)) {
+      object$fill <- rep_len(unlist(object$fill), sum(ll))
+    } else {
+      if(length(object$fill) <= max(ll)) {
+        object$fill <- unlist(lapply(ll, function(.ll) rep_len(object$fill, .ll)))
+      } else {
+        object$fill <- rep_len(object$fill, sum(ll))
+      }
+    }
+  } else {
+    if(!is.list(data[[fv]])) {
+      data[[fv]] <- as.list(data[[fv]])
+    }
+    data[[fv]] <- purrr::map2(data[[fv]], ll, rep_len)
+    fill <- unlist(data[[fv]])
+  }
+
+  robj <- NULL
+  if(isTRUE(object$percent)) {
+    data2 <- data
+    object2 <- object
+    data2$.value <- vapply(value, function(.value) {
+      s <- sum(.value, na.rm = TRUE)
+      if(s >= 0) {
+        s - 1
+      } else {
+        1 - s
+      }
+    }, numeric(1))
+
+    data2 <- data2[!identical(data2$.value, 0), ]
+    if(nrow(data2) >= 1) {
+      athestic <- c("x", "y", "colour", "color", "linetype", "size", "group",
+                    "alpha", "r0", "r1")
+      mapping2 <- aes_modify(mapping[athestic],
+                             aes_(value = ~.value, group = ~.group))
+      object2$fill <- object2$rfill
+      object2$data <- data2
+      object2$mapping <- mapping2
+      object2 <- object2[setdiff(names(object2), "rfill")]
+      robj <- do.call(geom_doughnut_temp, object2)
+    }
+  }
+
+  ids <- rep(data$.group, ll)
+  data <- data[ids, ]
+  data[[vv]] <- value
+  if(!is.null(fv)) data[[fv]] <- fill
+  mapping <- aes_modify(mapping, aes_(group = ~.group))
   object$data <- data
-  object <- do.call(geom_doughnut_temp, object)
-  ggplot_add(object, plot, object_name)
+  object$mapping <- mapping
+  object <- do.call(geom_doughnut_temp, object[setdiff(names(object), "rfill")])
+
+  ggplot_add(list(robj, object), plot, object_name)
 }
 
 #' @noRd
@@ -163,8 +200,6 @@ geom_doughnut_temp <- function(mapping = NULL,
                                ...,
                                units = "mm",
                                percent = FALSE,
-                               label_size = 7.5,
-                               label_col = "black",
                                na.rm = FALSE,
                                show.legend = NA,
                                inherit.aes = TRUE) {
@@ -179,8 +214,6 @@ geom_doughnut_temp <- function(mapping = NULL,
     params = list(
       units = units,
       percent = percent,
-      label_size = label_size,
-      label_col = label_col,
       na.rm = na.rm,
       ...
     )
@@ -198,8 +231,7 @@ GeomDoughnut <- ggproto(
   required_aes = c("x", "y"),
 
   draw_panel = function(self, data, panel_params, coord, units = "mm",
-                        percent = FALSE, label_size = 7.5, label_col = "black",
-                        na.rm = FALSE) {
+                        percent = FALSE, na.rm = FALSE) {
     if(empty(data)) {
       return(ggplot2::zeroGrob())
     }
@@ -213,9 +245,6 @@ GeomDoughnut <- ggproto(
                    r1 = first_row$r1,
                    value = .data$value,
                    percent = percent,
-                   label = .data$label,
-                   label_size = label_size,
-                   label_col = label_col,
                    units = units,
                    default.units = "native",
                    gp = gpar(col  = scales::alpha(.data$colour,

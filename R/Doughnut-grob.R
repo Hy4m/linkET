@@ -5,9 +5,6 @@
 #' @param value a numeric vector.
 #' @param percent logical. If FALSE (the default) the value will be treated as
 #' source value.
-#' @param label NULL or character vector with the same length as 'value'.
-#' @param label_size size of labels.
-#' @param label_col color of labels.
 #' @param units unit of the piechart size.
 #' @param default.units a string indicating the default units to use if x or y
 #' are only given as numeric vectors.
@@ -19,9 +16,6 @@
 #' @importFrom grid unit
 #' @importFrom grid viewport
 #' @importFrom grid polygonGrob
-#' @importFrom grid textGrob
-#' @importFrom grid nullGrob
-#' @importFrom grid grobTree
 #' @importFrom grid gpar
 #' @importFrom grid grid.draw
 #' @importFrom grid is.unit
@@ -34,18 +28,13 @@ DoughnutGrob <- function(x = 0.5,
                          r1 = 5,
                          value = runif(5),
                          percent = FALSE,
-                         label = NULL,
-                         label_size = 7.5,
-                         label_col = "black",
                          units = "mm",
                          default.units = "npc",
                          name = NULL,
                          gp = gpar(),
                          vp = NULL) {
-  if(!is.null(label)) {
-    if(length(label) != length(value)) {
-      stop("'label' should have same length as 'value'.", call. = FALSE)
-    }
+  if(all(value >= 0) && all(value <= 0)) {
+    stop("All 'value' should be non-negative or non-positive.", call. = FALSE)
   }
 
   if (!is.unit(x))
@@ -81,26 +70,14 @@ DoughnutGrob <- function(x = 0.5,
   r1 <- 0.5
   pxy <- purrr::pmap_dfr(list(s, e, seq_len(n)),
                          function(.s, .e, .n) {
-                           ll <- max(2, ceiling(degree(.e - .s)))
+                           ll <- max(2, ceiling(degree(abs(.e - .s))))
                            tt <- seq(.s, .e, length.out = ll)
                            tibble(x = c(r0 * cos(tt), r1 * cos(rev(tt))) + 0.5,
                                   y = c(r0 * sin(tt), r1 * sin(rev(tt))) + 0.5,
                                   group = .n
                            )
                          })
-  poly <- polygonGrob(pxy$x, pxy$y, pxy$group, gp = gp)
-
-  if(!is.null(label) && !all(is.na(label))) {
-    tt <- (s + e) / 2
-    rr <- (r0 + r1) / 2
-    lab <- textGrob(label, rr * cos(tt) + 0.5, rr * sin(tt) + 0.5,
-                    gp = gpar(fontsize = label_size,
-                              col = label_col))
-  } else {
-    lab <- nullGrob()
-  }
-
-  grobTree(poly, lab, name = name, vp = vp, cl = "doughnutGrob")
+  polygonGrob(pxy$x, pxy$y, pxy$group, gp = gp, vp = vp)
 }
 
 #' @rdname DoughnutGrob

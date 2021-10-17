@@ -12,9 +12,6 @@ DoughnutGrob(
   r1 = 5,
   value = runif(5),
   percent = FALSE,
-  label = NULL,
-  label_size = 7.5,
-  label_col = "black",
   units = "mm",
   default.units = "npc",
   name = NULL,
@@ -33,12 +30,6 @@ grid.doughnut(...)
 
 \item{percent}{logical. If FALSE (the default) the value will be treated as
 source value.}
-
-\item{label}{NULL or character vector with the same length as 'value'.}
-
-\item{label_size}{size of labels.}
-
-\item{label_col}{color of labels.}
 
 \item{units}{unit of the piechart size.}
 
