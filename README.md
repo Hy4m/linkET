@@ -29,8 +29,10 @@ This is a basic example which shows you how to solve a common problem:
 library(linkET)
 ## matrix_data
 matrix_data(list(mtcars = mtcars))
+#> A matrix data object:
 #> Number:  1 
-#> Dimensions:  32 rows, 11 columns.
+#> Names:  mtcars 
+#> Dimensions:  32 rows, 11 columns
 #> Row names:  Mazda RX4, Mazda RX4 Wag, Datsun 710, Hornet 4 Drive, Hor... 
 #> Column names:  mpg, cyl, disp, hp, drat, wt, qsec, vs, am, gear, carb
 
@@ -54,8 +56,10 @@ matrix_data(list(mtcars = mtcars)) %>%
 
 ## as method
 as_matrix_data(mtcars)
+#> A matrix data object:
 #> Number:  1 
-#> Dimensions:  32 rows, 11 columns.
+#> Names:  mtcars 
+#> Dimensions:  32 rows, 11 columns
 #> Row names:  Mazda RX4, Mazda RX4 Wag, Datsun 710, Hornet 4 Drive, Hor... 
 #> Column names:  mpg, cyl, disp, hp, drat, wt, qsec, vs, am, gear, carb
 
@@ -78,8 +82,10 @@ as_md_tbl(mtcars)
 ## special function for correlation matrix
 correlate(mtcars) %>% 
   as_matrix_data()
+#> A matrix data object:
 #> Number:  4 
-#> Dimensions:  11 rows, 11 columns.
+#> Names:  r, p, lower_ci, upper_ci 
+#> Dimensions:  11 rows, 11 columns
 #> Row names:  mpg, cyl, disp, hp, drat, wt, qsec, vs, am, gear, carb 
 #> Column names:  mpg, cyl, disp, hp, drat, wt, qsec, vs, am, gear, carb
 
@@ -194,4 +200,12 @@ qcorrplot(correlate(varechem), type = "lower", diag = FALSE) +
          fill = guide_colorbar(title = "Pearson's r", order = 3))
 ```
 
-<img src="man/figures/README-mantel-1.png" width="100%" />
+<img src="man/figures/README-mantel-1.png" width="100%" /> \#\# network
+
+``` r
+correlate(mtcars) %>% 
+  as.igraph() %>% 
+  plot(layout = layout_with_circular)
+```
+
+<img src="man/figures/README-unnamed-chunk-2-1.png" width="100%" />

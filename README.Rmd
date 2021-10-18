@@ -118,4 +118,11 @@ qcorrplot(correlate(varechem), type = "lower", diag = FALSE) +
                                order = 1),
          fill = guide_colorbar(title = "Pearson's r", order = 3))
 ```
+## network
+
+```{r}
+correlate(mtcars) %>% 
+  as.igraph() %>% 
+  plot(layout = layout_with_circular)
+```
 
