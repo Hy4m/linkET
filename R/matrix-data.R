@@ -103,14 +103,3 @@ check_matrix <- function(mat,
   mat
 }
 
-#' @noRd
-set_row_names <- function(x, name) {
-  rownames(x) <- name
-  x
-}
-
-#' @noRd
-set_col_names <- function(x, name) {
-  colnames(x) <- name
-  x
-}
