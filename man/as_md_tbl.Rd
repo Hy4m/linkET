@@ -29,9 +29,20 @@ as_md_tbl(x, ...)
 
 \method{as_md_tbl}{corr.test}(x, ...)
 
-\method{as_md_tbl}{data.frame}(x, name = NULL, ...)
+\method{as_md_tbl}{data.frame}(
+  x,
+  name = NULL,
+  row_vars = NULL,
+  col_vars = NULL,
+  row_names = NULL,
+  col_names = NULL,
+  is_corr = FALSE,
+  r_vars = NULL,
+  p_vars = NULL,
+  ...
+)
 
-\method{as_md_tbl}{matrix}(x, name = NULL, ...)
+\method{as_md_tbl}{matrix}(x, ...)
 }
 \arguments{
 \item{x}{any \code{R} can be converted to md_tbl.}
@@ -47,6 +58,17 @@ matrix, lower triangular or upper triangular matrix.}
 \item{diag}{logical, if TRUE (default) will keep the diagonal of matrix data.}
 
 \item{name}{variable name.}
+
+\item{row_vars, col_vars}{variable name of row/column id.}
+
+\item{row_names, col_names}{character, row/column names of matrix.}
+
+\item{is_corr}{if TRUE, the data will be regarded as the correlation
+coefficient.}
+
+\item{r_vars}{variable name of correlation coeffient column.}
+
+\item{p_vars}{variable name of p value column.}
 }
 \value{
 a tibble object.

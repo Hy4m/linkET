@@ -52,56 +52,40 @@ as_md_tbl.matrix_data <- function(x, ...)
 #' @rdname as_md_tbl
 #' @export
 as_md_tbl.pro_tbl <- function(x, byrow = TRUE, ...) {
-  env_nm <- unique(x$env)
-  spec_nm <- unique(x$spec)
-  spec <- env <- NULL
-  if(byrow) {
-    col_names <- env_nm
-    row_names <- spec_nm
-    x <- dplyr::rename(.rownames = spec,
-                       .colnames = env)
-  } else {
-    col_names <- spec_nm
-    row_names <- env_nm
-    x <- dplyr::rename(.rownames = env,
-                       .colnames = spec)
-  }
+  class(x) <- class(x)[-1L]
 
-  structure(
-    .Data = x,
-    row_names = row_names,
-    col_names = col_names,
-    type = "full",
-    diag = TRUE,
-    class = c("cor_md_tbl", "md_tbl", "tbl_df", "tbl", "data.frame"))
+  spec <- env <- NULL
+  if(isTRUE(byrow)) {
+    as_md_tbl(x,
+              row_vars = spec,
+              col_vars = env,
+              is_corr = TRUE)
+  } else {
+    as_md_tbl(x,
+              row_vars = env,
+              col_vars = spec,
+              is_corr = TRUE)
+  }
 }
 
 #' @method as_md_tbl mantel_tbl
 #' @rdname as_md_tbl
 #' @export
 as_md_tbl.mantel_tbl <- function(x, byrow = TRUE, ...) {
-  env_nm <- unique(x$env)
-  spec_nm <- unique(x$spec)
-  spec <- env <- NULL
-  if(byrow) {
-    col_names <- env_nm
-    row_names <- spec_nm
-    x <- dplyr::rename(.rownames = spec,
-                       .colnames = env)
-  } else {
-    col_names <- spec_nm
-    row_names <- env_nm
-    x <- dplyr::rename(.rownames = env,
-                       .colnames = spec)
-  }
+  class(x) <- class(x)[-1L]
 
-  structure(
-    .Data = x,
-    row_names = row_names,
-    col_names = col_names,
-    type = "full",
-    diag = TRUE,
-    class = c("cor_md_tbl", "md_tbl", "tbl_df", "tbl", "data.frame"))
+  spec <- env <- NULL
+  if(isTRUE(byrow)) {
+    as_md_tbl(x,
+              row_vars = spec,
+              col_vars = env,
+              is_corr = TRUE)
+  } else {
+    as_md_tbl(x,
+              row_vars = env,
+              col_vars = spec,
+              is_corr = TRUE)
+  }
 }
 
 #' @method as_md_tbl easycorrelation
@@ -112,7 +96,8 @@ as_md_tbl.easycorrelation <- function(x,
                                       diag = TRUE,
                                       ...) {
   if(inherits(x, "grouped_easycorrelation")) {
-    stop("`grouped_easycorrelation` is not implemented yet.", call. = FALSE)
+    stop("`grouped_easycorrelation` method of `as_md_tbl()`",
+         " is not implemented yet.", call. = FALSE)
   }
   if(nrow(x) < 1) {
     stop("Empty data.", call. = FALSE)
@@ -192,22 +177,68 @@ as_md_tbl.corr.test <- function(x, ...) {
   as_md_tbl(as_correlate(x), ...)
 }
 
+#' @param row_vars,col_vars variable name of row/column id.
+#' @param row_names,col_names character, row/column names of matrix.
+#' @param is_corr if TRUE, the data will be regarded as the correlation
+#' coefficient.
+#' @param r_vars variable name of correlation coeffient column.
+#' @param p_vars variable name of p value column.
 #' @method as_md_tbl data.frame
 #' @rdname as_md_tbl
 #' @export
-as_md_tbl.data.frame <- function(x, name = NULL, ...) {
-  if (is.null(name)) {
-    name <- deparse(substitute(x))
+as_md_tbl.data.frame <- function(x,
+                                 name = NULL,
+                                 row_vars = NULL,
+                                 col_vars = NULL,
+                                 row_names = NULL,
+                                 col_names = NULL,
+                                 is_corr = FALSE,
+                                 r_vars = NULL,
+                                 p_vars = NULL,
+                                 ...) {
+  row_vars <- rlang::enquo(row_vars)
+  col_vars <- rlang::enquo(col_vars)
+  if(rlang::quo_is_null(row_vars) || rlang::quo_is_null(col_vars)) {
+    if (is.null(name)) {
+      name <- deparse(substitute(x))
+    }
+    x <- as_md_tbl(as_matrix_data(x, name = name), ...)
+  } else {
+    row_vars <- rlang::as_name(row_vars)
+    col_vars <- rlang::as_name(col_vars)
+    x <- rename(x, .rownames = row_vars, .colnames = col_vars)
+
+    if(isTRUE(is_corr)) {
+      class(x) <- c("cor_md_tbl", "md_tbl", "tbl_df", "tbl", "data.frame")
+      r_vars <- rlang::enquo(r_vars)
+      p_vars <- rlang::enquo(p_vars)
+      if(!rlang::quo_is_null(r_vars)) {
+        x <- rename(x, r = rlang::as_name(r_vars))
+      }
+      if(!rlang::quo_is_null(p_vars)) {
+        x <- rename(x, p = rlang::as_name(p_vars))
+      }
+      if(!"r" %in% names(x)) {
+        stop("Did you forget to set the 'r_vars' param?", call. = FALSE)
+      }
+    } else {
+      class(x) <- c("md_tbl", "tbl_df", "tbl", "data.frame")
+    }
+
+    attr(x, "row_names") <- row_names %||% unique(x$.rownames)
+    attr(x, "col_names") <- col_names %||% unique(x$.colnames)
+    attr(x, "type") <- "full"
+    attr(x, "diag") <- TRUE
   }
-  as_md_tbl(as_matrix_data(x, name = name), ...)
+  x
 }
 
 #' @method as_md_tbl matrix
 #' @rdname as_md_tbl
 #' @export
-as_md_tbl.matrix <- function(x, name = NULL, ...) {
-  if (is.null(name)) {
-    name <- deparse(substitute(x))
-  }
-  as_md_tbl(as_matrix_data(x, name = name), ...)
+as_md_tbl.matrix <- function(x, ...) {
+  x <- as.data.frame(x)
+  as_md_tbl(x, ...)
 }
+
+

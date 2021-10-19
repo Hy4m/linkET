@@ -79,3 +79,17 @@ ggname <- function (prefix, grob)
   grob$name <- grid::grobName(grob, prefix)
   grob
 }
+
+#' @noRd
+rename <- function(data, ...) {
+  ll <- list(...)
+
+  if(length(ll) == 0) {
+    data
+  } else {
+    old <- unname(unlist(ll))
+    new <- names(ll)
+    names(data)[names(data) %in% old] <- new
+  }
+  data
+}
