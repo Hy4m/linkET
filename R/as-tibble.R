@@ -199,10 +199,14 @@ as_md_tbl.data.frame <- function(x,
   row_vars <- rlang::enquo(row_vars)
   col_vars <- rlang::enquo(col_vars)
   if(rlang::quo_is_null(row_vars) || rlang::quo_is_null(col_vars)) {
-    if (is.null(name)) {
-      name <- deparse(substitute(x))
+    if(isTRUE(is_corr)) {
+      x <- as_md_tbl(as_correlate(x, is_corr = TRUE), ...)
+    } else {
+      if (is.null(name)) {
+        name <- deparse(substitute(x))
+      }
+      x <- as_md_tbl(as_matrix_data(x, name = name), ...)
     }
-    x <- as_md_tbl(as_matrix_data(x, name = name), ...)
   } else {
     row_vars <- rlang::as_name(row_vars)
     col_vars <- rlang::as_name(col_vars)
@@ -241,4 +245,10 @@ as_md_tbl.matrix <- function(x, ...) {
   as_md_tbl(x, ...)
 }
 
+#' @method as_md_tbl md_tbl
+#' @rdname as_md_tbl
+#' @export
+as_md_tbl.md_tbl <- function(x, ...) {
+  x
+}
 

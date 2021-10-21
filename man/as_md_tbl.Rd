@@ -11,6 +11,7 @@
 \alias{as_md_tbl.corr.test}
 \alias{as_md_tbl.data.frame}
 \alias{as_md_tbl.matrix}
+\alias{as_md_tbl.md_tbl}
 \title{Coerce matrix_data to data frames}
 \usage{
 as_md_tbl(x, ...)
@@ -43,6 +44,8 @@ as_md_tbl(x, ...)
 )
 
 \method{as_md_tbl}{matrix}(x, ...)
+
+\method{as_md_tbl}{md_tbl}(x, ...)
 }
 \arguments{
 \item{x}{any \code{R} can be converted to md_tbl.}
