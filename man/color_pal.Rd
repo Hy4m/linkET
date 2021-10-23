@@ -5,12 +5,14 @@
 \alias{colour_pal}
 \title{Colour Palettes}
 \usage{
-color_pal(n)
+color_pal(n, alpha = 0.2)
 
-colour_pal(n)
+colour_pal(n, alpha = 0.2)
 }
 \arguments{
 \item{n}{integer, should be less than 6.}
+
+\item{alpha}{alpha level in [0,1].}
 }
 \value{
 a palette.
