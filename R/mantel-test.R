@@ -188,20 +188,20 @@ mantel_test <- function(spec,
 
   if(is.null(spec_dist)) {
     if(all(vapply(spec, is.numeric, logical(1)))) {
-      message("`mantel_test()` using 'bray' method for 'spec'.")
+      message("`mantel_test()` using 'bray' dist method for 'spec'.")
       spec_dist <- dist_func(.FUN = "vegdist", method = "bray")
     } else {
-      message("`mantel_test()` using 'gower' method for 'spec'.")
+      message("`mantel_test()` using 'gower' dist method for 'spec'.")
       spec_dist <- dist_func(.FUN = "gowdis")
     }
   }
 
   if(is.null(env_dist)) {
     if(all(vapply(env, is.numeric, logical(1)))) {
-      message("`mantel_test()` using 'euclidean' method for 'env'.")
+      message("`mantel_test()` using 'euclidean' dist method for 'env'.")
       env_dist <- dist_func(.FUN = "vegdist", method = "euclidean")
     } else {
-      message("`mantel_test()` using 'gower' method for 'env'.")
+      message("`mantel_test()` using 'gower' dist method for 'env'.")
       env_dist <- dist_func(.FUN = "gowdis")
     }
   }
@@ -241,10 +241,10 @@ mantel_test <- function(spec,
     if(mantel_fun == "mantel.partial") {
       if(is.null(env_ctrl_dist)) {
         if(all(vapply(env_ctrl, is.numeric, logical(1)))) {
-          message("`mantel_test()` using 'euclidean' method for 'env_ctrl'.")
+          message("`mantel_test()` using 'euclidean' dist method for 'env_ctrl'.")
           env_ctrl_dist <- dist_func(.FUN = "vegdist", method = "euclidean")
         } else {
-          message("`mantel_test()` using 'gower' method for 'env_ctrl'.")
+          message("`mantel_test()` using 'gower' dist method for 'env_ctrl'.")
           env_ctrl_dist <- dist_func(.FUN = "gowdis")
         }
       }

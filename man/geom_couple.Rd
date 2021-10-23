@@ -12,7 +12,7 @@ geom_couple(
   label.colour = "black",
   label.family = "",
   label.fontface = 1,
-  nudge_x = 0.1,
+  nudge_x = 0.5,
   ...
 )
 
