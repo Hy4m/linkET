@@ -8,7 +8,7 @@
 #' @export
 #' @examples
 #' color_pal(4)
-color_pal <- function (n, alpha = 0.2)
+color_pal <- function (n, alpha = 0.6)
 {
   stopifnot(n <= 6)
   colors <- c("#D95F02", "#1B9E77", "#7570B3", "#E7298A", "#A6761D",

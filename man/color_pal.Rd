@@ -5,9 +5,9 @@
 \alias{colour_pal}
 \title{Colour Palettes}
 \usage{
-color_pal(n, alpha = 0.2)
+color_pal(n, alpha = 0.6)
 
-colour_pal(n, alpha = 0.2)
+colour_pal(n, alpha = 0.6)
 }
 \arguments{
 \item{n}{integer, should be less than 6.}
