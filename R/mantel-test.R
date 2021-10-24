@@ -186,6 +186,14 @@ mantel_test <- function(spec,
     }
   }
 
+  if(!missing(spec_dist_method)) {
+    warning("'spec_dist_method' parameter has been deprecated,\n",
+            "please use 'spec_dist' parameter instead.", call. = FALSE)
+  }
+  if(!missing(env_dist_method)) {
+    warning("'env_dist_method' parameter has been deprecated,\n",
+            "please use 'env_dist' parameter instead.", call. = FALSE)
+  }
   if(is.null(spec_dist)) {
     if(all(vapply(spec, is.numeric, logical(1)))) {
       message("`mantel_test()` using 'bray' dist method for 'spec'.")

@@ -51,24 +51,23 @@ ggplot_add.geom_couple <- function(object, plot, object_name) {
   stopifnot(is_hyplot(plot))
   md <- plot$data
   type <- attr(md, "type")
-  if(type == "full") {
-    stop("`geom_couple()` just support for triangle corrplot.")
-  }
-
   diag <- attr(md, "diag")
   n <- ncols(md)
   m <- nrows(md)
   from <- object$mapping$from
   to <- object$mapping$to
-  edge <- link_tbl(data = object$data,
-                   md = md,
-                   row_names = rev(row_names(md)),
-                   col_names = col_names(md),
-                   type = type,
-                   diag = diag,
-                   from = from,
-                   to = to)
-  node <- attr(edge, "node")
+  link_data <- link_tbl(data = object$data,
+                        md = md,
+                        row_names = rev(row_names(md)),
+                        col_names = col_names(md),
+                        type = type,
+                        diag = diag,
+                        from = from,
+                        to = to)
+  .isEdge <- NULL
+  edge <- dplyr::filter(link_data, .isEdge)
+  node <- dplyr::filter(link_data, !.isEdge)
+
   mapping <- aes_modify(aes_(x = ~.x, y = ~.y, xend = ~.xend, yend = ~.yend),
                         object$mapping)
   params <- modifyList(list(data = edge, mapping = mapping, inherit.aes = FALSE),
@@ -77,32 +76,22 @@ ggplot_add.geom_couple <- function(object, plot, object_name) {
   xmin <- min(edge$.x, na.rm = TRUE)
   xmax <- max(edge$.x, na.rm = TRUE)
   if(type == "upper") {
-    if(isTRUE(diag)) {
-      xrange <- c(min(-0.5, xmin - 0.2 * n), n + 0.5)
-      yrange <- c(0.5, n + 0.5)
-    } else {
-      xrange <- c(min(-0.5, xmin - 0.2 * n), n - 0.5)
-      yrange <- c(-0.5, n - 0.5)
-    }
-
+    xrange <- c(min(-0.5, xmin - 0.2 * n), n + 0.5)
+    yrange <- c(0.5, n + 0.5)
   } else if (type == "lower") {
-    if(isTRUE(diag)) {
-      xrange <- c(0.5, max(xmax + 0.2 * n, n + 1.5))
-      yrange <- c(0.5, n + 0.5)
-    } else {
-      xrange <- c(0.5, max(xmax + 0.2 * n, n + 0.5))
-      yrange <- c(0.5, n + 0.5)
-    }
+    xrange <- c(0.5, max(xmax + 0.2 * n, n + 1.5))
+    yrange <- c(0.5, n + 0.5)
+  } else {
+    xrange <- c(0.5, max(xmax + 0.2 * n, n + 1.5))
+    yrange <- c(0.5, n + 0.5)
   }
+
   nudge_x <- object$nudge_x
   if(type == "upper") {
     nudge_x <- - nudge_x
   }
 
-  hjust <- switch (type,
-                   lower = 0,
-                   upper = 1
-  )
+  hjust <- switch (type, full = 0, lower = 0, upper = 1)
 
   obj <- list(
     do.call(geom_curve2, params),
@@ -128,8 +117,6 @@ link_tbl <- function(data,
                      from = NULL,
                      to = NULL)
 {
-  if(!is.data.frame(data))
-    data <- as.data.frame(data)
   if(!is_md_tbl(md))
     stop("Need a md_tbl.", call. = FALSE)
 
@@ -150,56 +137,62 @@ link_tbl <- function(data,
   unique_from <- unique(from[!is.na(from)])
   n <- length(row_names)
   m <- length(unique_from)
-  if(type == "upper") {
-    if(m == 1) {
-      x <- 0.5 + 0.18 * n
-      y <- 0.5 + 0.3 * n
-    } else if(m == 2) {
-      x <- c(0.5 - 0.02 * n, 0.5 + 0.2 * n)
-      y <- c(0.5 + 0.46 * n, 0.5 + 0.2 * n)
+  if(type == "full") {
+    l <- length(col_names)
+    x <- rep(l + 1 + max(l, n) * 0.382, m)
+    y <- seq(n + 0.5, 0.5, length.out = m + 2)[-c(1, m + 2)]
+    xend <- rep_len(l + 1, n)
+    yend <- 1:n
+  } else {
+    if(type == "upper") {
+      if(m == 1) {
+        x <- 0.5 + 0.18 * n
+        y <- 0.5 + 0.3 * n
+      } else if(m == 2) {
+        x <- c(0.5 - 0.02 * n, 0.5 + 0.2 * n)
+        y <- c(0.5 + 0.46 * n, 0.5 + 0.2 * n)
+      } else {
+        y <- seq(0.5 + n * (1 - 0.3), 0.5 + n * 0.1, length.out = m)
+        x <- seq(0.5 - 0.25 * n, 0.5 + 0.3 * n, length.out = m)
+      }
     } else {
-      y <- seq(0.5 + n * (1 - 0.3), 0.5 + n * 0.1, length.out = m)
-      x <- seq(0.5 - 0.25 * n, 0.5 + 0.3 * n, length.out = m)
+      if(m == 1) {
+        x <- 0.5 + 0.82 * n
+        y <- 0.5 + 0.7 * n
+      } else if(m == 2) {
+        x <- c(0.5 + 0.8 * n, 0.5 + 1.02 * n)
+        y <- c(0.5 + 0.8 * n, 0.5 + 0.54 * n)
+      } else {
+        y <- seq(0.5 + n * (1 - 0.1), 0.5 + n * 0.3, length.out = m)
+        x <- seq(0.5 + 0.75 * n, 0.5 + 1.3 * n, length.out = m)
+      }
     }
-  } else if(type == "lower") {
-    if(m == 1) {
-      x <- 0.5 + 0.82 * n
-      y <- 0.5 + 0.7 * n
-    } else if(m == 2) {
-      x <- c(0.5 + 0.8 * n, 0.5 + 1.02 * n)
-      y <- c(0.5 + 0.8 * n, 0.5 + 0.54 * n)
+    xend <- n:1
+    yend <- 1:n
+    if(type == "upper") {
+      if(isTRUE(diag)) {
+        xend <- xend - 1
+      }
     } else {
-      y <- seq(0.5 + n * (1 - 0.1), 0.5 + n * 0.3, length.out = m)
-      x <- seq(0.5 + 0.75 * n, 0.5 + 1.3 * n, length.out = m)
+      if(isTRUE(diag)) {
+        xend <- xend + 1
+      }
     }
   }
   x <- set_names(x, unique_from)
   y <- set_names(y, unique_from)
-
-  ## get position of env point
-  xend <- n:1
-  yend <- 1:n
-  if(type == "upper") {
-    if(isTRUE(diag)) {
-      xend <- xend - 1
-    }
-  } else {
-    if(isTRUE(diag)) {
-      xend <- xend + 1
-    }
-  }
   xend <- set_names(xend, row_names)
   yend <- set_names(yend, row_names)
 
-  ## bind postion end data
   edge <- tibble::tibble(.x = x[from],
                          .y = y[from],
                          .xend = xend[to],
-                         .yend = yend[to])
+                         .yend = yend[to],
+                         .isEdge = TRUE)
   node <- tibble::tibble(.x = x[unique_from],
                          .y = y[unique_from],
-                         .label = unique_from)
+                         .label = unique_from,
+                         .isEdge = FALSE)
 
-  structure(.Data = dplyr::bind_cols(edge, data), node = node,
-            class = class(edge))
+  dplyr::bind_rows(dplyr::bind_cols(edge, data), node)
 }
