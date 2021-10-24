@@ -69,12 +69,16 @@ GeomCurve2 <- ggproto(
   draw_panel = function(self, data, panel_params, coord, rm.dup = TRUE,
                         node.shape = 21, node.colour = "blue", node.fill = "red",
                         node.size = 2, curvature = 0, angle = 90, ncp = 5, arrow = NULL,
-                        arrow.fill = NULL, lineend = "butt", na.rm = FALSE) {
+                        arrow.fill = NULL, lineend = "butt", node.color = NULL,
+                        na.rm = FALSE) {
     if(empty(data)) {
       return(ggplot2::zeroGrob())
     }
     aesthetics <- setdiff(names(data), c("x", "y", "xend", "yend", "colour",
                                          "fill", "size", "linetype"))
+    if(!is.null(node.color)) {
+      node.colour <- node.color
+    }
     start.colour <- node.colour[1]
     end.colour <- if(length(node.colour) > 1) node.colour[2] else node.colour[1]
     start.fill <- node.fill[1]
