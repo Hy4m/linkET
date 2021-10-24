@@ -182,15 +182,15 @@ mantel <- mantel_test(varespec, varechem,
                   labels = c("< 0.2", "0.2 - 0.4", ">= 0.4")),
          pd = cut(p, breaks = c(-Inf, 0.01, 0.05, Inf),
                   labels = c("< 0.01", "0.01 - 0.05", ">= 0.05")))
-#> `mantel_test()` using 'bray' method for 'spec'.
-#> `mantel_test()` using 'euclidean' method for 'env'.
+#> `mantel_test()` using 'bray' dist method for 'spec'.
+#> `mantel_test()` using 'euclidean' dist method for 'env'.
 
 qcorrplot(correlate(varechem), type = "lower", diag = FALSE) +
   geom_square() +
   geom_couple(aes(colour = pd, size = rd), data = mantel, curvature = 0.1) +
   scale_fill_gradientn(colours = RColorBrewer::brewer.pal(11, "RdBu")) +
   scale_size_manual(values = c(0.5, 1, 2)) +
-  scale_colour_manual(values = c("#D95F02", "#1B9E77", "#A2A2A288")) +
+  scale_colour_manual(values = color_pal(3)) +
   guides(size = guide_legend(title = "Mantel's r",
                              override.aes = list(colour = "grey35"), 
                              order = 2),
