@@ -2,6 +2,7 @@
 #' @title Helper function
 #' @param md,x a matrix_data object.
 #' @param value a valid value for dimension names.
+#' @param type character, "full" (default), "upper", "lower" or "diag".
 #' @param diag logical, if TRUE (default) will keep the diagonal of matrix data.
 #' @param ... other parameters.
 #' @rdname Helper_function
@@ -201,6 +202,20 @@ trim_diag <- function(md)
     md <- dplyr::filter(md, row_id)
   }
   md
+}
+
+#' @rdname Helper_function
+#' @export
+filter_func <- function(..., type = "full", diag = TRUE) {
+  type <- match.arg(type, c("full", "upper", "lower", "diag"))
+  function(data) {
+    data <- switch(type,
+                   full = if(isTRUE(diag)) data else trim_diag(data),
+                   upper = extract_upper(data, diag),
+                   lower = extract_lower(data, diag),
+                   diag = extract_diag(data))
+    dplyr::filter(data, ...)
+  }
 }
 
 #' @rdname Helper_function

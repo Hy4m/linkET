@@ -13,6 +13,7 @@
 \alias{extract_lower}
 \alias{extract_diag}
 \alias{trim_diag}
+\alias{filter_func}
 \alias{t.matrix_data}
 \alias{t.md_tbl}
 \title{Helper function}
@@ -41,6 +42,8 @@ extract_diag(md)
 
 trim_diag(md)
 
+filter_func(..., type = "full", diag = TRUE)
+
 \method{t}{matrix_data}(x, ...)
 
 \method{t}{md_tbl}(x, ...)
@@ -53,6 +56,8 @@ trim_diag(md)
 \item{diag}{logical, if TRUE (default) will keep the diagonal of matrix data.}
 
 \item{...}{other parameters.}
+
+\item{type}{character, "full" (default), "upper", "lower" or "diag".}
 }
 \description{
 Helper function for matrix_data object
