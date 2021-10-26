@@ -86,35 +86,60 @@ geom_mark <- function(mapping = NULL,
 #' @usage NULL
 #' @export
 GeomMark <- ggproto("GeomMark", GeomText,
-                   required_aes = c("x", "y", "pvalue"),
+                   required_aes = c("x", "y"),
 
                    default_aes = aes(
-                     r = NA, colour = "black", size = 3.88, angle = 0, hjust = 0.5,
-                     vjust = 0.5, alpha = NA, family = "", fontface = 1, lineheight = 1.2
-                   ),
+                     r = NA, pvalue = NA, colour = "black", size = 3.88,
+                     angle = 0, hjust = 0.5, vjust = 0.5, alpha = NA,
+                     family = "",  fontface = 1, lineheight = 1.2),
 
-                   draw_panel = function(data, panel_params, coord, digits = 2,
-                                         nsmall = 2, sig_level = c(0.05, 0.01, 0.001),
-                                         mark = c("*", "**", "***"), sig_thres = NULL,
-                                         sep = "", parse = FALSE, na.rm = FALSE) {
-                     stopifnot(length(sig_level) == length(mark))
-                     if(!is.null(sig_thres))
-                       data <- dplyr::filter(data, pvalue <= sig_thres)
-                     star <- sig_mark(data$pvalue, sig_level, mark)
-                     na_idx <- is.na(data$r)
-                     num <- ifelse(na_idx, "", format_number(data$r, digits, nsmall))
-                     if(parse) {
-                       if(!requireNamespace("latex2exp", quietly = TRUE))
-                         warning("Need latex2exp package.", call. = FALSE)
-                       parse <- FALSE
+                   draw_panel = function(data,
+                                         panel_params,
+                                         coord,
+                                         digits = 2,
+                                         nsmall = 2,
+                                         sig_level = c(0.05, 0.01, 0.001),
+                                         mark = c("*", "**", "***"),
+                                         sig_thres = NULL,
+                                         sep = "",
+                                         parse = FALSE,
+                                         na.rm = FALSE) {
+                     if(empty(data)) {
+                       return(grid::nullGrob())
                      }
-                     if(parse) {
-                       label <- paste(num, paste0("{", star, "}"), sep = sep)
-                       data$label <- latex2exp::TeX(label, output = "text")
+
+                     if(all(is.na(data$pvalue))) {
+                       if(all(is.na(data$r))) {
+                         grid::nullGrob()
+                       } else {
+                         data$label <- format_number(data$r, digits, nsmall)
+                         GeomText$draw_panel(data, panel_params, coord)
+                       }
                      } else {
-                       data$label <- paste(num, star, sep = sep)
+                       if(!is.null(sig_thres))
+                         data <- dplyr::filter(data, pvalue <= sig_thres)
+                       if(all(is.na(data$r))) {
+                         data$label <- format_number(data$pvalue, digits, nsmall)
+                         GeomText$draw_panel(data, panel_params, coord)
+                       } else {
+                         star <- sig_mark(data$pvalue, sig_level, mark)
+                         num <- format_number(data$r, digits, nsmall)
+                         if(isTRUE(parse)) {
+                           if(!requireNamespace("latex2exp", quietly = TRUE))
+                             warning("Need latex2exp package.", call. = FALSE)
+                           parse <- FALSE
+                         }
+                         if(parse) {
+                           label <- paste_with_na(num,
+                                                  paste_with_na("{", star, "}"),
+                                                  sep = sep)
+                           data$label <- latex2exp::TeX(label, output = "text")
+                         } else {
+                           data$label <- paste_with_na(num, star, sep = sep)
+                         }
+                         GeomText$draw_panel(data, panel_params, coord)
+                       }
                      }
-                     GeomText$draw_panel(data, panel_params, coord)
                    },
                    draw_key = draw_key_text
 )
@@ -142,5 +167,31 @@ format_number <- function (x, digits = 2, nsmall = 2)
 {
   if (!is.numeric(x))
     stop("`x` must be a numeric vector.", call. = FALSE)
-  format(round(x, digits = digits), nsmall = nsmall)
+  is_na <- is.na(x)
+  x <- format(round(x, digits = digits), nsmall = nsmall)
+  x[is_na] <- ""
+  x
+}
+
+#' @noRd
+paste_with_na <- function(...,
+                          sep = "",
+                          collapse = NULL,
+                          recycle0 = FALSE) {
+  ll <- list(...)
+  if(length(ll) == 0) {
+    return(character(0))
+  }
+  n <- max(vapply(ll, length, numeric(1)))
+  ll <- lapply(ll, function(.x) {
+    if(length(.x) < n) {
+      .x <- rep_len(.x, n)
+    }
+    .x[is.na(.x)] <- ""
+    .x
+  })
+  ll$sep <- sep
+  ll$collapse <- collapse
+  ll$recycle0 <- recycle0
+  do.call("paste", ll)
 }
