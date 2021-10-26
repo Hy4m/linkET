@@ -16,6 +16,7 @@ geom_mark(
   nudge_y = 0,
   digits = 2,
   nsmall = 2,
+  only_mark = FALSE,
   sig_level = c(0.05, 0.01, 0.001),
   mark = c("*", "**", "***"),
   sig_thres = NULL,
@@ -72,6 +73,8 @@ significant digits (signif) to be used, the default value is 2.}
 \item{nsmall}{the minimum number of digits to the right of the decimal
 point in formatting real/complex numbers in non-scientific formats,
 the default value is 2.}
+
+\item{only_mark}{if TRUE, only the significant marks add on the plot.}
 
 \item{sig_level}{significance level，the default values is [0.05, 0.01, 0.001].}
 

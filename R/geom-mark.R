@@ -5,6 +5,7 @@
 #' @param nsmall the minimum number of digits to the right of the decimal
 #'     point in formatting real/complex numbers in non-scientific formats,
 #'     the default value is 2.
+#' @param only_mark if TRUE, only the significant marks add on the plot.
 #' @param sig_level significance level，the default values is [0.05, 0.01, 0.001].
 #' @param mark significance mark，the default values is ["*", "**", "***"].
 #' @param sig_thres if not NULL, just when pvalue is not larger than sig_thres will be ploted.
@@ -43,6 +44,7 @@ geom_mark <- function(mapping = NULL,
                       nudge_y = 0,
                       digits = 2,
                       nsmall = 2,
+                      only_mark = FALSE,
                       sig_level = c(0.05, 0.01, 0.001),
                       mark = c("*", "**", "***"),
                       sig_thres = NULL,
@@ -70,6 +72,7 @@ geom_mark <- function(mapping = NULL,
     params = list(
       digits = digits,
       nsmall = nsmall,
+      only_mark = only_mark,
       sig_level = sig_level,
       mark = mark,
       sig_thres = sig_thres,
@@ -98,6 +101,7 @@ GeomMark <- ggproto("GeomMark", GeomText,
                                          coord,
                                          digits = 2,
                                          nsmall = 2,
+                                         only_mark = FALSE,
                                          sig_level = c(0.05, 0.01, 0.001),
                                          mark = c("*", "**", "***"),
                                          sig_thres = NULL,
@@ -124,18 +128,22 @@ GeomMark <- ggproto("GeomMark", GeomText,
                        } else {
                          star <- sig_mark(data$pvalue, sig_level, mark)
                          num <- format_number(data$r, digits, nsmall)
-                         if(isTRUE(parse)) {
-                           if(!requireNamespace("latex2exp", quietly = TRUE))
-                             warning("Need latex2exp package.", call. = FALSE)
-                           parse <- FALSE
-                         }
-                         if(parse) {
-                           label <- paste_with_na(num,
-                                                  paste_with_na("{", star, "}"),
-                                                  sep = sep)
-                           data$label <- latex2exp::TeX(label, output = "text")
+                         if(isTRUE(only_mark)) {
+                           data$label <- star
                          } else {
-                           data$label <- paste_with_na(num, star, sep = sep)
+                           if(isTRUE(parse)) {
+                             if(!requireNamespace("latex2exp", quietly = TRUE))
+                               warning("Need latex2exp package.", call. = FALSE)
+                             parse <- FALSE
+                           }
+                           if(parse) {
+                             label <- paste_with_na(num,
+                                                    paste_with_na("{", star, "}"),
+                                                    sep = sep)
+                             data$label <- latex2exp::TeX(label, output = "text")
+                           } else {
+                             data$label <- paste_with_na(num, star, sep = sep)
+                           }
                          }
                          GeomText$draw_panel(data, panel_params, coord)
                        }
