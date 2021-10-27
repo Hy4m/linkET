@@ -123,7 +123,11 @@ GeomMark <- ggproto("GeomMark", GeomText,
                        if(!is.null(sig_thres))
                          data <- dplyr::filter(data, pvalue <= sig_thres)
                        if(all(is.na(data$r))) {
-                         data$label <- format_number(data$pvalue, digits, nsmall)
+                         if(isTRUE(only_mark)) {
+                           data$label <- sig_mark(data$pvalue, sig_level, mark)
+                         } else {
+                           data$label <- format_number(data$pvalue, digits, nsmall)
+                         }
                          GeomText$draw_panel(data, panel_params, coord)
                        } else {
                          star <- sig_mark(data$pvalue, sig_level, mark)
