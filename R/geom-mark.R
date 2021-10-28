@@ -35,6 +35,9 @@
 #' @importFrom ggplot2 position_nudge
 #' @rdname geom_mark
 #' @export
+#' @examples
+#' correlate(mtcars) %>%
+#'   qcorrplot() + geom_mark()
 geom_mark <- function(mapping = NULL,
                       data = NULL,
                       stat = "identity",

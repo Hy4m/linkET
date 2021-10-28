@@ -12,6 +12,16 @@
 #' @rdname qcorrplot
 #' @author Hou Yun
 #' @export
+#' @examples
+#' ### type = "full"
+#' qcorrplot(correlate(mtcars)) +
+#'   geom_square()
+#' ### type = "lower"
+#' qcorrplot(correlate(mtcars), type = "lower") +
+#'   geom_square()
+#' ### type = "upper"
+#' qcorrplot(correlate(mtcars), type = "upper") +
+#'   geom_square()
 qcorrplot <- function(data, ...) {
   UseMethod("qcorrplot")
 }

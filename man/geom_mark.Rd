@@ -125,4 +125,8 @@ Significant marks Geom
    }
 }
 
+\examples{
+correlate(mtcars) \%>\%
+  qcorrplot() + geom_mark()
+}
 \keyword{datasets}

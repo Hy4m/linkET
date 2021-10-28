@@ -128,6 +128,17 @@ a gg object.
 Correlation Plot
 These functions can be used to visualize simply and directly a correlation matrix.
 }
+\examples{
+### type = "full"
+qcorrplot(correlate(mtcars)) +
+  geom_square()
+### type = "lower"
+qcorrplot(correlate(mtcars), type = "lower") +
+  geom_square()
+### type = "upper"
+qcorrplot(correlate(mtcars), type = "upper") +
+  geom_square()
+}
 \author{
 Hou Yun
 }
