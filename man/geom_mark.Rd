@@ -4,7 +4,7 @@
 \name{geom_mark}
 \alias{geom_mark}
 \alias{GeomMark}
-\title{Significant marks Geom}
+\title{Significant Marks}
 \usage{
 geom_mark(
   mapping = NULL,
@@ -102,7 +102,7 @@ that define both data and aesthetics and shouldn't inherit behaviour from
 the default plot specification, e.g. \code{\link[ggplot2:borders]{borders()}}.}
 }
 \description{
-Significant marks Geom
+layer function to add significant marks on a plot.
 }
 \section{Aesthetics}{
 

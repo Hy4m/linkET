@@ -1,4 +1,6 @@
-#' Significant marks Geom
+#' Significant Marks
+#'
+#' @description layer function to add significant marks on a plot.
 #'
 #' @param digits integer indicating the number of decimal places (round) or
 #'     significant digits (signif) to be used, the default value is 2.
