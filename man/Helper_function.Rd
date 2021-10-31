@@ -42,7 +42,7 @@ extract_diag(md)
 
 trim_diag(md)
 
-filter_func(..., type = "full", diag = TRUE)
+filter_func(..., type = "full", diag = FALSE)
 
 \method{t}{matrix_data}(x, ...)
 

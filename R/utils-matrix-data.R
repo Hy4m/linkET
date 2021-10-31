@@ -206,7 +206,7 @@ trim_diag <- function(md)
 
 #' @rdname Helper_function
 #' @export
-filter_func <- function(..., type = "full", diag = TRUE) {
+filter_func <- function(..., type = "full", diag = FALSE) {
   type <- match.arg(type, c("full", "upper", "lower", "diag"))
   function(data) {
     data <- switch(type,
