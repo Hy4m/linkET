@@ -5,7 +5,6 @@
 #' @param value a numeric vector.
 #' @param percent logical. If FALSE (the default) the value will be treated as
 #' source value.
-#' @param units unit of the piechart size.
 #' @param default.units a string indicating the default units to use if x or y
 #' are only given as numeric vectors.
 #' @param name a character identifier.
@@ -28,7 +27,6 @@ DoughnutGrob <- function(x = 0.5,
                          r1 = 5,
                          value = runif(5),
                          percent = FALSE,
-                         units = "mm",
                          default.units = "npc",
                          name = NULL,
                          gp = gpar(),
@@ -48,15 +46,11 @@ DoughnutGrob <- function(x = 0.5,
     r1 <- temp
   }
 
-  if(!units %in% c("npc", "native")) {
-    vp <- viewport(x = x,
-                   y = y,
-                   width = unit(2 * r1, units),
-                   height = unit(2 * r1, units),
-                   clip = "off")
-  } else {
-    vp <- NULL
-  }
+  vp <- viewport(x = x,
+                 y = y,
+                 width = unit(2 * r1, "mm"),
+                 height = unit(2 * r1, "mm"),
+                 clip = "off")
   if(isTRUE(percent)) {
     ratio <- value
   } else {
@@ -86,4 +80,5 @@ grid.doughnut <- function(...) {
   grid.draw(DoughnutGrob(...))
 }
 
+#' @noRd
 degree <- function(x) x / pi * 180

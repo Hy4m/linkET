@@ -1,6 +1,5 @@
 #' Doughnut Layer
 #' @description layer function to draw doughnut.
-#' @param units unit of the piechart size.
 #' @param percent logical. If FALSE (the default) the value will be treated as
 #' source value.
 #' @param rfill the fill colour of other area.
@@ -43,7 +42,6 @@ geom_doughnut <- function(mapping = NULL,
                           ...,
                           percent = FALSE,
                           rfill = "grey80",
-                          units = "mm",
                           na.rm = FALSE,
                           show.legend = NA,
                           inherit.aes = TRUE) {
@@ -53,7 +51,6 @@ geom_doughnut <- function(mapping = NULL,
                  position = position,
                  percent = percent,
                  rfill = rfill,
-                 units = units,
                  na.rm = na.rm,
                  show.legend = show.legend,
                  inherit.aes = inherit.aes,
@@ -175,7 +172,6 @@ geom_doughnut_temp <- function(mapping = NULL,
                                position = "identity",
                                ...,
                                rfill = "grey80",
-                               units = "mm",
                                percent = FALSE,
                                na.rm = FALSE,
                                show.legend = NA,
@@ -190,7 +186,6 @@ geom_doughnut_temp <- function(mapping = NULL,
     inherit.aes = inherit.aes,
     params = list(
       rfill = rfill,
-      units = units,
       percent = percent,
       na.rm = na.rm,
       ...
@@ -208,8 +203,8 @@ GeomDoughnut <- ggproto(
                     linetype = 1, fill = "grey50", alpha = NA),
   required_aes = c("x", "y", "ids"),
 
-  draw_panel = function(self, data, panel_params, coord, units = "mm",
-                        percent = FALSE, rfill = "grey80", na.rm = FALSE) {
+  draw_panel = function(self, data, panel_params, coord, percent = FALSE,
+                        rfill = "grey80", na.rm = FALSE) {
     if(empty(data)) {
       return(ggplot2::zeroGrob())
     }
@@ -224,7 +219,6 @@ GeomDoughnut <- ggproto(
                            r1 = first_row$r1,
                            value = .data$value,
                            percent = percent,
-                           units = units,
                            default.units = "native",
                            gp = gpar(col  = scales::alpha(.data$colour,
                                                           .data$alpha),
@@ -243,7 +237,6 @@ GeomDoughnut <- ggproto(
                               r1 = first_row$r1,
                               value = value,
                               percent = percent,
-                              units = units,
                               default.units = "native",
                               gp = gpar(col  = scales::alpha(first_row$colour,
                                                              first_row$alpha),

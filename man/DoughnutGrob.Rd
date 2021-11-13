@@ -12,7 +12,6 @@ DoughnutGrob(
   r1 = 5,
   value = runif(5),
   percent = FALSE,
-  units = "mm",
   default.units = "npc",
   name = NULL,
   gp = gpar(),
@@ -30,8 +29,6 @@ grid.doughnut(...)
 
 \item{percent}{logical. If FALSE (the default) the value will be treated as
 source value.}
-
-\item{units}{unit of the piechart size.}
 
 \item{default.units}{a string indicating the default units to use if x or y
 are only given as numeric vectors.}

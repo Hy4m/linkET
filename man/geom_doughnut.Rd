@@ -15,7 +15,6 @@ geom_doughnut(
   ...,
   percent = FALSE,
   rfill = "grey80",
-  units = "mm",
   na.rm = FALSE,
   show.legend = NA,
   inherit.aes = TRUE
@@ -65,8 +64,6 @@ to the paired geom/stat.}
 source value.}
 
 \item{rfill}{the fill colour of other area.}
-
-\item{units}{unit of the piechart size.}
 
 \item{na.rm}{If \code{FALSE}, the default, missing values are removed with
 a warning. If \code{TRUE}, missing values are silently removed.}
