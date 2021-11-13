@@ -72,6 +72,16 @@ check_matrix <- function(mat,
   if (length(unique(unlist(lapply(mat, ncol)))) != 1L) {
     stop("The rows of input matrix should be same.", call. = FALSE)
   }
+
+  row_names <- row_names %||% rownames(first) %||% paste0("Row", seq_len(nrow(first)))
+  col_names <- col_names %||% colnames(first) %||% paste0("Col", seq_len(ncol(first)))
+  if(length(unique(row_names)) != nrow(first)) {
+    stop("`row_names` contains duplicate values.", call. = FALSE)
+  }
+  if(length(unique(col_names)) != ncol(first)) {
+    stop("`col_names` contains duplicate values.", call. = FALSE)
+  }
+
   mat <- lapply(mat, function(x) {
     if (!is.null(row_names)) {
       rownames(x) <- row_names
