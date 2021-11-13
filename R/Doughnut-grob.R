@@ -31,7 +31,7 @@ DoughnutGrob <- function(x = 0.5,
                          name = NULL,
                          gp = gpar(),
                          vp = NULL) {
-  if(all(value >= 0) && all(value <= 0)) {
+  if(all(value >= 0) && all(value < 0)) {
     stop("All 'value' should be non-negative or non-positive.", call. = FALSE)
   }
 
