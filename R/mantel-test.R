@@ -8,7 +8,7 @@
 #'      \item{\code{"mantel"} will use \code{vegan::mantel()} (default).}
 #'      \item{\code{"mantel.randtest"} will use \code{ade4::mantel.randtest()}.}
 #'      \item{\code{"mantel.rtest"} will use \code{ade4::mantel.rtest()}.}
-#'      \item{\code{"mantel.partial"} will use \code{vegan::mantel.partial()} (default).}
+#'      \item{\code{"mantel.partial"} will use \code{vegan::mantel.partial()}.}
 #'   }
 #' @param spec_select,env_select NULL (default), numeric or character vector index of columns.
 #' @param use one of "everything", "complete" or "pairwise".

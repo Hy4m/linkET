@@ -34,7 +34,7 @@ mantel_test(
    \item{\code{"mantel"} will use \code{vegan::mantel()} (default).}
    \item{\code{"mantel.randtest"} will use \code{ade4::mantel.randtest()}.}
    \item{\code{"mantel.rtest"} will use \code{ade4::mantel.rtest()}.}
-   \item{\code{"mantel.partial"} will use \code{vegan::mantel.partial()} (default).}
+   \item{\code{"mantel.partial"} will use \code{vegan::mantel.partial()}.}
 }}
 
 \item{spec_select, env_select}{NULL (default), numeric or character vector index of columns.}
