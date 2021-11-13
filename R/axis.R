@@ -41,8 +41,8 @@ set_secondary_axis <- function(...,
 #' @export
 ggplot_add.secondary_axis <- function(object, plot, object_name) {
   stopifnot(is_hyplot(plot))
-  md <- plot$data
   guide_axis_manual <- get_function("ggh4x", "guide_axis_manual")
+  md <- plot$data
   type <- attr(md, "type")
   position_aes <- object$position_aes
   object <- object[setdiff(names(object), "position_aes")]
