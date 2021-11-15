@@ -66,7 +66,7 @@ GeomCurve2 <- ggproto(
                     alpha = NA),
   required_aes = c("x", "y", "xend", "yend"),
 
-  draw_panel = function(self, data, panel_params, coord, rm.dup = TRUE,
+  draw_panel = function(self, data, panel_params, coord, drop = TRUE,
                         node.shape = 21, node.colour = "blue", node.fill = "red",
                         node.size = 2, curvature = 0, angle = 90, ncp = 5, arrow = NULL,
                         arrow.fill = NULL, lineend = "butt", node.color = NULL,
@@ -103,7 +103,7 @@ GeomCurve2 <- ggproto(
            shape = end.shape,
            size = end.size,
            stroke = 0.5))
-    if(isTRUE(rm.dup)) {
+    if(isTRUE(drop)) {
       start.data <- cbind(start.data, data[aesthetics])[!duplicated(start.data), , drop = FALSE]
       end.data <- cbind(end.data, data[aesthetics])[!duplicated(end.data), , drop = FALSE]
     } else {
