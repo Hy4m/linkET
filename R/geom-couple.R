@@ -70,6 +70,8 @@ ggplot_add.geom_couple <- function(object, plot, object_name) {
 
   mapping <- aes_modify(aes_(x = ~.x, y = ~.y, xend = ~.xend, yend = ~.yend),
                         object$mapping)
+  mapping2 <- aes_modify(aes_(x = ~.x, y = ~.y, label = ~.label),
+                         object$mapping[c("x", "y")])
   params <- modifyList(list(data = edge, mapping = mapping, inherit.aes = FALSE),
                        object$params)
 
@@ -96,7 +98,7 @@ ggplot_add.geom_couple <- function(object, plot, object_name) {
   obj <- list(
     do.call(geom_curve2, params),
     do.call(geom_text,
-            list(mapping = aes_(x = ~.x, y = ~.y, label = ~.label),
+            list(mapping = mapping2,
                  data = node, hjust = hjust, size = object$label.size,
                  colour = object$label.colour, family = object$label.family,
                  fontface = object$label.fontface, nudge_x = nudge_x,
