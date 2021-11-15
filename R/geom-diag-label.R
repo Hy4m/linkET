@@ -27,12 +27,13 @@ ggplot_add.geom_diag_label <- function(object, plot, object_name) {
   if(!identical(row_names, col_names)) {
     stop("`geom_diag_label()` just support for symmetric matrices.", call. = FALSE)
   }
-  data <- tibble::tibble(x = seq_along(col_names),
-                         y = rev(seq_along(row_names)),
-                         label = col_names)
+  data <- tibble::tibble(.x = seq_along(col_names),
+                         .y = rev(seq_along(row_names)),
+                         .label = col_names)
   params <- object$params
   params$data <- data
-  params$mapping <- aes_(x = ~x, y = ~y, label = ~label)
+  params$mapping <- aes_modify(aes_(x = ~.x, y = ~.y, label = ~.label),
+                               params$mapping)
   params$inherit.aes <- FALSE
   geom <- paste0("geom_", object$geom)
   object <- do.call(geom, params)
