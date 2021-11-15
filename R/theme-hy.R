@@ -2,7 +2,9 @@
 #' @title hyplot theme
 #' @param ... extra params passing to \code{\link[ggplot2]{theme}}.
 #' @return The theme.
-#' @importFrom ggplot2 theme element_text element_blank element_rect element_line
+#' @importFrom ggplot2 theme
+#' @importFrom ggplot2 element_text
+#' @importFrom ggplot2 element_blank
 #' @rdname theme_hy
 #' @author Hou Yun
 #' @export
