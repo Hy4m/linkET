@@ -68,24 +68,32 @@ check_corr <- function(x) {
   }
   rnm <- rownames(x)
   cnm <- colnames(x)
+  out <- TRUE
   if(!is.null(cnm) && is.null(rnm)) {
-    return(FALSE)
+    out <- FALSE
   }
 
   if(is.null(cnm) && !is.null(rnm)) {
-    return(FALSE)
+    out <- FALSE
   }
 
   if(any(x > 1) || any(x < -1)) {
-    return(FALSE)
+    out <- FALSE
   }
 
   if(identical(rnm, cnm) && !is.null(rnm)) {
     if(isSymmetric(x)) {
-      return(TRUE)
+      out <- TRUE
     } else {
-      return(FALSE)
+      out <- FALSE
     }
   }
-  TRUE
+  if(isTRUE(out)) {
+    message("Guess the input data is a correlation matrix,\n",
+            "you can override this behavior by setting the `is_corr` parameter.")
+  } else {
+    message("Guess the input data is not a correlation matrix,\n",
+            "you can override this behavior by setting the `is_corr` parameter.")
+  }
+  out
 }
