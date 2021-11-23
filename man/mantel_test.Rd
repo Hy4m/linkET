@@ -66,14 +66,26 @@ Mantel and partial mantel test for dissimilarity matrices
 library(vegan)
 data("varespec")
 data("varechem")
+
+## set group id of `spec` on columns by `spec_select`
 mantel_test(varespec, varechem,
   spec_select = list(spec01 = 1:5, spec02 = 6:12))
+
+## set group id of `spec` on columns by `spec_select`
+## set group id of `env` on columns by `env_select`
 mantel_test(varespec, varechem,
   spec_select = list(spec01 = 1:5, spec02 = 6:12),
   env_select = list(env01 = 1:5, env02 = 6:10, env03 = 11:14))
+
+## set group id of all data on rows by `group`
 set.seed(20211123)
 sam_grp <- sample(paste0("sample", 1:3), 24, replace = TRUE)
 mantel_test(varespec, varechem, group = sam_grp)
+
+## partial mantel test
+m <- matrix(rnorm(24*5), nrow = 24)
+mantel_test(varespec, varechem, env_ctrl = m,
+mantel_fun = "mantel.partial")
 }
 }
 \author{
