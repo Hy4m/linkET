@@ -2,7 +2,7 @@
 #' @title Mantel test
 #' @param spec,env data frame object.
 #' @param group vector for grouping the rows.
-#' @param env_ctrl NULL (default), data frame.
+#' @param env_ctrl NULL (default), or a data frame.
 #' @param mantel_fun string, function of mantel test.
 #'    \itemize{
 #'      \item{\code{"mantel"} will use \code{vegan::mantel()} (default).}
@@ -34,11 +34,10 @@
 #' mantel_test(varespec, varechem,
 #'   spec_select = list(spec01 = 1:5, spec02 = 6:12),
 #'   env_select = list(env01 = 1:5, env02 = 6:10, env03 = 11:14))
-#' set.seed(20191224)
+#' set.seed(20211123)
 #' sam_grp <- sample(paste0("sample", 1:3), 24, replace = TRUE)
 #' mantel_test(varespec, varechem, group = sam_grp)
 #' }
-#' @seealso \code{\link{mantel_test}}.
 #' @author Hou Yun
 #' @export
 mantel_test <- function(spec,
@@ -57,6 +56,8 @@ mantel_test <- function(spec,
                         env_dist_method,
                         ...)
 {
+  use <- match.arg(use, c("everything", "complete", "pairwise"))
+
   if(!is.data.frame(spec))
     spec <- as.data.frame(spec)
   if(!is.data.frame(env))
@@ -67,20 +68,30 @@ mantel_test <- function(spec,
   if(mantel_fun == "mantel.partial") {
     if(is.null(env_ctrl))
       stop("Did you forget to set the 'env_ctrl' param?", call. = FALSE)
-    if(!is.data.frame(env_ctrl) && !is.list(env_ctrl))
-      stop("'env_ctrl' needs a list or data.frame.", call. = FALSE)
+    if(!is.data.frame(env_ctrl))
+      env_ctrl <- as.data.frame(env_ctrl)
+    if(nrow(env_ctrl) != nrow(spec)) {
+      stop("'env_ctrl' must have the same rows as 'spec'.", call. = FALSE)
+    }
   }
+
+  if(!missing(spec_dist_method)) {
+    warning("'spec_dist_method' parameter has been deprecated,\n",
+            "please use 'spec_dist' parameter instead.", call. = FALSE)
+  }
+  if(!missing(env_dist_method)) {
+    warning("'env_dist_method' parameter has been deprecated,\n",
+            "please use 'env_dist' parameter instead.", call. = FALSE)
+  }
+
   if(!is.null(group)) {
     if(length(group) != nrow(spec))
       stop("Length of 'group' and rows of 'spec' must be same.", call. = FALSE)
     spec <- split(spec, group, drop = FALSE)
     env <- split(env, group, drop = FALSE)
+
     if(mantel_fun == "mantel.partial") {
-      if(is.data.frame(env_ctrl)) {
-        env_ctrl <- rep_len(list(env_ctrl), length(spec))
-      } else {
-        env_ctrl <- env_ctrl[names(spec)]
-      }
+      env_ctrl <- split(env_ctrl, group, drop = FALSE)
     } else {
       env_ctrl <- as.list(rep(NA, length(spec)))
     }
@@ -98,8 +109,6 @@ mantel_test <- function(spec,
                      env_ctrl_dist = env_ctrl_dist,
                      use = use,
                      seed = seed,
-                     spec_dist_method = spec_dist_method,
-                     env_dist_method = env_dist_method,
                      ...) %>%
           dplyr::mutate(.group = .group)
       })
@@ -115,8 +124,6 @@ mantel_test <- function(spec,
                        env_ctrl_dist = env_ctrl_dist,
                        use = use,
                        seed = seed,
-                       spec_dist_method = spec_dist_method,
-                       env_dist_method = env_dist_method,
                        ...)
   }
   grouped <- if(!is.null(group)) TRUE else FALSE
@@ -136,8 +143,6 @@ mantel_test <- function(spec,
                          env_dist = NULL,
                          env_ctrl_dist = NULL,
                          seed = 123,
-                         spec_dist_method,
-                         env_dist_method,
                          ...)
 {
   .FUN <- switch (mantel_fun,
@@ -148,21 +153,6 @@ mantel_test <- function(spec,
                   stop("Invalid 'mantel_fun' parameter.", call. = FALSE)
   )
 
-  use <- match.arg(use, c("everything", "complete", "pairwise"))
-
-  if(!is.data.frame(spec))
-    spec <- as.data.frame(spec)
-  if(!is.data.frame(env))
-    env <- as.data.frame(env)
-  if(nrow(spec) != nrow(env)) {
-    stop("'spec' must have the same rows as 'env'.", call. = FALSE)
-  }
-  if(mantel_fun == "mantel.partial") {
-    if(is.null(env_ctrl))
-      stop("Did you forget to set the 'env_ctrl' param?", call. = FALSE)
-    if(!is.data.frame(env_ctrl))
-      env_ctrl <- as.data.frame(env_ctrl)
-  }
   if(!is.list(spec_select) && !is.null(spec_select))
     stop("'spec_select' needs a list or NULL.", call. = FALSE)
   if(!is.list(env_select) && !is.null(env_select))
@@ -186,14 +176,7 @@ mantel_test <- function(spec,
     }
   }
 
-  if(!missing(spec_dist_method)) {
-    warning("'spec_dist_method' parameter has been deprecated,\n",
-            "please use 'spec_dist' parameter instead.", call. = FALSE)
-  }
-  if(!missing(env_dist_method)) {
-    warning("'env_dist_method' parameter has been deprecated,\n",
-            "please use 'env_dist' parameter instead.", call. = FALSE)
-  }
+
   if(is.null(spec_dist)) {
     if(all(vapply(spec, is.numeric, logical(1)))) {
       message("`mantel_test()` using 'bray' dist method for 'spec'.")
@@ -211,6 +194,18 @@ mantel_test <- function(spec,
     } else {
       message("`mantel_test()` using 'gower' dist method for 'env'.")
       env_dist <- dist_func(.FUN = "gowdis")
+    }
+  }
+
+  if(mantel_fun == "mantel.partial") {
+    if(is.null(env_ctrl_dist)) {
+      if(all(vapply(env_ctrl, is.numeric, logical(1)))) {
+        message("`mantel_test()` using 'euclidean' dist method for 'env_ctrl'.")
+        env_ctrl_dist <- dist_func(.FUN = "vegdist", method = "euclidean")
+      } else {
+        message("`mantel_test()` using 'gower' dist method for 'env_ctrl'.")
+        env_ctrl_dist <- dist_func(.FUN = "gowdis")
+      }
     }
   }
 
@@ -247,16 +242,6 @@ mantel_test <- function(spec,
 
     set.seed(.seed)
     if(mantel_fun == "mantel.partial") {
-      if(is.null(env_ctrl_dist)) {
-        if(all(vapply(env_ctrl, is.numeric, logical(1)))) {
-          message("`mantel_test()` using 'euclidean' dist method for 'env_ctrl'.")
-          env_ctrl_dist <- dist_func(.FUN = "vegdist", method = "euclidean")
-        } else {
-          message("`mantel_test()` using 'gower' dist method for 'env_ctrl'.")
-          env_ctrl_dist <- dist_func(.FUN = "gowdis")
-        }
-      }
-
       env_ctrl_dist <- env_ctrl_dist(env_ctrl)
       .FUN(spec_dist, env_dist, env_ctrl_dist, ...)
     } else {

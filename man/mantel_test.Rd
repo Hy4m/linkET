@@ -27,7 +27,7 @@ mantel_test(
 
 \item{group}{vector for grouping the rows.}
 
-\item{env_ctrl}{NULL (default), data frame.}
+\item{env_ctrl}{NULL (default), or a data frame.}
 
 \item{mantel_fun}{string, function of mantel test.
  \itemize{
@@ -71,13 +71,10 @@ mantel_test(varespec, varechem,
 mantel_test(varespec, varechem,
   spec_select = list(spec01 = 1:5, spec02 = 6:12),
   env_select = list(env01 = 1:5, env02 = 6:10, env03 = 11:14))
-set.seed(20191224)
+set.seed(20211123)
 sam_grp <- sample(paste0("sample", 1:3), 24, replace = TRUE)
 mantel_test(varespec, varechem, group = sam_grp)
 }
-}
-\seealso{
-\code{\link{mantel_test}}.
 }
 \author{
 Hou Yun
