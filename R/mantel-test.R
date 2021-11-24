@@ -80,10 +80,12 @@ mantel_test <- function(spec,
   if(mantel_fun == "mantel.partial") {
     if(is.null(env_ctrl))
       stop("Did you forget to set the 'env_ctrl' param?", call. = FALSE)
-    if(!is.data.frame(env_ctrl))
+    if(!is.data.frame(env_ctrl) && !is.list(env_ctrl))
       env_ctrl <- as.data.frame(env_ctrl)
-    if(nrow(env_ctrl) != nrow(spec)) {
-      stop("'env_ctrl' must have the same rows as 'spec'.", call. = FALSE)
+    if(is.data.frame(env_ctrl)) {
+      if(nrow(env_ctrl) != nrow(spec)) {
+        stop("'env_ctrl' must have the same rows as 'spec'.", call. = FALSE)
+      }
     }
   }
 
@@ -103,7 +105,10 @@ mantel_test <- function(spec,
     env <- split(env, group, drop = FALSE)
 
     if(mantel_fun == "mantel.partial") {
-      env_ctrl <- split(env_ctrl, group, drop = FALSE)
+      if(is.data.frame(env_ctrl)) {
+        env_ctrl <- split(env_ctrl, group, drop = FALSE)
+      }
+      env_ctrl <- env_ctrl[names(spec)]
     } else {
       env_ctrl <- as.list(rep(NA, length(spec)))
     }
