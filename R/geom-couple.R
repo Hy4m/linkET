@@ -69,7 +69,7 @@ ggplot_add.geom_couple <- function(object, plot, object_name) {
   node <- dplyr::filter(link_data, !.isEdge)
 
   mapping <- aes_modify(aes_(x = ~.x, y = ~.y, xend = ~.xend, yend = ~.yend),
-                        object$mapping)
+                        object$mapping[setdiff(names(object$mapping), c("from", "to"))])
   mapping2 <- aes_modify(aes_(x = ~.x, y = ~.y, label = ~.label),
                          object$mapping[c("x", "y")])
   params <- modifyList(list(data = edge, mapping = mapping, inherit.aes = FALSE),
