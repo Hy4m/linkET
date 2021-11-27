@@ -89,10 +89,10 @@ check_corr <- function(x) {
     }
   }
   if(isTRUE(out)) {
-    message("Guess the input data is a correlation matrix,\n",
+    message("The input data is a correlation matrix,\n",
             "you can override this behavior by setting the `is_corr` parameter.")
   } else {
-    message("Guess the input data is not a correlation matrix,\n",
+    message("The input data is not a correlation matrix,\n",
             "you can override this behavior by setting the `is_corr` parameter.")
   }
   out
