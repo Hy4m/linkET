@@ -12,7 +12,6 @@ geom_curve2(
   stat = "identity",
   position = "identity",
   ...,
-  curvature = 0,
   angle = 90,
   ncp = 5,
   arrow = NULL,
@@ -54,10 +53,6 @@ a call to a position adjustment function.}
 often aesthetics, used to set an aesthetic to a fixed value, like
 \code{colour = "red"} or \code{size = 3}. They may also be parameters
 to the paired geom/stat.}
-
-\item{curvature}{A numeric value giving the amount of curvature.
-    Negative values produce left-hand curves, positive values
-    produce right-hand curves, and zero produces a straight line.}
 
 \item{angle}{A numeric value between 0 and 180,
     giving an amount to skew the control
@@ -104,6 +99,7 @@ Curve Layer
       \item \code{colour}
       \item \code{linetype}
       \item \code{size}
+      \item \code{curvature}
   }
 }
 

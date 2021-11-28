@@ -13,6 +13,7 @@
 #'       \item \code{colour}
 #'       \item \code{linetype}
 #'       \item \code{size}
+#'       \item \code{curvature}
 #'   }
 #' @importFrom ggplot2 GeomCurve
 #' @importFrom ggplot2 GeomPoint
@@ -26,7 +27,6 @@ geom_curve2 <- function(mapping = NULL,
                         stat = "identity",
                         position = "identity",
                         ...,
-                        curvature = 0,
                         angle = 90,
                         ncp = 5,
                         arrow = NULL,
@@ -44,7 +44,6 @@ geom_curve2 <- function(mapping = NULL,
     show.legend = show.legend,
     inherit.aes = inherit.aes,
     params = list(
-      curvature = curvature,
       angle = angle,
       ncp = ncp,
       arrow = arrow,
@@ -63,17 +62,47 @@ geom_curve2 <- function(mapping = NULL,
 GeomCurve2 <- ggproto(
   "GeomCurve2", GeomCurve,
   default_aes = aes(colour = "grey35", size = 0.5, linetype = 1,
-                    alpha = NA),
+                    alpha = NA, curvature = 0),
   required_aes = c("x", "y", "xend", "yend"),
 
   draw_panel = function(self, data, panel_params, coord, drop = TRUE,
                         node.shape = 21, node.colour = "blue", node.fill = "red",
-                        node.size = 2, curvature = 0, angle = 90, ncp = 5, arrow = NULL,
+                        node.size = 2, angle = 90, ncp = 5, arrow = NULL,
                         arrow.fill = NULL, lineend = "butt", node.color = NULL,
                         na.rm = FALSE) {
     if(empty(data)) {
       return(ggplot2::zeroGrob())
     }
+
+    if (!coord$is_linear()) {
+      warning("`geom_curve2` is not implemented for non-linear coordinates.",
+              call. = FALSE)
+    }
+
+    trans <- coord$transform(data, panel_params)
+
+    arrow.fill <- arrow.fill %||% trans$colour
+
+    grobs <- curve2Grob(x1 = trans$x,
+                        y1 = trans$y,
+                        x2 = trans$xend,
+                        y2 = trans$yend,
+                        default.units = "native",
+                        curvature = trans$curvature,
+                        angle = angle,
+                        ncp = ncp,
+                        square = FALSE,
+                        squareShape = 1,
+                        inflect = FALSE,
+                        open = TRUE,
+                        gp = gpar(
+                          col = scales::alpha(trans$colour, trans$alpha),
+                          fill = scales::alpha(arrow.fill, trans$alpha),
+                          lwd = trans$size * ggplot2::.pt,
+                          lty = trans$linetype,
+                          lineend = lineend),
+                        arrow = arrow)
+
     aesthetics <- setdiff(names(data), c("x", "y", "xend", "yend", "colour",
                                          "fill", "size", "linetype"))
     if(!is.null(node.color)) {
@@ -114,10 +143,7 @@ GeomCurve2 <- ggproto(
       "geom_curve2",
       grid::gTree(
         children = grid::gList(
-          GeomCurve$draw_panel(data, panel_params, coord, curvature = curvature,
-                               angle = angle, ncp = ncp, arrow = arrow,
-                               arrow.fill = arrow.fill, lineend = lineend,
-                               na.rm = na.rm),
+          grobs,
           GeomPoint$draw_panel(start.data, panel_params, coord),
           GeomPoint$draw_panel(end.data, panel_params, coord)
         )
@@ -126,3 +152,60 @@ GeomCurve2 <- ggproto(
   },
   draw_key = draw_key_path
 )
+
+#' @importFrom grid grobTree
+#' @noRd
+curve2Grob <- function(x1, y1, x2, y2,
+                       default.units = "npc",
+                       curvature = 1,
+                       angle = 90,
+                       ncp = 1,
+                       shape = 0.5,
+                       square = TRUE,
+                       squareShape = 1,
+                       inflect = FALSE,
+                       arrow = NULL,
+                       open = TRUE,
+                       debug = FALSE,
+                       name = NULL,
+                       gp = gpar(),
+                       vp = NULL) {
+  n <- max(length(x1), length(y1), length(x2), length(y2))
+  if(length(x1) < n) {
+    x1 <- rep_len(x1, n)
+  }
+  if(length(y1) < n) {
+    y1 <- rep_len(y1, n)
+  }
+  if(length(x2) < n) {
+    x2 <- rep_len(x2, n)
+  }
+  if(length(y2) < n) {
+    y2 <- rep_len(y2, n)
+  }
+  if(length(curvature) != n) {
+    curvature <- rep_len(curvature, n)
+  }
+
+  grobs <- lapply(seq_len(n), function(.n) {
+    grid::curveGrob(x1 = x1[.n],
+                    y1 = y1[.n],
+                    x2 = x2[.n],
+                    y2 = y2[.n],
+                    default.units = default.units,
+                    curvature = curvature[.n],
+                    angle = angle,
+                    ncp = ncp,
+                    shape = shape,
+                    square = square,
+                    squareShape = squareShape,
+                    inflect = inflect,
+                    arrow = arrow,
+                    open = open,
+                    debug = debug,
+                    name = name,
+                    gp = gp,
+                    vp = vp)
+  })
+  do.call("grobTree", grobs)
+}
