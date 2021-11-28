@@ -12,7 +12,7 @@ mantel_test(
   mantel_fun = "mantel",
   spec_select = NULL,
   env_select = NULL,
-  use = "everything",
+  na_omit = TRUE,
   spec_dist = NULL,
   env_dist = NULL,
   env_ctrl_dist = NULL,
@@ -27,7 +27,7 @@ mantel_test(
 
 \item{group}{vector for grouping the rows.}
 
-\item{env_ctrl}{NULL (default), or a data frame.}
+\item{env_ctrl}{NULL (default), TRUE or a data frame.}
 
 \item{mantel_fun}{string, function of mantel test.
  \itemize{
@@ -39,7 +39,7 @@ mantel_test(
 
 \item{spec_select, env_select}{NULL (default), numeric or character vector index of columns.}
 
-\item{use}{one of "everything", "complete" or "pairwise".}
+\item{na_omit}{if TRUE (default), the incomplete cases will be removed.}
 
 \item{spec_dist}{NULL (default) or \code{dist_func()}.}
 

@@ -2,7 +2,7 @@
 #' @title Mantel test
 #' @param spec,env data frame object.
 #' @param group vector for grouping the rows.
-#' @param env_ctrl NULL (default), or a data frame.
+#' @param env_ctrl NULL (default), TRUE or a data frame.
 #' @param mantel_fun string, function of mantel test.
 #'    \itemize{
 #'      \item{\code{"mantel"} will use \code{vegan::mantel()} (default).}
@@ -11,7 +11,7 @@
 #'      \item{\code{"mantel.partial"} will use \code{vegan::mantel.partial()}.}
 #'   }
 #' @param spec_select,env_select NULL (default), numeric or character vector index of columns.
-#' @param use one of "everything", "complete" or "pairwise".
+#' @param na_omit if TRUE (default), the incomplete cases will be removed.
 #' @param spec_dist NULL (default) or \code{dist_func()}.
 #' @param env_dist NULL (default) or \code{dist_func()}.
 #' @param env_ctrl_dist NULL (default) or \code{dist_func()}.
@@ -59,7 +59,7 @@ mantel_test <- function(spec,
                         mantel_fun = "mantel",
                         spec_select = NULL, # a list of index vector
                         env_select = NULL,
-                        use = "everything",
+                        na_omit = TRUE,
                         spec_dist = NULL,
                         env_dist = NULL,
                         env_ctrl_dist = NULL,
@@ -68,8 +68,6 @@ mantel_test <- function(spec,
                         env_dist_method,
                         ...)
 {
-  use <- match.arg(use, c("everything", "complete", "pairwise"))
-
   if(!is.data.frame(spec))
     spec <- as.data.frame(spec)
   if(!is.data.frame(env))
@@ -78,10 +76,14 @@ mantel_test <- function(spec,
     stop("'spec' must have the same rows as 'env'.", call. = FALSE)
   }
   if(mantel_fun == "mantel.partial") {
-    if(is.null(env_ctrl))
+    if(is.null(env_ctrl)) {
       stop("Did you forget to set the 'env_ctrl' param?", call. = FALSE)
-    if(!is.data.frame(env_ctrl) && !is.list(env_ctrl))
+    }
+
+    if(!is.data.frame(env_ctrl) && !is.list(env_ctrl) && !isTRUE(env_ctrl)) {
       env_ctrl <- as.data.frame(env_ctrl)
+    }
+
     if(is.data.frame(env_ctrl)) {
       if(nrow(env_ctrl) != nrow(spec)) {
         stop("'env_ctrl' must have the same rows as 'spec'.", call. = FALSE)
@@ -99,8 +101,10 @@ mantel_test <- function(spec,
   }
 
   if(!is.null(group)) {
-    if(length(group) != nrow(spec))
+    if(length(group) != nrow(spec)) {
       stop("Length of 'group' and rows of 'spec' must be same.", call. = FALSE)
+    }
+
     spec <- split(spec, group, drop = FALSE)
     env <- split(env, group, drop = FALSE)
 
@@ -108,7 +112,11 @@ mantel_test <- function(spec,
       if(is.data.frame(env_ctrl)) {
         env_ctrl <- split(env_ctrl, group, drop = FALSE)
       }
-      env_ctrl <- env_ctrl[names(spec)]
+      if(is.list(env_ctrl)) {
+        env_ctrl <- env_ctrl[names(spec)]
+      } else {
+        env_ctrl <- rep_len(env_ctrl, length(spec))
+      }
     } else {
       env_ctrl <- as.list(rep(NA, length(spec)))
     }
@@ -124,7 +132,7 @@ mantel_test <- function(spec,
                      spec_dist = spec_dist,
                      env_dist = env_dist,
                      env_ctrl_dist = env_ctrl_dist,
-                     use = use,
+                     na_omit = na_omit,
                      seed = seed,
                      ...) %>%
           dplyr::mutate(.group = .group)
@@ -139,12 +147,11 @@ mantel_test <- function(spec,
                        spec_dist = spec_dist,
                        env_dist = env_dist,
                        env_ctrl_dist = env_ctrl_dist,
-                       use = use,
+                       na_omit = na_omit,
                        seed = seed,
                        ...)
   }
-  grouped <- if(!is.null(group)) TRUE else FALSE
-  attr(df, "grouped") <- grouped
+  attr(df, "grouped") <- if(!is.null(group)) TRUE else FALSE
   df
 }
 
@@ -155,7 +162,7 @@ mantel_test <- function(spec,
                          mantel_fun = "mantel",
                          spec_select = NULL, # a list of index vector
                          env_select = NULL,
-                         use = "everything",
+                         na_omit = TRUE,
                          spec_dist = NULL,
                          env_dist = NULL,
                          env_ctrl_dist = NULL,
@@ -180,19 +187,9 @@ mantel_test <- function(spec,
   if(is.null(env_select)) {
     env_select <- as.list(setNames(1:ncol(env), names(env)))
   }
-
-  if(use == "complete") {
-    non_na <- complete.cases(spec) & complete.cases(env)
-    if(mantel_fun == "mantel.partial") {
-      non_na <- non_na & complete.cases(env_ctrl)
-    }
-    spec <- spec[non_na, , drop = FALSE]
-    env <- env[non_na, , drop = FALSE]
-    if(mantel_fun == "mantel.partial") {
-      env_ctrl <- env_ctrl[non_na, , drop = FALSE]
-    }
+  if(mantel_fun == "mantel.partial") {
+    env_ctrl <- check_env_ctrl(env, env_ctrl, env_select)
   }
-
 
   if(is.null(spec_dist)) {
     if(all(vapply(spec, is.numeric, logical(1)))) {
@@ -214,18 +211,6 @@ mantel_test <- function(spec,
     }
   }
 
-  if(mantel_fun == "mantel.partial") {
-    if(is.null(env_ctrl_dist)) {
-      if(all(vapply(env_ctrl, is.numeric, logical(1)))) {
-        message("`mantel_test()` using 'euclidean' dist method for 'env_ctrl'.")
-        env_ctrl_dist <- dist_func(.FUN = "vegdist", method = "euclidean")
-      } else {
-        message("`mantel_test()` using 'gower' dist method for 'env_ctrl'.")
-        env_ctrl_dist <- dist_func(.FUN = "gowdis")
-      }
-    }
-  }
-
   spec_select <- make_list_names(spec_select, "spec")
   env_select <- make_list_names(env_select, "env")
   spec_name <- rep(names(spec_select), each = length(env_select))
@@ -242,16 +227,25 @@ mantel_test <- function(spec,
   rp <- purrr::pmap(list(spec_name, env_name, seeds), function(.x, .y, .seed) {
     .spec <- spec[[.x]]
     .env <- env[[.y]]
-    if(use == "pairwise") {
+    if(mantel_fun == "mantel.partial") {
+      .env_ctrl <- env_ctrl[[.y]]
+      if(is.null(env_ctrl_dist)) {
+        if(all(vapply(.env_ctrl, is.numeric, logical(1)))) {
+          env_ctrl_dist <- dist_func(.FUN = "vegdist", method = "euclidean")
+        } else {
+          env_ctrl_dist <- dist_func(.FUN = "gowdis")
+        }
+      }
+    }
+
+    if(isTRUE(na_omit)) {
       non_na <- complete.cases(.spec) & complete.cases(.env)
       if(mantel_fun == "mantel.partial") {
-        non_na <- non_na & complete.cases(env_ctrl)
+        non_na <- non_na & complete.cases(.env_ctrl)
+        .env_ctrl <- .env_ctrl[non_na, , drop = FALSE]
       }
       .spec <- .spec[non_na, , drop = FALSE]
       .env <- .env[non_na, , drop = FALSE]
-      if(mantel_fun == "mantel.partial") {
-        env_ctrl <- env_ctrl[non_na, , drop = FALSE]
-      }
     }
 
     spec_dist <- spec_dist(.spec)
@@ -259,7 +253,7 @@ mantel_test <- function(spec,
 
     set.seed(.seed)
     if(mantel_fun == "mantel.partial") {
-      env_ctrl_dist <- env_ctrl_dist(env_ctrl)
+      env_ctrl_dist <- env_ctrl_dist(.env_ctrl)
       .FUN(spec_dist, env_dist, env_ctrl_dist, ...)
     } else {
       .FUN(spec_dist, env_dist, ...)
@@ -287,4 +281,38 @@ extract_mantel <- function(x, .f = "mantel") {
     p <- purrr::map_dbl(x, `[[`, "pvalue")
   }
   list(r = r, p = p)
+}
+
+#' @noRd
+check_env_ctrl <- function(env, env_ctrl, env_select) {
+  if(is.null(env_ctrl)) {
+    stop("Did you forget to set the 'env_ctrl' param?", call. = FALSE)
+  }
+
+  if(isTRUE(env_ctrl)) {
+    env_select <- make_list_names(env_select, "env")
+    env_list <- purrr::map(env_select, function(.x) {
+      subset(env, select = .x, drop = FALSE)})
+    name_list <- purrr::map(env_list, function(.env) {
+      setdiff(names(env), names(.env))
+    })
+    if(any(purrr::map_dbl(name_list, length) < 1)) {
+      stop("Zero length error: `env_ctrl` is empty.", call. = FALSE)
+    }
+    env_ctrl <- purrr::map(name_list, function(.name) {
+      subset(env, select = .name, drop = FALSE)})
+  }
+
+  if(!is.data.frame(env_ctrl) && !is.list(env_ctrl)) {
+    env_ctrl <- as.data.frame(env_ctrl)
+  }
+
+  if(is.data.frame(env_ctrl)) {
+    if(nrow(env_ctrl) != nrow(env)) {
+      stop("'env_ctrl' must have the same rows as 'env'.", call. = FALSE)
+    }
+    env_ctrl <- rlang::set_names(rep_len(list(env_ctrl), length(env_select)), names(env_select))
+  }
+
+  env_ctrl
 }
