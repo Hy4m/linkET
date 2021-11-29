@@ -56,6 +56,16 @@ ggplot_add.geom_couple <- function(object, plot, object_name) {
   m <- nrows(md)
   from <- object$mapping$from
   to <- object$mapping$to
+
+  if("curvature" %in% names(object$params)) {
+    if(inherits(object$params$curvature, "nice_curvature")) {
+      .f <- object$params$curvature
+      object$data <- .f(object$data, md, to)
+    }
+    object$mapping <- aes_modify(object$mapping, aes_(curvature = ~.curvature))
+    object$params <- object$params[setdiff(names(object$params), "curvature")]
+  }
+
   link_data <- link_tbl(data = object$data,
                         md = md,
                         row_names = rev(row_names(md)),
@@ -107,6 +117,42 @@ ggplot_add.geom_couple <- function(object, plot, object_name) {
   plot <- plot + expand_limits(x = xrange, y = yrange)
 
   ggplot_add(object = obj, plot = plot, object_name = object_name)
+}
+
+#' @param curvature a numeric value giving the amount of curvature.
+#' @param by one of "from" or "to". Compute the best curvature based on
+#' start or end points.
+#' @rdname geom_couple
+#' @export
+nice_curvature <- function(curvature, by = "to") {
+  by <- match.arg(by, c("from", "to"))
+
+  if(missing(curvature)) {
+    curvature <- 0.1
+  }
+
+  if(curvature < 0) {
+    curvature <- -curvature
+  }
+
+  f <- function(.data, .md, from = NULL, to = NULL) {
+    if(by == "from") {
+      from <- if(is.null(from)) .data[[1]] else rlang::eval_tidy(from, .data)
+      nm <- unique(from)
+      half <- length(nm) / 2
+      id <- rlang::set_names(seq_along(nm), rev(nm))
+      .data$.curvature <- ifelse(id[from] >= half, curvature, -curvature)
+    } else {
+      to <- if(is.null(to)) .data[[2]] else rlang::eval_tidy(to, .data)
+      rnm <- row_names(.md)
+      half <- length(rnm) / 2
+      id <- rlang::set_names(seq_along(rnm), rev(rnm))
+      .data$.curvature <- ifelse(id[to] >= half, curvature, -curvature)
+    }
+    .data
+  }
+  class(f) <- c("nice_curvature", class(f))
+  f
 }
 
 #' @noRd
