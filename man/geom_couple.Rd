@@ -3,6 +3,7 @@
 \name{geom_couple}
 \alias{geom_couple}
 \alias{anno_link}
+\alias{nice_curvature}
 \title{Link Layer}
 \usage{
 geom_couple(
@@ -17,6 +18,8 @@ geom_couple(
 )
 
 anno_link(...)
+
+nice_curvature(curvature, by = "to")
 }
 \arguments{
 \item{data}{a data frame.}
@@ -28,6 +31,11 @@ anno_link(...)
 \item{nudge_x}{horizonal justification of label.}
 
 \item{...}{extra parameters passing to layer function.}
+
+\item{curvature}{a numeric value giving the amount of curvature.}
+
+\item{by}{one of "from" or "to". Compute the best curvature based on
+start or end points.}
 }
 \value{
 a ggplot layer.

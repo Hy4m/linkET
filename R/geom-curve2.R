@@ -89,18 +89,17 @@ GeomCurve2 <- ggproto(
                         y2 = trans$yend,
                         default.units = "native",
                         curvature = trans$curvature,
+                        col = scales::alpha(trans$colour, trans$alpha),
+                        fill = scales::alpha(arrow.fill, trans$alpha),
+                        lwd = trans$size * ggplot2::.pt,
+                        lty = trans$linetype,
+                        lineend = lineend,
                         angle = angle,
                         ncp = ncp,
                         square = FALSE,
                         squareShape = 1,
                         inflect = FALSE,
                         open = TRUE,
-                        gp = gpar(
-                          col = scales::alpha(trans$colour, trans$alpha),
-                          fill = scales::alpha(arrow.fill, trans$alpha),
-                          lwd = trans$size * ggplot2::.pt,
-                          lty = trans$linetype,
-                          lineend = lineend),
                         arrow = arrow)
 
     aesthetics <- setdiff(names(data), c("x", "y", "xend", "yend", "colour",
@@ -156,56 +155,37 @@ GeomCurve2 <- ggproto(
 #' @importFrom grid grobTree
 #' @noRd
 curve2Grob <- function(x1, y1, x2, y2,
-                       default.units = "npc",
                        curvature = 1,
-                       angle = 90,
-                       ncp = 1,
-                       shape = 0.5,
-                       square = TRUE,
-                       squareShape = 1,
-                       inflect = FALSE,
-                       arrow = NULL,
-                       open = TRUE,
-                       debug = FALSE,
-                       name = NULL,
-                       gp = gpar(),
-                       vp = NULL) {
+                       col = "black",
+                       fill = "grey50",
+                       lwd = 0.5,
+                       lty = 1,
+                       lineend = "butt",
+                       ...) {
   n <- max(length(x1), length(y1), length(x2), length(y2))
-  if(length(x1) < n) {
-    x1 <- rep_len(x1, n)
-  }
-  if(length(y1) < n) {
-    y1 <- rep_len(y1, n)
-  }
-  if(length(x2) < n) {
-    x2 <- rep_len(x2, n)
-  }
-  if(length(y2) < n) {
-    y2 <- rep_len(y2, n)
-  }
-  if(length(curvature) != n) {
-    curvature <- rep_len(curvature, n)
-  }
+
+  x1 <- rep_len(x1, n)
+  y1 <- rep_len(y1, n)
+  x2 <- rep_len(x2, n)
+  y2 <- rep_len(y2, n)
+  curvature <- rep_len(curvature, n)
+  col <- rep_len(col, n)
+  fill <- rep_len(fill, n)
+  lwd <- rep_len(lwd, n)
+  lty <- rep_len(lty, n)
 
   grobs <- lapply(seq_len(n), function(.n) {
     grid::curveGrob(x1 = x1[.n],
                     y1 = y1[.n],
                     x2 = x2[.n],
                     y2 = y2[.n],
-                    default.units = default.units,
                     curvature = curvature[.n],
-                    angle = angle,
-                    ncp = ncp,
-                    shape = shape,
-                    square = square,
-                    squareShape = squareShape,
-                    inflect = inflect,
-                    arrow = arrow,
-                    open = open,
-                    debug = debug,
-                    name = name,
-                    gp = gp,
-                    vp = vp)
+                    gp = gpar(col = col[.n],
+                              fill = fill[.n],
+                              lwd = lwd[.n],
+                              lty = lty[.n],
+                              lineend = lineend),
+                    ...)
   })
   do.call("grobTree", grobs)
 }
