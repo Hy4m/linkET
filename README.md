@@ -154,6 +154,8 @@ correlate(varespec[1:30], varechem) %>%
 qcorrplot(varespec[1:30], type = "lower") +
   geom_square() +
   scale_fill_gradientn(colours = RColorBrewer::brewer.pal(11, "RdBu"))
+#> The input data is not a correlation matrix,
+#> you can override this behavior by setting the `is_corr` parameter.
 ```
 
 <img src="man/figures/README-heatmap-5.png" width="100%" />
@@ -187,7 +189,9 @@ mantel <- mantel_test(varespec, varechem,
 
 qcorrplot(correlate(varechem), type = "lower", diag = FALSE) +
   geom_square() +
-  geom_couple(aes(colour = pd, size = rd), data = mantel, curvature = 0.1) +
+  geom_couple(aes(colour = pd, size = rd), 
+              data = mantel, 
+              curvature = nice_curvature()) +
   scale_fill_gradientn(colours = RColorBrewer::brewer.pal(11, "RdBu")) +
   scale_size_manual(values = c(0.5, 1, 2)) +
   scale_colour_manual(values = color_pal(3)) +
