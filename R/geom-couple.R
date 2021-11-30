@@ -61,9 +61,9 @@ ggplot_add.geom_couple <- function(object, plot, object_name) {
     if(inherits(object$params$curvature, "nice_curvature")) {
       .f <- object$params$curvature
       object$data <- .f(object$data, md, to)
+      object$mapping <- aes_modify(object$mapping, aes_(curvature = ~.curvature))
+      object$params <- object$params[setdiff(names(object$params), "curvature")]
     }
-    object$mapping <- aes_modify(object$mapping, aes_(curvature = ~.curvature))
-    object$params <- object$params[setdiff(names(object$params), "curvature")]
   }
 
   link_data <- link_tbl(data = object$data,
