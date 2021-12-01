@@ -142,6 +142,14 @@ nice_curvature <- function(curvature, by = "to") {
       half <- length(nm) / 2
       id <- rlang::set_names(seq_along(nm), rev(nm))
       .data$.curvature <- ifelse(id[from] >= half, curvature, -curvature)
+      if(length(nm) %% 2 == 1) {
+        to <- if(is.null(to)) .data[[2]] else rlang::eval_tidy(to, .data)
+        rnm <- row_names(.md)
+        half2 <- length(rnm) / 2
+        id2 <- rlang::set_names(seq_along(rnm), rev(rnm))
+        .data$.curvature <- ifelse((id[from] == (half + 0.5)) & id2[to] >= half2,
+                                   .data$.curvature, -.data$.curvature)
+      }
     } else {
       to <- if(is.null(to)) .data[[2]] else rlang::eval_tidy(to, .data)
       rnm <- row_names(.md)
