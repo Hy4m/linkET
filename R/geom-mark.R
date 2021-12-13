@@ -139,35 +139,8 @@ GeomMark <- ggproto("GeomMark", GeomText,
                            data$label <- star
                            GeomText$draw_panel(data, panel_params, coord)
                          } else {
-                           if(sep == "<br>") {
-                             sep <- "\n"
-                           }
-
-                           if(sep %in% c("^", "_")) {
-                             if(!requireNamespace("ggtext", quietly = TRUE)) {
-                               warning("Need ggtext package.", call. = FALSE)
-                               sep <- ""
-                             }
-                             if(sep == "^") {
-                               data$label <- paste_with_na(num,
-                                                      paste_with_na("<sup>", star, "</sup>"))
-                             }
-                             if(sep == "_") {
-                               data$label <- paste_with_na(num,
-                                                      paste_with_na("<sub>", star, "</sub>"))
-                             }
-
-                             GeomRichtext <- get_function("ggtext", "GeomRichtext")
-                             GeomRichtext$draw_panel(data, panel_params, coord)
-                           } else if(sep == "\n") {
-                             data$label <- paste_with_na(num,
-                                                         paste_with_na("(", star, ")"),
-                                                         sep = "\n")
-                             GeomText$draw_panel(data, panel_params, coord)
-                           } else {
-                             data$label <- paste_with_na(num, star, sep = sep)
-                             GeomText$draw_panel(data, panel_params, coord)
-                           }
+                           data$label <- paste_with_na(num, star, sep = sep)
+                           GeomText$draw_panel(data, panel_params, coord)
                          }
                        }
                      }

@@ -24,9 +24,11 @@ theme_hy <- function(..., use_md = FALSE)
   } else {
     element_markdown <- get_function("ggtext", "element_markdown")
     theme(
-      axis.text = element_text(size = 10.5, colour = "black"),
+      axis.text = element_markdown(size = 10.5, colour = "black"),
       axis.title = element_blank(),
       axis.line = element_blank(),
+      axis.text.y.left = element_markdown(),
+      axis.text.y.right = element_markdown(),
       axis.text.x.top = element_markdown(angle = 90, hjust = 0, vjust = 0),
       axis.text.x.bottom = element_markdown(angle = 90, hjust = 1, vjust = 1),
       ...
