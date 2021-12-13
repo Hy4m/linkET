@@ -64,3 +64,4 @@ ggplot_add.secondary_axis <- function(object, plot, object_name) {
 
   ggplot_add(object, plot, object_name)
 }
+

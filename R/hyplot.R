@@ -2,7 +2,9 @@
 #' @title Initialize hyplot
 #' @param md a matrix_data or md_tbl object or any can be converted to matrix_data.
 #' @param mapping default list of aesthetic mappings to use for plot.
-#' @param drop logical.
+#' @param drop logical. If TRUE, the unused labels will be removed.
+#' @param use_md logical. if TRUE, will use \code{ggtext::element_markdown()} to
+#' draw the axis labels.
 #' @param ... passing to \code{\link{as_matrix_data}}.
 #' @return a ggplot object.
 #' @importFrom ggplot2 ggplot
@@ -20,6 +22,7 @@
 hyplot <- function(md,
                    mapping = NULL,
                    drop = TRUE,
+                   use_md = NULL,
                    ...) {
   if (!is_matrix_data(md) && !is_md_tbl(md)) {
     if (!"name" %in% names(list(...))) {
@@ -38,6 +41,10 @@ hyplot <- function(md,
   diag <- attr(md, "diag")
   row_names <- rev(row_names(md))
   col_names <- col_names(md)
+
+  if(is.null(use_md)) {
+    use_md <- requireNamespace("ggtext") && is_richtext(c(row_names, col_names))
+  }
 
   if(type == "full" || isTRUE(diag)) {
     drop <- FALSE
@@ -83,7 +90,7 @@ hyplot <- function(md,
 
 
   # adjust the default theme
-  p <- p + theme_hy(legend.position = guide_pos)
+  p <- p + theme_hy(legend.position = guide_pos, use_md = use_md)
   class(p) <- c("hyplot", class(p))
   p
 }

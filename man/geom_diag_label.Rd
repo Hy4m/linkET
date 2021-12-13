@@ -4,12 +4,12 @@
 \alias{geom_diag_label}
 \title{Add diagonal label on hyplot}
 \usage{
-geom_diag_label(..., geom = "text")
+geom_diag_label(..., geom = NULL)
 }
 \arguments{
 \item{...}{extra parameters.}
 
-\item{geom}{one of "text", "label".}
+\item{geom}{one of "text", "label" or "richtext" (needs `ggtext` package).}
 }
 \description{
 \code{geom_panel_grid} is mainly used with \code{hyplot()}.

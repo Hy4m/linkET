@@ -5,13 +5,13 @@
 #' @description \code{geom_diag_label} is mainly used with \code{hyplot()} and
 #'     \code{qcorrplot()} functions to add diagnoal labels on correct position
 #'     base on different type of cor_tbl object.
-#' @param geom one of "text", "label".
+#' @param geom one of "text", "label" or "richtext" (needs `ggtext` package).
 #' @param ... extra parameters.
 #' @importFrom ggplot2 aes_ geom_label
 #' @rdname geom_diag_label
 #' @author Hou Yun
 #' @export
-geom_diag_label <- function(..., geom = "text")
+geom_diag_label <- function(..., geom = NULL)
 {
   structure(.Data = list(geom = geom, params = list(...)),
             class = "geom_diag_label")
@@ -27,6 +27,25 @@ ggplot_add.geom_diag_label <- function(object, plot, object_name) {
   if(!identical(row_names, col_names)) {
     stop("`geom_diag_label()` just support for symmetric matrices.", call. = FALSE)
   }
+
+  if(is.null(object$geom)) {
+    if(is_richtext(col_names)) {
+      if(requireNamespace("ggtext")) {
+        object$geom <- "richtext"
+      } else {
+        message("It looks like the label contains richtext\n",
+                "you can install the ggtext package to add richtext.\n")
+        object$geom <- "text"
+      }
+    } else {
+      object$geom <- "text"
+    }
+  }
+
+  if(object$geom == "richtext") {
+    geom_richtext <- get_function("ggtext", "geom_richtext")
+  }
+
   data <- tibble::tibble(.x = seq_along(col_names),
                          .y = rev(seq_along(row_names)),
                          .label = col_names)
