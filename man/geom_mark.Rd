@@ -21,7 +21,6 @@ geom_mark(
   mark = c("*", "**", "***"),
   sig_thres = NULL,
   sep = "",
-  parse = FALSE,
   na.rm = FALSE,
   show.legend = NA,
   inherit.aes = TRUE
@@ -83,9 +82,6 @@ the default value is 2.}
 \item{sig_thres}{if not NULL, just when pvalue is not larger than sig_thres will be ploted.}
 
 \item{sep}{a character string to separate the number and mark symbols.}
-
-\item{parse}{If \code{TRUE}, the labels will be parsed into expressions and
-displayed as described in \code{?plotmath}.}
 
 \item{na.rm}{If \code{FALSE}, the default, missing values are removed with
 a warning. If \code{TRUE}, missing values are silently removed.}

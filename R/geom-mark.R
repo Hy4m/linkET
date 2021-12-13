@@ -54,7 +54,6 @@ geom_mark <- function(mapping = NULL,
                       mark = c("*", "**", "***"),
                       sig_thres = NULL,
                       sep = "",
-                      parse = FALSE,
                       na.rm = FALSE,
                       show.legend = NA,
                       inherit.aes = TRUE)
@@ -82,7 +81,6 @@ geom_mark <- function(mapping = NULL,
       mark = mark,
       sig_thres = sig_thres,
       sep = sep,
-      parse = parse,
       na.rm = na.rm,
       ...
     )
@@ -139,22 +137,38 @@ GeomMark <- ggproto("GeomMark", GeomText,
                          num <- format_number(data$r, digits, nsmall)
                          if(isTRUE(only_mark)) {
                            data$label <- star
+                           GeomText$draw_panel(data, panel_params, coord)
                          } else {
-                           if(isTRUE(parse)) {
-                             if(!requireNamespace("latex2exp", quietly = TRUE))
-                               warning("Need latex2exp package.", call. = FALSE)
-                             parse <- FALSE
+                           if(sep == "<br>") {
+                             sep <- "\n"
                            }
-                           if(parse) {
-                             label <- paste_with_na(num,
-                                                    paste_with_na("{", star, "}"),
-                                                    sep = sep)
-                             data$label <- latex2exp::TeX(label, output = "text")
+
+                           if(sep %in% c("^", "_")) {
+                             if(!requireNamespace("ggtext", quietly = TRUE)) {
+                               warning("Need ggtext package.", call. = FALSE)
+                               sep <- ""
+                             }
+                             if(sep == "^") {
+                               data$label <- paste_with_na(num,
+                                                      paste_with_na("<sup>", star, "</sup>"))
+                             }
+                             if(sep == "_") {
+                               data$label <- paste_with_na(num,
+                                                      paste_with_na("<sub>", star, "</sub>"))
+                             }
+
+                             GeomRichtext <- get_function("ggtext", "GeomRichtext")
+                             GeomRichtext$draw_panel(data, panel_params, coord)
+                           } else if(sep == "\n") {
+                             data$label <- paste_with_na(num,
+                                                         paste_with_na("(", star, ")"),
+                                                         sep = "\n")
+                             GeomText$draw_panel(data, panel_params, coord)
                            } else {
                              data$label <- paste_with_na(num, star, sep = sep)
+                             GeomText$draw_panel(data, panel_params, coord)
                            }
                          }
-                         GeomText$draw_panel(data, panel_params, coord)
                        }
                      }
                    },
