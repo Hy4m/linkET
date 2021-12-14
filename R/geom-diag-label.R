@@ -55,6 +55,14 @@ ggplot_add.geom_diag_label <- function(object, plot, object_name) {
                                params$mapping)
   params$inherit.aes <- FALSE
   geom <- paste0("geom_", object$geom)
+  if(geom == "geom_richtext") {
+    if(!"fill" %in% names(params)) {
+      params$fill <- NA
+    }
+    if(!"label.color" %in% names(params)) {
+      params$label.color <- NA
+    }
+  }
   object <- do.call(geom, params)
   ggplot_add(object, plot, object_name)
 }
