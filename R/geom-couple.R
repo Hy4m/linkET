@@ -2,6 +2,7 @@
 #' @description  Function to draw mantel test plot on a correlation matrix heatmap.
 #' @param data a data frame.
 #' @param mapping aesthetic mappings parameters.
+#' @param drop logical. If TRUE (default), the unused levels will be droped.
 #' @param label.size,label.colour,label.family,label.fontface parameters for label.
 #' @param nudge_x horizonal justification of label.
 #' @param ... extra parameters passing to layer function.
@@ -16,6 +17,7 @@
 #' @export
 geom_couple <- function(data,
                         mapping = NULL,
+                        drop = TRUE,
                         label.size = 3.88,
                         label.colour = "black",
                         label.family = "",
@@ -25,6 +27,7 @@ geom_couple <- function(data,
 {
   structure(.Data = list(mapping = mapping,
                          data = data,
+                         drop = drop,
                          label.size = label.size,
                          label.colour = label.colour,
                          label.family = label.family,
@@ -73,7 +76,8 @@ ggplot_add.geom_couple <- function(object, plot, object_name) {
                         type = type,
                         diag = diag,
                         from = from,
-                        to = to)
+                        to = to,
+                        drop = object$drop)
   .isEdge <- NULL
   edge <- dplyr::filter(link_data, .isEdge)
   node <- dplyr::filter(link_data, !.isEdge)
@@ -171,7 +175,8 @@ link_tbl <- function(data,
                      type,
                      diag,
                      from = NULL,
-                     to = NULL)
+                     to = NULL,
+                     drop = TRUE)
 {
   if(!is_md_tbl(md))
     stop("Need a md_tbl.", call. = FALSE)
@@ -186,11 +191,20 @@ link_tbl <- function(data,
   } else {
     eval_tidy(to, data)
   }
-  if(!is.character(from))
+  if(is.factor(from)) {
+    unique_from <- levels(from)
     from <- as.character(from)
+    if(isTRUE(drop)) {
+      unique_from <- unique_from[unique_from %in% from]
+    }
+  } else {
+    from <- as.character(from)
+    unique_from <- unique(from[!is.na(from)])
+  }
+
   if(!is.character(to))
     to <- as.character(to)
-  unique_from <- unique(from[!is.na(from)])
+
   n <- length(row_names)
   m <- length(unique_from)
   if(type == "full") {

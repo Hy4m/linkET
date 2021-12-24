@@ -9,6 +9,7 @@
 geom_couple(
   data,
   mapping = NULL,
+  drop = TRUE,
   label.size = 3.88,
   label.colour = "black",
   label.family = "",
@@ -25,6 +26,8 @@ nice_curvature(curvature, by = "to")
 \item{data}{a data frame.}
 
 \item{mapping}{aesthetic mappings parameters.}
+
+\item{drop}{logical. If TRUE (default), the unused levels will be droped.}
 
 \item{label.size, label.colour, label.family, label.fontface}{parameters for label.}
 
