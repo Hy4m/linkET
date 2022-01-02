@@ -47,12 +47,13 @@ ggplot_add.magic_text <- function(object, plot, object_name) {
     object$mapping <- aes_modify(plot$mapping, object$mapping)
   }
 
+  object$data <- object$data %||% plot$data
   label <- aes_vars(object$mapping, "label")
   if(is.null(label) && is.null(object$label)) {
     stop("geom_magic_text requires the label aesthetics.", call. = FALSE)
   }
 
-  if(isTRUE(parse)) {
+  if(isTRUE(object$parse)) {
     if(!is.null(object$label)) {
      object$label <- latex_richtext(object$label,
                                     sup = object$sup,
