@@ -30,7 +30,7 @@ ggplot_add.geom_diag_label <- function(object, plot, object_name) {
 
   if(is.null(object$geom)) {
     if(is_richtext(col_names)) {
-      if(requireNamespace("ggtext")) {
+      if(suppressMessages(requireNamespace("ggtext"))) {
         object$geom <- "richtext"
       } else {
         message("It looks like the label contains richtext\n",

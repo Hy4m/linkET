@@ -43,7 +43,7 @@ hyplot <- function(md,
   col_names <- col_names(md)
 
   if(is.null(use_md)) {
-    use_md <- requireNamespace("ggtext") && is_richtext(c(row_names, col_names))
+    use_md <- suppressMessages(requireNamespace("ggtext")) && is_richtext(c(row_names, col_names))
   }
 
   if(type == "full" || isTRUE(diag)) {
