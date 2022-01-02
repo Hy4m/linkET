@@ -59,8 +59,8 @@ ggplot_add.geom_diag_label <- function(object, plot, object_name) {
     if(!"fill" %in% names(params)) {
       params$fill <- NA
     }
-    if(!"label.color" %in% names(params)) {
-      params$label.color <- NA
+    if(!"label.colour" %in% names(params)) {
+      params$label.colour <- NA
     }
   }
   object <- do.call(geom, params)
