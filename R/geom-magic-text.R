@@ -79,7 +79,10 @@ ggplot_add.magic_text <- function(object, plot, object_name) {
   ggplot_add(object, plot, object_name)
 }
 
-#' @noRd
+
+#' @param x a character vector.
+#' @rdname geom_magic_text
+#' @export
 latex_richtext <- function(x,
                            sup = "^",
                            sub = "_",
