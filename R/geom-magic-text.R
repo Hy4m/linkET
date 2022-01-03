@@ -79,9 +79,14 @@ ggplot_add.magic_text <- function(object, plot, object_name) {
   ggplot_add(object, plot, object_name)
 }
 
-
+#' @title Converts a LaTeX String to a Rich Text
+#' @description Helper function to convert a LaTeX string to a rich text.
 #' @param x a character vector.
-#' @rdname geom_magic_text
+#' @param sup one-length character, indicates that characters after this is superscript.
+#' @param sub one-length character, indicates that characters after this is subscript.
+#' @param br string,  separator of lines.
+#' @rdname latex_richtext
+#' @author Hou Yun
 #' @export
 latex_richtext <- function(x,
                            sup = "^",
@@ -155,6 +160,5 @@ end_bracket <- function(id, ll) {
   s <- which(cumsum(out) == 0L)
   s[s > id][1L]
 }
-
 
 

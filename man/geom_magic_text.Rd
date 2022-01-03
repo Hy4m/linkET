@@ -2,7 +2,6 @@
 % Please edit documentation in R/geom-magic-text.R
 \name{geom_magic_text}
 \alias{geom_magic_text}
-\alias{latex_richtext}
 \title{Magic Method to Draw labels}
 \usage{
 geom_magic_text(
@@ -16,8 +15,6 @@ geom_magic_text(
   br = "\\n",
   ...
 )
-
-latex_richtext(x, sup = "^", sub = "_", br = "\\n")
 }
 \arguments{
 \item{mapping}{set of aesthetic mappings created by \code{aes()} or \code{aes_()}.}
@@ -39,8 +36,6 @@ call to a position adjustment function.}
 \item{br}{string,  separator of lines.}
 
 \item{...}{others passing to \code{ggtext::geom_richtext()}.}
-
-\item{x}{a character vector.}
 }
 \value{
 a gg layer object.
