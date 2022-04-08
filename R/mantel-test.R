@@ -187,6 +187,7 @@ mantel_test <- function(spec,
   if(is.null(env_select)) {
     env_select <- as.list(setNames(1:ncol(env), names(env)))
   }
+
   if(mantel_fun == "mantel.partial") {
     env_ctrl <- check_env_ctrl(env, env_ctrl, env_select)
   }
@@ -220,9 +221,17 @@ mantel_test <- function(spec,
   seeds <- 10000 * round(runif(length(spec_name)))
 
   spec <- purrr::map(spec_select, function(.x) {
-    subset(spec, select = .x, drop = FALSE)})
+    if (is.function(.x)) {
+      .x(spec)
+    } else {
+      subset(spec, select = .x, drop = FALSE)
+    }})
   env <- purrr::map(env_select, function(.x) {
-    subset(env, select = .x, drop = FALSE)})
+    if (is.function(.x)) {
+      .x(env)
+    } else {
+      subset(env, select = .x, drop = FALSE)
+    }})
 
   rp <- purrr::pmap(list(spec_name, env_name, seeds), function(.x, .y, .seed) {
     .spec <- spec[[.x]]
@@ -292,7 +301,11 @@ check_env_ctrl <- function(env, env_ctrl, env_select) {
   if(isTRUE(env_ctrl)) {
     env_select <- make_list_names(env_select, "env")
     env_list <- purrr::map(env_select, function(.x) {
-      subset(env, select = .x, drop = FALSE)})
+      if (is.function(.x)) {
+        .x(env)
+      } else {
+        subset(env, select = .x, drop = FALSE)
+      }})
     name_list <- purrr::map(env_list, function(.env) {
       setdiff(names(env), names(.env))
     })
@@ -315,4 +328,69 @@ check_env_ctrl <- function(env, env_ctrl, env_select) {
   }
 
   env_ctrl
+}
+
+
+#' @title Subset columns using regular expression
+#' Subset columns from a data frame if column names match the regular pattern.
+#' @param data a data frame.
+#' @param chr a character used to match the column names.
+#' @param prefix prefix of column names.
+#' @param suffix suffix of column names.
+#' @param regex other string (or regular expression) in column names.
+#' @param ... other parameters passing to \code{grepl}.
+#' @return a data frame.
+#' @rdname regex_select
+#' @author Hou yun
+#' @examples
+#' prefix_with(mtcars, "m")
+#' @export
+regex_select <- function(prefix = "",
+                         suffix = NULL,
+                         regex = NULL,
+                         ...) {
+  if (is.null(prefix %||% suffix %||% regex)) {
+    stop("At least one pattern is not null.", call. = FALSE)
+  }
+  if (!is.null(prefix)) {
+    regex <- paste0("^", prefix)
+  } else if (!is.null(suffix)) {
+    regex <- paste0(suffix, "$")
+  } else {
+    regex <- regex
+  }
+  function(data) {
+    if (!is.data.frame(data)) {
+      data <- as.data.frame(data)
+    }
+    if (empty(data)) {
+      stop("Empty data.", call. = FALSE)
+    }
+    id <- names(data)[Reduce("|", lapply(regex, function(.regex) {
+      grepl(pattern = .regex, x = names(data), ...)
+    }))]
+
+    data[id]
+  }
+}
+
+#' @rdname regex_select
+#' @export
+prefix_with <- function(data, chr = "", ...) {
+  FUN <- regex_select(prefix = chr, ...)
+  FUN(data)
+}
+
+#' @rdname regex_select
+#' @export
+suffix_with <- function(data, chr = "", ...) {
+  FUN <- regex_select(suffix = chr, ...)
+  FUN(data)
+}
+
+#' @rdname regex_select
+#' @export
+contain_with <- function(data, chr = "", ...) {
+  FUN <- regex_select(regex = chr, ...)
+  FUN(data)
 }
