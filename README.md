@@ -16,7 +16,7 @@ You can install the released version of `linkET` from
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("Hy4m/linkET")
+devtools::install_github("Hy4m/linkET", force = TRUE)
 packageVersion("linkET")
 ```
 
@@ -115,7 +115,6 @@ library(ggplot2)
 matrix_data(list(mtcars = mtcars)) %>% 
   hyplot(aes(fill = mtcars)) +
   geom_tile()
-#> 载入需要的名字空间：ggtext
 ```
 
 <img src="man/figures/README-heatmap-1.png" width="100%" />
