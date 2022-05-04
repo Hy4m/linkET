@@ -99,22 +99,22 @@ half_circle <- function(x, y, xend, yend,
                         n = 100) {
   side <- match.arg(side, c("left", "right"))
   if (isFALSE(directed)) {
-    if (x > x1) {
+    if (x > xend) {
       temp_x <- x
       temp_y <- y
-      x <- x1
-      x1 <- temp_x
-      y <- y1
-      y1 <- temp_y
+      x <- xend
+      xend <- temp_x
+      y <- yend
+      yend <- temp_y
     }
-    if (identical(x, x1)) {
-      if (y > y1) {
+    if (identical(x, xend)) {
+      if (y > yend) {
         temp_x <- x
         temp_y <- y
-        x <- x1
-        x1 <- temp_x
-        y <- y1
-        y1 <- temp_y
+        x <- xend
+        xend <- temp_x
+        y <- yend
+        yend <- temp_y
       }
     }
   }
