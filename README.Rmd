@@ -86,6 +86,13 @@ correlate(varespec[1:30], varechem) %>%
 qcorrplot(varespec[1:30], type = "lower") +
   geom_square() +
   scale_fill_gradientn(colours = RColorBrewer::brewer.pal(11, "RdBu"))
+
+## you can set your style
+set_corrplot_style()
+qcorrplot(mtcars) + geom_square()
+
+## reset to default style
+set_default_style()
 ```
 
 ## mantel test

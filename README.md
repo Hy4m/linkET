@@ -161,6 +161,21 @@ qcorrplot(varespec[1:30], type = "lower") +
 
 <img src="man/figures/README-heatmap-5.png" width="100%" />
 
+``` r
+## you can set your style
+set_corrplot_style()
+qcorrplot(mtcars) + geom_square()
+#> The input data is not a correlation matrix,
+#> you can override this behavior by setting the `is_corr` parameter.
+```
+
+<img src="man/figures/README-heatmap-6.png" width="100%" />
+
+``` r
+## reset to default style
+set_default_style()
+```
+
 ## mantel test
 
 ``` r
