@@ -339,6 +339,7 @@ check_env_ctrl <- function(env, env_ctrl, env_select) {
 #' @param suffix suffix of column names.
 #' @param regex other string (or regular expression) in column names.
 #' @param ... other parameters passing to \code{grepl}.
+#' @param byrow logical, if TRUE will select rows based on regex.
 #' @return a data frame.
 #' @rdname regex_select
 #' @author Hou yun

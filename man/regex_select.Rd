@@ -25,6 +25,8 @@ contain_with(data, chr = "", ..., byrow = FALSE)
 
 \item{...}{other parameters passing to \code{grepl}.}
 
+\item{byrow}{logical, if TRUE will select rows based on regex.}
+
 \item{data}{a data frame.}
 
 \item{chr}{a character used to match the column names.}
