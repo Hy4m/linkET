@@ -348,7 +348,8 @@ check_env_ctrl <- function(env, env_ctrl, env_select) {
 regex_select <- function(prefix = "",
                          suffix = NULL,
                          regex = NULL,
-                         ...) {
+                         ...,
+                         byrow = FALSE) {
   if (is.null(prefix %||% suffix %||% regex)) {
     stop("At least one pattern is not null.", call. = FALSE)
   }
@@ -366,31 +367,38 @@ regex_select <- function(prefix = "",
     if (empty(data)) {
       stop("Empty data.", call. = FALSE)
     }
-    id <- names(data)[Reduce("|", lapply(regex, function(.regex) {
-      grepl(pattern = .regex, x = names(data), ...)
-    }))]
 
-    data[id]
+    if (isTRUE(byrow)) {
+      id <- rownames(data)[Reduce("|", lapply(regex, function(.regex) {
+        grepl(pattern = .regex, x = rownames(data), ...)
+      }))]
+      data[id, , drop = FALSE]
+    } else {
+      id <- names(data)[Reduce("|", lapply(regex, function(.regex) {
+        grepl(pattern = .regex, x = names(data), ...)
+      }))]
+      data[id]
+    }
   }
 }
 
 #' @rdname regex_select
 #' @export
-prefix_with <- function(data, chr = "", ...) {
-  FUN <- regex_select(prefix = chr, ...)
+prefix_with <- function(data, chr = "", ..., byrow = FALSE) {
+  FUN <- regex_select(prefix = chr, ..., byrow = byrow)
   FUN(data)
 }
 
 #' @rdname regex_select
 #' @export
-suffix_with <- function(data, chr = "", ...) {
-  FUN <- regex_select(suffix = chr, ...)
+suffix_with <- function(data, chr = "", ..., byrow = FALSE) {
+  FUN <- regex_select(suffix = chr, ..., byrow = byrow)
   FUN(data)
 }
 
 #' @rdname regex_select
 #' @export
-contain_with <- function(data, chr = "", ...) {
-  FUN <- regex_select(regex = chr, ...)
+contain_with <- function(data, chr = "", ..., byrow = FALSE) {
+  FUN <- regex_select(regex = chr, ..., byrow = byrow)
   FUN(data)
 }
