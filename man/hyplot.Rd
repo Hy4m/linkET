@@ -4,7 +4,7 @@
 \alias{hyplot}
 \title{Initialize hyplot}
 \usage{
-hyplot(md, mapping = NULL, drop = TRUE, use_md = NULL, ...)
+hyplot(md, mapping = NULL, drop = TRUE, use_md = NULL, facets = list(), ...)
 }
 \arguments{
 \item{md}{a matrix_data or md_tbl object or any can be converted to matrix_data.}
@@ -15,6 +15,8 @@ hyplot(md, mapping = NULL, drop = TRUE, use_md = NULL, ...)
 
 \item{use_md}{logical. if TRUE, will use \code{ggtext::element_markdown()} to
 draw the axis labels.}
+
+\item{facets}{a parameters list of \code{facet_wrap}.}
 
 \item{...}{passing to \code{\link{as_matrix_data}}.}
 }

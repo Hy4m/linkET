@@ -5,6 +5,7 @@
 #' @param drop logical. If TRUE (default), the unused levels will be droped.
 #' @param label.size,label.colour,label.family,label.fontface parameters for label.
 #' @param nudge_x horizonal justification of label.
+#' @param offset_x,offset_y NULL or named-list, add a little offset to the node points.
 #' @param ... extra parameters passing to layer function.
 #' @return a ggplot layer.
 #' @note `anno_link()` has been soft deprecated, please use `geom_couple()`
@@ -23,6 +24,8 @@ geom_couple <- function(data,
                         label.family = "",
                         label.fontface = 1,
                         nudge_x = 0.5,
+                        offset_x = NULL,
+                        offset_y = NULL,
                         ...)
 {
   structure(.Data = list(mapping = mapping,
@@ -33,6 +36,8 @@ geom_couple <- function(data,
                          label.family = label.family,
                          label.fontface = label.fontface,
                          nudge_x = nudge_x,
+                         offset_x = NULL,
+                         offset_y = NULL,
                          params = list(...)),
             class = "geom_couple")
 }
@@ -77,7 +82,10 @@ ggplot_add.geom_couple <- function(object, plot, object_name) {
                         diag = diag,
                         from = from,
                         to = to,
-                        drop = object$drop)
+                        drop = object$drop,
+                        offset_x = object$offset_x,
+                        offset_y = object$offset_y)
+
   .isEdge <- NULL
   edge <- dplyr::filter(link_data, .isEdge)
   node <- dplyr::filter(link_data, !.isEdge)
@@ -176,10 +184,14 @@ link_tbl <- function(data,
                      diag,
                      from = NULL,
                      to = NULL,
-                     drop = TRUE)
+                     drop = TRUE,
+                     offset_x = NULL,
+                     offset_y = NULL)
 {
-  if(!is_md_tbl(md))
+  if(!is_md_tbl(md)) {
     stop("Need a md_tbl.", call. = FALSE)
+  }
+
 
   from <- if(is.null(from)) {
     data[[1]]
@@ -202,8 +214,9 @@ link_tbl <- function(data,
     unique_from <- unique(from[!is.na(from)])
   }
 
-  if(!is.character(to))
+  if(!is.character(to)) {
     to <- as.character(to)
+  }
 
   n <- length(row_names)
   m <- length(unique_from)
@@ -254,6 +267,17 @@ link_tbl <- function(data,
   xend <- set_names(xend, row_names)
   yend <- set_names(yend, row_names)
 
+  if (!is.null(offset_x)) {
+    offset_x <- as.list(offset_x)
+    x <- do.call(c(..x.. = x, offset_x))
+    xend <- do.call(c(..x.. = xend, offset_x))
+  }
+  if (!is.null(offset_y)) {
+    offset_y <- as.list(offset_y)
+    y <- do.call(c(..x.. = y, offset_y))
+    yend <- do.call(c(..x.. = yend, offset_y))
+  }
+
   edge <- tibble::tibble(.x = x[from],
                          .y = y[from],
                          .xend = xend[to],
@@ -265,4 +289,30 @@ link_tbl <- function(data,
                          .isEdge = FALSE)
 
   dplyr::bind_rows(dplyr::bind_cols(edge, data), node)
+}
+
+offset <- function(..x.., ...) {
+  ll <- list(...)
+  if (length(ll) < 1) {
+    return(..x..)
+  }
+
+  nm <- names(..x..)
+  nm2 <- names(ll)
+  nm2 <- intersect(nm, nm2)
+  if (length(nm2) < 1) {
+    return(..x..)
+  }
+
+  ll <- ll[nm2]
+  all_one_length_num <- any(vapply(ll, length, numeric(1)) == 1L) &&
+    any(vapply(ll, function(.x) class(.x) %in% c("numeric", "integer"), logical(1)))
+  if (!all_one_length_num) {
+    stop("offset should be one-length numeric value.", call. = FALSE)
+  }
+
+  for (ii in nm2) {
+    ..x..[nm == ii] <- ..x..[nm == ii] + ll[[ii]]
+  }
+  ..x..
 }

@@ -15,6 +15,8 @@ geom_couple(
   label.family = "",
   label.fontface = 1,
   nudge_x = 0.5,
+  offset_x = NULL,
+  offset_y = NULL,
   ...
 )
 
@@ -32,6 +34,8 @@ nice_curvature(curvature, by = "to")
 \item{label.size, label.colour, label.family, label.fontface}{parameters for label.}
 
 \item{nudge_x}{horizonal justification of label.}
+
+\item{offset_x, offset_y}{NULL or named-list, add a little offset to the node points.}
 
 \item{...}{extra parameters passing to layer function.}
 

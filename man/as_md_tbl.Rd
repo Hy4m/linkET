@@ -3,10 +3,12 @@
 \name{as_md_tbl}
 \alias{as_md_tbl}
 \alias{as_md_tbl.matrix_data}
+\alias{as_md_tbl.grouped_matrix_data}
 \alias{as_md_tbl.pro_tbl}
 \alias{as_md_tbl.mantel_tbl}
 \alias{as_md_tbl.easycorrelation}
 \alias{as_md_tbl.correlate}
+\alias{as_md_tbl.grouped_correlate}
 \alias{as_md_tbl.rcorr}
 \alias{as_md_tbl.corr.test}
 \alias{as_md_tbl.data.frame}
@@ -18,6 +20,8 @@ as_md_tbl(x, ...)
 
 \method{as_md_tbl}{matrix_data}(x, ...)
 
+\method{as_md_tbl}{grouped_matrix_data}(x, ...)
+
 \method{as_md_tbl}{pro_tbl}(x, byrow = TRUE, ...)
 
 \method{as_md_tbl}{mantel_tbl}(x, byrow = TRUE, ...)
@@ -25,6 +29,8 @@ as_md_tbl(x, ...)
 \method{as_md_tbl}{easycorrelation}(x, type = "full", diag = TRUE, ...)
 
 \method{as_md_tbl}{correlate}(x, ...)
+
+\method{as_md_tbl}{grouped_correlate}(x, ...)
 
 \method{as_md_tbl}{rcorr}(x, ...)
 
@@ -35,6 +41,7 @@ as_md_tbl(x, ...)
   name = NULL,
   row_vars = NULL,
   col_vars = NULL,
+  group_vars = NULL,
   row_names = NULL,
   col_names = NULL,
   is_corr = FALSE,
@@ -62,7 +69,7 @@ matrix, lower triangular or upper triangular matrix.}
 
 \item{name}{variable name.}
 
-\item{row_vars, col_vars}{variable name of row/column id.}
+\item{row_vars, col_vars, group_vars}{variable name of row/column/group id.}
 
 \item{row_names, col_names}{character, row/column names of matrix.}
 

@@ -1,6 +1,6 @@
 #' Helper function for matrix_data object
 #' @title Helper function
-#' @param md,x a matrix_data object.
+#' @param md a matrix_data object.
 #' @param value a valid value for dimension names.
 #' @param type character, "full" (default), "upper", "lower" or "diag".
 #' @param diag logical, if TRUE (default) will keep the diagonal of matrix data.
@@ -12,6 +12,8 @@ row_names <- function(md)
 {
   if (is_matrix_data(md)) {
     rownames(md[[1]])
+  } else if (is_grouped_matrix_data(md)){
+    unique(unlist(lapply(md, attr, "row_names")))
   } else if (is_md_tbl(md)) {
     attr(md, "row_names")
   } else {
@@ -29,6 +31,16 @@ row_names <- function(md)
       .md
     })
     structure(.Data = md, class = "matrix_data")
+  } else if (is_grouped_matrix_data(md)) {
+    md <- lapply(md, function(.md) {
+      e <- lapply(.md, function(e) {
+        rownames(e) <- value
+        e
+      })
+      class(e) <- "matrix_data"
+      e
+    })
+    structure(.Data = md, class = "grouped_matrix_data")
   } else if (is_md_tbl(md)) {
     attr(md, "row_names") <- value
     md
@@ -43,6 +55,8 @@ col_names <- function(md)
 {
   if (is_matrix_data(md)) {
     colnames(md[[1]])
+  } else if (is_grouped_matrix_data(md)){
+    unique(unlist(lapply(md, attr, "col_names")))
   } else if (is_md_tbl(md)) {
     attr(md, "col_names")
   } else {
@@ -60,6 +74,16 @@ col_names <- function(md)
       .md
     })
     structure(.Data = md, class = "matrix_data")
+  } else if (is_grouped_matrix_data(md)) {
+    md <- lapply(md, function(.md) {
+      e <- lapply(.md, function(e) {
+        colnames(e) <- value
+        e
+      })
+      class(e) <- "matrix_data"
+      e
+    })
+    structure(.Data = md, class = "grouped_matrix_data")
   } else if (is_md_tbl(md)) {
     attr(md, "col_names") <- value
     md
@@ -73,6 +97,8 @@ col_names <- function(md)
 nrows <- function(md) {
   if (is_matrix_data(md)) {
     nrow(md[[1]])
+  } else if (is_grouped_matrix_data(md)) {
+    max(vapply(md, nrows, numeric(1)))
   } else if (is_md_tbl(md)) {
     length(attr(md, "row_names"))
   } else {
@@ -85,6 +111,8 @@ nrows <- function(md) {
 ncols <- function(md) {
   if (is_matrix_data(md)) {
     ncol(md[[1]])
+  } else if (is_grouped_matrix_data(md)) {
+    max(vapply(md, ncols, numeric(1)))
   } else if (is_md_tbl(md)) {
     length(attr(md, "col_names"))
   } else {
@@ -101,6 +129,13 @@ is_matrix_data <- function(md)
 
 #' @rdname Helper_function
 #' @export
+is_grouped_matrix_data <- function(md)
+{
+  inherits(md, "grouped_matrix_data")
+}
+
+#' @rdname Helper_function
+#' @export
 is_md_tbl <- function(md)
 {
   inherits(md, "md_tbl")
@@ -110,13 +145,13 @@ is_md_tbl <- function(md)
 #' @export
 extract_upper <- function(md, diag = TRUE)
 {
-  stopifnot(is_matrix_data(md) || is_md_tbl(md))
+  stopifnot(is_matrix_data(md) || is_grouped_matrix_data(md) || is_md_tbl(md))
   row_names <- row_names(md)
   col_names <- col_names(md)
   if(!identical(row_names, col_names)) {
     stop("`extract_upper()` just support for symmetric matrices.", call. = FALSE)
   }
-  if(is_matrix_data(md)) {
+  if(is_matrix_data(md) || is_grouped_matrix_data(md)) {
     attr(md, "type") <- "upper"
     attr(md, "diag") <- diag
   } else {
@@ -139,13 +174,13 @@ extract_upper <- function(md, diag = TRUE)
 #' @export
 extract_lower <- function(md, diag = TRUE)
 {
-  stopifnot(is_matrix_data(md) || is_md_tbl(md))
+  stopifnot(is_matrix_data(md) || is_grouped_matrix_data(md) || is_md_tbl(md))
   row_names <- row_names(md)
   col_names <- col_names(md)
   if(!identical(row_names, col_names)) {
     stop("`extract_lower()` just support for symmetric matrices.", call. = FALSE)
   }
-  if(is_matrix_data(md)) {
+  if(is_matrix_data(md) || is_grouped_matrix_data(md)) {
     attr(md, "type") <- "lower"
     attr(md, "diag") <- diag
   } else {
@@ -186,13 +221,13 @@ extract_diag <- function(md)
 #' @export
 trim_diag <- function(md)
 {
-  stopifnot(is_matrix_data(md) || is_md_tbl(md))
+  stopifnot(is_matrix_data(md) || is_grouped_matrix_data(md) || is_md_tbl(md))
   row_names <- row_names(md)
   col_names <- col_names(md)
   if(!identical(row_names, col_names)) {
     stop("`trim_diag()` just support for symmetric matrices.", call. = FALSE)
   }
-  if(is_matrix_data(md)) {
+  if(is_matrix_data(md) || is_grouped_matrix_data(md)) {
     attr(md, "diag") <- FALSE
   } else {
     n <- nrows(md)
@@ -216,32 +251,4 @@ filter_func <- function(..., type = "full", diag = FALSE) {
                    diag = extract_diag(data))
     dplyr::filter(data, ...)
   }
-}
-
-#' @rdname Helper_function
-#' @export
-t.matrix_data <- function(x, ...) {
-  type <- attr(x, "type")
-  diag <- attr(x, "diag")
-  structure(.Data = lapply(x, t),
-            type = type,
-            diag = diag,
-            class = "matrix_data")
-}
-
-#' @rdname Helper_function
-#' @export
-t.md_tbl <- function(x, ...) {
-  row_name <- attr(x, "row_names")
-  col_name <- attr(x, "col_names")
-  nm <- names(x)
-  rid <- which(nm == ".rownames")
-  cid <- which(nm == ".colnames")
-  nm[rid] <- ".colnames"
-  nm[cid] <- ".rownames"
-  names(x) <- nm
-  attr(x, "row_names") <- col_name
-  attr(x, "col_names") <- row_name
-
-  x
 }

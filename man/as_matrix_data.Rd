@@ -5,6 +5,7 @@
 \alias{as_matrix_data.matrix}
 \alias{as_matrix_data.data.frame}
 \alias{as_matrix_data.correlate}
+\alias{as_matrix_data.grouped_correlate}
 \alias{as_matrix_data.rcorr}
 \alias{as_matrix_data.corr.test}
 \alias{as_matrix_data.default}
@@ -12,11 +13,13 @@
 \usage{
 as_matrix_data(x, ...)
 
-\method{as_matrix_data}{matrix}(x, name = NULL, ...)
+\method{as_matrix_data}{matrix}(x, name = NULL, group = NULL, ...)
 
-\method{as_matrix_data}{data.frame}(x, name = NULL, include = "numeric", ...)
+\method{as_matrix_data}{data.frame}(x, name = NULL, include = "numeric", group = NULL, ...)
 
 \method{as_matrix_data}{correlate}(x, extra_mat = list(), ...)
+
+\method{as_matrix_data}{grouped_correlate}(x, extra_mat = list(), ...)
 
 \method{as_matrix_data}{rcorr}(x, extra_mat = list(), ...)
 
@@ -30,6 +33,8 @@ as_matrix_data(x, ...)
 \item{...}{ignore.}
 
 \item{name}{variable name.}
+
+\item{group}{a character vector used to split the matrix data.}
 
 \item{include}{one of "numeric" (default), "character" or "factor".}
 

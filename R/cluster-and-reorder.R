@@ -16,6 +16,10 @@ make_cluster <- function(md,
                          row_dist = NULL,
                          col_dist = NULL)
 {
+  if (is_grouped_matrix_data(md)) {
+    return(md)
+  }
+
   stopifnot(is_matrix_data(md))
   cluster <- match.arg(cluster, c("all", "row", "col", "none"))
   if (cluster == "none") {

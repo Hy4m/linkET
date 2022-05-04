@@ -2,6 +2,7 @@
 #' @title as_matrix_data
 #' @param x any \code{R} object.
 #' @param name variable name.
+#' @param group a character vector used to split the matrix data.
 #' @param extra_mat a list of matrix.
 #' @param ... ignore.
 #' @return a matrix_data object.
@@ -16,14 +17,17 @@ as_matrix_data <- function(x, ...)
 #' @rdname as_matrix_data
 #' @export
 #' @method as_matrix_data matrix
-as_matrix_data.matrix <- function(x, name = NULL, ...)
+as_matrix_data.matrix <- function(x,
+                                  name = NULL,
+                                  group = NULL,
+                                  ...)
 {
   if (is.null(name)) {
     name <- deparse(substitute(x))
   }
 
   x <- rlang::set_names(list(x), name)
-  matrix_data(x, ...)
+  matrix_data(x, group = group, ...)
 }
 
 #' @param include one of "numeric" (default), "character" or "factor".
@@ -33,6 +37,7 @@ as_matrix_data.matrix <- function(x, name = NULL, ...)
 as_matrix_data.data.frame <- function(x,
                                       name = NULL,
                                       include = "numeric",
+                                      group = NULL,
                                       ...)
 {
   if (is.null(name)) {
@@ -44,13 +49,15 @@ as_matrix_data.data.frame <- function(x,
   id <- vapply(x, Fun, logical(1))
 
   x <- rlang::set_names(list(x[id]), name)
-  matrix_data(x, ...)
+  matrix_data(x, group = group, ...)
 }
 
 #' @rdname as_matrix_data
 #' @export
 #' @method as_matrix_data correlate
-as_matrix_data.correlate <- function(x, extra_mat = list(), ...) {
+as_matrix_data.correlate <- function(x,
+                                     extra_mat = list(),
+                                     ...) {
   id <- vapply(x, is.null, logical(1))
   x <- x[!id]
   if(length(extra_mat) > 0) {
@@ -59,13 +66,40 @@ as_matrix_data.correlate <- function(x, extra_mat = list(), ...) {
     }
     x <- c(x, extra_mat)
   }
-  matrix_data(x, ...)
+  x <- matrix_data(x, group = NULL, ...)
+  class(x) <- c("cor_matrix_data", class(x))
+  x
+}
+
+#' @rdname as_matrix_data
+#' @export
+#' @method as_matrix_data grouped_correlate
+as_matrix_data.grouped_correlate <- function(x,
+                                             extra_mat = list(),
+                                             ...) {
+  nm <- names(x)
+  if (length(extra_mat) > 0) {
+    if (all(names(extra_mat) %in% nm)) {
+      extra_mat <- extra_mat[nm]
+    } else {
+      extra_mat <- rep_len(list(extra_mat), length(x))
+      names(extra_mat) <- nm
+    }
+  }
+  x <- lapply(nm, function(.nm) {
+    as_matrix_data(x = x[[.nm]], extra_mat = extra_mat[[.nm]], ...)
+  })
+  names(x) <- nm
+  class(x) <- "grouped_matrix_data"
+  x
 }
 
 #' @rdname as_matrix_data
 #' @export
 #' @method as_matrix_data rcorr
-as_matrix_data.rcorr <- function(x, extra_mat = list(), ...) {
+as_matrix_data.rcorr <- function(x,
+                                 extra_mat = list(),
+                                 ...) {
   x <- as_correlate(x)
   as_matrix_data(x, extra_mat = extra_mat, ...)
 }
@@ -73,7 +107,9 @@ as_matrix_data.rcorr <- function(x, extra_mat = list(), ...) {
 #' @rdname as_matrix_data
 #' @export
 #' @method as_matrix_data corr.test
-as_matrix_data.corr.test <- function(x, extra_mat = list(), ...) {
+as_matrix_data.corr.test <- function(x,
+                                     extra_mat = list(),
+                                     ...) {
   x <- as_correlate(x)
   as_matrix_data(x, extra_mat = extra_mat, ...)
 }

@@ -5,6 +5,7 @@
 #' matrix, lower triangular or upper triangular matrix.
 #' @param diag logical, if TRUE (default) will keep the diagonal of matrix data.
 #' @param row_names,col_names the name of rows and columns.
+#' @param group NULL or a character vector.
 #' @param ... passing to \code{\link{make_cluster}}.
 #' @return a object of matrix_data
 #' @rdname matrix_data
@@ -15,6 +16,7 @@ matrix_data <- function(x,
                         diag = TRUE,
                         row_names = NULL,
                         col_names = NULL,
+                        group = NULL,
                         ...)
 {
   stopifnot(is.list(x))
@@ -23,26 +25,36 @@ matrix_data <- function(x,
   if (length(x) != length(unique(nm))) {
     stop("matrix_data error: each element of `x` must have a unique name.", call. = FALSE)
   }
-  mat <- lapply(x, as.matrix)
-  mat <- check_matrix(mat, row_names, col_names)
 
-  first <- mat[[1]]
-  row_names <- rownames(first)
-  col_names <- colnames(first)
-  if(!identical(row_names, col_names)) {
-    if(type != "full") {
-      warning("'type = ", type, "' just support for symmetric matrices.")
-      type <- "full"
+  if (is.null(group)) {
+    x <- lapply(x, as.matrix)
+    x <- check_matrix(x, row_names, col_names)
+
+    first <- x[[1]]
+    row_names <- rownames(first)
+    col_names <- colnames(first)
+    if(!identical(row_names, col_names)) {
+      if(type != "full") {
+        warning("'type = ", type, "' just support for symmetric matrices.")
+        type <- "full"
+      }
+      if(!isTRUE(diag)) {
+        diag <- TRUE
+      }
     }
-    if(!isTRUE(diag)) {
-      diag <- TRUE
-    }
+    x <- structure(.Data = x,
+                   type = type,
+                   diag = diag,
+                   row_names = row_names,
+                   col_names = col_names,
+                   class = "matrix_data")
+  } else {
+    x <- grouped_mat(x, group)
+    x <- lapply(x, matrix_data, type = type, diag = diag, row_names = row_names,
+                  col_names = col_names)
+    class(x) <- "grouped_matrix_data"
   }
-  md <- structure(.Data = mat,
-                  type = type,
-                  diag = diag,
-                  class = "matrix_data")
-  make_cluster(md, ...)
+  make_cluster(x, ...)
 }
 
 #' @method print matrix_data
@@ -54,6 +66,16 @@ print.matrix_data <- function(x, ...) {
   cat("Dimensions: ", paste0(nrows(x), " rows, ", ncols(x), " columns\n"))
   cat("Row names: ", glue::glue_collapse(row_names(x), ", ", 60), "\n")
   cat("Column names: ", glue::glue_collapse(col_names(x), ", ", 60), "\n")
+}
+
+#' @method print grouped_matrix_data
+#' @export
+print.grouped_matrix_data <- function(x, ...) {
+  nm <- names(x)
+  for (i in nm) {
+    cat("Group:", i, "\n")
+    print(x[[i]])
+  }
 }
 
 check_matrix <- function(mat,
@@ -113,3 +135,18 @@ check_matrix <- function(mat,
   mat
 }
 
+#' @noRd
+grouped_mat <- function(x, group) {
+  x <- lapply(x, function(.x) {
+    .x <- tryCatch(as.data.frame(.x),
+                   error = function(e) as.data.frame(as.matrix(.x)))
+    split(.x, group)
+  })
+  nm <- unique(group)
+
+  x <- lapply(nm, function(.nm) {
+    lapply(x, function(.x) .x[[.nm]])
+  })
+  names(x) <- nm
+  x
+}

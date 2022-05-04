@@ -8,14 +8,13 @@
 \alias{nrows}
 \alias{ncols}
 \alias{is_matrix_data}
+\alias{is_grouped_matrix_data}
 \alias{is_md_tbl}
 \alias{extract_upper}
 \alias{extract_lower}
 \alias{extract_diag}
 \alias{trim_diag}
 \alias{filter_func}
-\alias{t.matrix_data}
-\alias{t.md_tbl}
 \title{Helper function}
 \usage{
 row_names(md)
@@ -32,6 +31,8 @@ ncols(md)
 
 is_matrix_data(md)
 
+is_grouped_matrix_data(md)
+
 is_md_tbl(md)
 
 extract_upper(md, diag = TRUE)
@@ -43,13 +44,9 @@ extract_diag(md)
 trim_diag(md)
 
 filter_func(..., type = "full", diag = FALSE)
-
-\method{t}{matrix_data}(x, ...)
-
-\method{t}{md_tbl}(x, ...)
 }
 \arguments{
-\item{md, x}{a matrix_data object.}
+\item{md}{a matrix_data object.}
 
 \item{value}{a valid value for dimension names.}
 

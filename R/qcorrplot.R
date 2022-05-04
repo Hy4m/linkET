@@ -6,6 +6,9 @@
 #' @param grid_col colour of panel grid.
 #' @param grid_size size of panel grid.
 #' @param fixed if TRUE (default), the coordinates will have a fixed aspect ratio.
+#' @param use_md logical. if TRUE, will use \code{ggtext::element_markdown()} to
+#' draw the axis labels.
+#' @param facets NULL or a parameters list of \code{facet_wrap}.
 #' @param ... other parameters.
 #' @return a gg object.
 #' @importFrom ggplot2 coord_fixed
@@ -35,6 +38,8 @@ qcorrplot.cor_md_tbl <- function(data,
                                  grid_col = "grey50",
                                  grid_size = 0.25,
                                  fixed = TRUE,
+                                 use_md = NULL,
+                                 facets = list(),
                                  ...) {
   if("p" %in% names(data)) {
     base_mapping <- aes_(fill = ~r, r = ~r, r0 = ~r, pvalue = ~p)
@@ -44,7 +49,9 @@ qcorrplot.cor_md_tbl <- function(data,
 
   p <- hyplot(md = data,
               mapping = aes_modify(base_mapping, mapping),
-              drop = drop)
+              drop = drop,
+              use_md = use_md,
+              facets = facets)
 
   ## add panel grid
   p <- p + geom_panel_grid(colour = grid_col, size = grid_size)
@@ -61,121 +68,6 @@ qcorrplot.cor_md_tbl <- function(data,
   p
 }
 
-#' @rdname qcorrplot
-#' @method qcorrplot correlate
-#' @export
-qcorrplot.correlate <- function(data,
-                                mapping = NULL,
-                                drop = FALSE,
-                                grid_col = "grey50",
-                                grid_size = 0.25,
-                                fixed = TRUE,
-                                ...) {
-  data <- as_md_tbl(data, ...)
-  qcorrplot(data = data,
-            mapping = mapping,
-            drop = drop,
-            grid_col = grid_col,
-            grid_size = grid_size,
-            fixed = fixed)
-}
-
-#' @rdname qcorrplot
-#' @method qcorrplot rcorr
-#' @export
-qcorrplot.rcorr <- function(data,
-                            mapping = NULL,
-                            drop = FALSE,
-                            grid_col = "grey50",
-                            grid_size = 0.25,
-                            fixed = TRUE,
-                            ...) {
-  data <- as_md_tbl(data, ...)
-  qcorrplot(data = data,
-            mapping = mapping,
-            drop = drop,
-            grid_col = grid_col,
-            grid_size = grid_size,
-            fixed = fixed)
-}
-
-#' @rdname qcorrplot
-#' @method qcorrplot corr.test
-#' @export
-qcorrplot.corr.test <- function(data,
-                                mapping = NULL,
-                                drop = FALSE,
-                                grid_col = "grey50",
-                                grid_size = 0.25,
-                                fixed = TRUE,
-                                ...) {
-  data <- as_md_tbl(data, ...)
-  qcorrplot(data = data,
-            mapping = mapping,
-            drop = drop,
-            grid_col = grid_col,
-            grid_size = grid_size,
-            fixed = fixed)
-}
-
-
-
-#' @rdname qcorrplot
-#' @method qcorrplot mantel_tbl
-#' @export
-qcorrplot.mantel_tbl <- function(data,
-                                 mapping = NULL,
-                                 drop = FALSE,
-                                 grid_col = "grey50",
-                                 grid_size = 0.25,
-                                 fixed = TRUE,
-                                 ...) {
-  data <- as_md_tbl(data, ...)
-  qcorrplot(data = data,
-            mapping = mapping,
-            drop = drop,
-            grid_col = grid_col,
-            grid_size = grid_size,
-            fixed = fixed)
-}
-
-#' @rdname qcorrplot
-#' @method qcorrplot pro_tbl
-#' @export
-qcorrplot.pro_tbl <- function(data,
-                              mapping = NULL,
-                              drop = FALSE,
-                              grid_col = "grey50",
-                              grid_size = 0.25,
-                              fixed = TRUE,
-                              ...) {
-  data <- as_md_tbl(data, ...)
-  qcorrplot(data = data,
-            mapping = mapping,
-            drop = drop,
-            grid_col = grid_col,
-            grid_size = grid_size,
-            fixed = fixed)
-}
-
-#' @rdname qcorrplot
-#' @method qcorrplot easycorrelation
-#' @export
-qcorrplot.easycorrelation <- function(data,
-                                      mapping = NULL,
-                                      drop = FALSE,
-                                      grid_col = "grey50",
-                                      grid_size = 0.25,
-                                      fixed = TRUE,
-                                      ...) {
-  data <- as_md_tbl(data, ...)
-  qcorrplot(data = data,
-            mapping = mapping,
-            drop = drop,
-            grid_col = grid_col,
-            grid_size = grid_size,
-            fixed = fixed)
-}
 
 #' @rdname qcorrplot
 #' @method qcorrplot matrix
@@ -186,6 +78,8 @@ qcorrplot.matrix <- function(data,
                              grid_col = "grey50",
                              grid_size = 0.25,
                              fixed = TRUE,
+                             use_md = NULL,
+                             facets = list(),
                              ...) {
   data <- as_correlate(data)
   qcorrplot(data = data,
@@ -194,6 +88,8 @@ qcorrplot.matrix <- function(data,
             grid_col = grid_col,
             grid_size = grid_size,
             fixed = fixed,
+            use_md = use_md,
+            facets = facets,
             ...)
 }
 
@@ -206,6 +102,8 @@ qcorrplot.data.frame <- function(data,
                                  grid_col = "grey50",
                                  grid_size = 0.25,
                                  fixed = TRUE,
+                                 use_md = NULL,
+                                 facets = list(),
                                  ...) {
   data <- as_correlate(data)
   qcorrplot(data = data,
@@ -214,7 +112,30 @@ qcorrplot.data.frame <- function(data,
             grid_col = grid_col,
             grid_size = grid_size,
             fixed = fixed,
+            use_md = use_md,
+            facets = facets,
             ...)
 }
 
-
+#' @rdname qcorrplot
+#' @method qcorrplot default
+#' @export
+qcorrplot.default <- function(data,
+                              mapping = NULL,
+                              drop = FALSE,
+                              grid_col = "grey50",
+                              grid_size = 0.25,
+                              fixed = TRUE,
+                              use_md = NULL,
+                              facets = list(),
+                              ...) {
+  data <- as_md_tbl(data, ...)
+  qcorrplot(data = data,
+            mapping = mapping,
+            drop = drop,
+            grid_col = grid_col,
+            grid_size = grid_size,
+            fixed = fixed,
+            use_md = use_md,
+            facets = facets)
+}

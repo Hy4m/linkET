@@ -3,14 +3,9 @@
 \name{qcorrplot}
 \alias{qcorrplot}
 \alias{qcorrplot.cor_md_tbl}
-\alias{qcorrplot.correlate}
-\alias{qcorrplot.rcorr}
-\alias{qcorrplot.corr.test}
-\alias{qcorrplot.mantel_tbl}
-\alias{qcorrplot.pro_tbl}
-\alias{qcorrplot.easycorrelation}
 \alias{qcorrplot.matrix}
 \alias{qcorrplot.data.frame}
+\alias{qcorrplot.default}
 \title{Correlation Plot
 These functions can be used to visualize simply and directly a correlation matrix.}
 \usage{
@@ -23,66 +18,8 @@ qcorrplot(data, ...)
   grid_col = "grey50",
   grid_size = 0.25,
   fixed = TRUE,
-  ...
-)
-
-\method{qcorrplot}{correlate}(
-  data,
-  mapping = NULL,
-  drop = FALSE,
-  grid_col = "grey50",
-  grid_size = 0.25,
-  fixed = TRUE,
-  ...
-)
-
-\method{qcorrplot}{rcorr}(
-  data,
-  mapping = NULL,
-  drop = FALSE,
-  grid_col = "grey50",
-  grid_size = 0.25,
-  fixed = TRUE,
-  ...
-)
-
-\method{qcorrplot}{corr.test}(
-  data,
-  mapping = NULL,
-  drop = FALSE,
-  grid_col = "grey50",
-  grid_size = 0.25,
-  fixed = TRUE,
-  ...
-)
-
-\method{qcorrplot}{mantel_tbl}(
-  data,
-  mapping = NULL,
-  drop = FALSE,
-  grid_col = "grey50",
-  grid_size = 0.25,
-  fixed = TRUE,
-  ...
-)
-
-\method{qcorrplot}{pro_tbl}(
-  data,
-  mapping = NULL,
-  drop = FALSE,
-  grid_col = "grey50",
-  grid_size = 0.25,
-  fixed = TRUE,
-  ...
-)
-
-\method{qcorrplot}{easycorrelation}(
-  data,
-  mapping = NULL,
-  drop = FALSE,
-  grid_col = "grey50",
-  grid_size = 0.25,
-  fixed = TRUE,
+  use_md = NULL,
+  facets = list(),
   ...
 )
 
@@ -93,6 +30,8 @@ qcorrplot(data, ...)
   grid_col = "grey50",
   grid_size = 0.25,
   fixed = TRUE,
+  use_md = NULL,
+  facets = list(),
   ...
 )
 
@@ -103,6 +42,20 @@ qcorrplot(data, ...)
   grid_col = "grey50",
   grid_size = 0.25,
   fixed = TRUE,
+  use_md = NULL,
+  facets = list(),
+  ...
+)
+
+\method{qcorrplot}{default}(
+  data,
+  mapping = NULL,
+  drop = FALSE,
+  grid_col = "grey50",
+  grid_size = 0.25,
+  fixed = TRUE,
+  use_md = NULL,
+  facets = list(),
   ...
 )
 }
@@ -120,6 +73,11 @@ qcorrplot(data, ...)
 \item{grid_size}{size of panel grid.}
 
 \item{fixed}{if TRUE (default), the coordinates will have a fixed aspect ratio.}
+
+\item{use_md}{logical. if TRUE, will use \code{ggtext::element_markdown()} to
+draw the axis labels.}
+
+\item{facets}{NULL or a parameters list of \code{facet_wrap}.}
 }
 \value{
 a gg object.

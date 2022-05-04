@@ -10,6 +10,7 @@ matrix_data(
   diag = TRUE,
   row_names = NULL,
   col_names = NULL,
+  group = NULL,
   ...
 )
 }
@@ -22,6 +23,8 @@ matrix, lower triangular or upper triangular matrix.}
 \item{diag}{logical, if TRUE (default) will keep the diagonal of matrix data.}
 
 \item{row_names, col_names}{the name of rows and columns.}
+
+\item{group}{NULL or a character vector.}
 
 \item{...}{passing to \code{\link{make_cluster}}.}
 }

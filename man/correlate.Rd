@@ -4,48 +4,54 @@
 \alias{correlate}
 \alias{fast_correlate}
 \alias{fast_correlate2}
+\alias{print.correlate}
+\alias{print.grouped_correlate}
 \title{Correlate}
 \usage{
 correlate(
   x,
   y = NULL,
+  group = NULL,
   method = "pearson",
   use = "everything",
   adjust = FALSE,
   adjust_method = "holm",
+  engine = "default",
   ...
 )
 
-fast_correlate(
-  x,
-  y = NULL,
-  adjust = FALSE,
-  adjust_method = "holm",
-  use = "everything",
-  ...
-)
+fast_correlate(...)
 
-fast_correlate2(
-  x,
-  method = "pearson",
-  adjust = FALSE,
-  adjust_method = "holm",
-  ...
-)
+fast_correlate2(...)
+
+\method{print}{correlate}(x, all = FALSE, ...)
+
+\method{print}{grouped_correlate}(x, all = FALSE, ...)
 }
 \arguments{
 \item{x, y}{a matrix object or NULL.}
 
-\item{method}{a character string indicating which correlation coefficient is to be used
+\item{group}{NULL or a character vector.}
+
+\item{method}{a character string indicating which correlation coefficient
+is to be used
 for the test. One of "pearson", "kendall", or "spearman".}
 
-\item{use}{an optional character string giving a method for computing covariances in the presence of missing values.}
+\item{use}{an optional character string giving a method for computing
+covariances in the presence of missing values.}
 
-\item{adjust}{logical, if TRUE (default) will adjust p value for multiple comparisons.}
+\item{adjust}{logical, if TRUE (default) will adjust p value for multiple
+comparisons.}
 
 \item{adjust_method}{correction method.}
 
-\item{...}{extra params, see Details.}
+\item{engine}{one of "default", "WGCNA", "picante", "Hmisc" or "psych",
+indicating which package is used to calculate the correlation.}
+
+\item{...}{extra params passing to \code{print}.}
+
+\item{all}{if FALSE (default) just print correlation matrix, else will
+print all values.}
 }
 \value{
 a list with correlation matrix, P values matrix, confidence intervals matrix.
@@ -75,10 +81,15 @@ fast_correlate(m1, m2)
 require(picante)
   fast_correlate2(m1)
 }
+m <- correlate(mtcars, cor.test = TRUE)
+print(m)
+print(m, TRUE)
 }
 \seealso{
 \code{\link[stats]{cor}}, \code{\link[stats]{cor.test}}.
 }
 \author{
+Hou Yun
+
 Hou Yun
 }

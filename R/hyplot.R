@@ -5,12 +5,14 @@
 #' @param drop logical. If TRUE, the unused labels will be removed.
 #' @param use_md logical. if TRUE, will use \code{ggtext::element_markdown()} to
 #' draw the axis labels.
+#' @param facets a parameters list of \code{facet_wrap}.
 #' @param ... passing to \code{\link{as_matrix_data}}.
 #' @return a ggplot object.
 #' @importFrom ggplot2 ggplot
 #' @importFrom ggplot2 aes_
 #' @importFrom ggplot2 scale_x_discrete
 #' @importFrom ggplot2 scale_y_discrete
+#' @importFrom ggplot2 facet_wrap
 #' @importFrom utils modifyList
 #' @rdname hyplot
 #' @examples
@@ -23,19 +25,21 @@ hyplot <- function(md,
                    mapping = NULL,
                    drop = TRUE,
                    use_md = NULL,
+                   facets = list(),
                    ...) {
-  if (!is_matrix_data(md) && !is_md_tbl(md)) {
+  if (!is_matrix_data(md) && !is_grouped_matrix_data(md) && !is_md_tbl(md)) {
     if (!"name" %in% names(list(...))) {
       nm <- deparse(substitute(md))
       md <- as_matrix_data(md, name = nm, ...)
     } else {
       md <- as_matrix_data(md, ...)
     }
+    md <- as_md_tbl(md)
+  } else {
+    md <- as_md_tbl(md, ...)
   }
 
-  if (is_matrix_data(md)) {
-    md <- fortify(md, ...)
-  }
+  grouped <- inherits(md, "grouped_md_tbl")
 
   type <- attr(md, "type")
   diag <- attr(md, "diag")
@@ -91,6 +95,12 @@ hyplot <- function(md,
 
   # adjust the default theme
   p <- p + theme_hy(legend.position = guide_pos, use_md = use_md)
+
+  if (isTRUE(grouped)) {
+    .group <- NULL
+    facets$facets <- facets$facets %||% ~ .group
+    p <- p + do.call(facet_wrap, facets)
+  }
   class(p) <- c("hyplot", class(p))
   p
 }
@@ -98,16 +108,4 @@ hyplot <- function(md,
 #' @noRd
 is_hyplot <- function(plot) {
   inherits(plot, "hyplot")
-}
-
-#' @noRd
-is_upper_plot <- function(plot) {
-  stopifnot(is_hyplot(plot))
-  attr(plot$data, "type") == "upper"
-}
-
-#' @noRd
-is_lower_plot <- function(plot) {
-  stopifnot(is_hyplot(plot))
-  attr(plot$data, "type") == "lower"
 }
