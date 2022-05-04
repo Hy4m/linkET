@@ -290,6 +290,8 @@ as_md_tbl.data.frame <- function(x,
       }
       if (!rlang::quo_is_null(group_vars)) {
         group <- rlang::eval_tidy(group_vars, x)
+      } else {
+        group <- NULL
       }
       x <- as_md_tbl(as_matrix_data(x, name = name, group = group), ...)
     }
