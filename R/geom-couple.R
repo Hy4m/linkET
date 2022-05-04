@@ -36,8 +36,8 @@ geom_couple <- function(data,
                          label.family = label.family,
                          label.fontface = label.fontface,
                          nudge_x = nudge_x,
-                         offset_x = NULL,
-                         offset_y = NULL,
+                         offset_x = offset_x,
+                         offset_y = offset_y,
                          params = list(...)),
             class = "geom_couple")
 }
@@ -269,13 +269,17 @@ link_tbl <- function(data,
 
   if (!is.null(offset_x)) {
     offset_x <- as.list(offset_x)
-    x <- do.call(c(..x.. = x, offset_x))
-    xend <- do.call(c(..x.. = xend, offset_x))
+    offset_x[["..x.."]] <- x
+    x <- do.call(offset, offset_x)
+    offset_x[["..x.."]] <- xend
+    xend <- do.call(offset, offset_x)
   }
   if (!is.null(offset_y)) {
     offset_y <- as.list(offset_y)
-    y <- do.call(c(..x.. = y, offset_y))
-    yend <- do.call(c(..x.. = yend, offset_y))
+    offset_y[["..x.."]] <- y
+    y <- do.call(offset, offset_y)
+    offset_y[["..x.."]] <- yend
+    yend <- do.call(offset, offset_y)
   }
 
   edge <- tibble::tibble(.x = x[from],
