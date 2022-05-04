@@ -26,7 +26,9 @@
 #'       \item \code{textcolour}
 #'    }
 #' @importFrom ggplot2 draw_key_path
+#' @importFrom geomtextpath GeomTextpath
 #' @rdname geom_halfcircle
+#' @author Hou Yun
 #' @export
 geom_halfcircle <- function(mapping = NULL,
                             data = NULL,
@@ -91,8 +93,32 @@ GeomHalfcircle <- ggproto(
 )
 
 #' @noRd
-half_circle <- function(x, y, xend, yend, side = "left", n = 100) {
+half_circle <- function(x, y, xend, yend,
+                        side = "left",
+                        directed = FALSE,
+                        n = 100) {
   side <- match.arg(side, c("left", "right"))
+  if (isFALSE(directed)) {
+    if (x > x1) {
+      temp_x <- x
+      temp_y <- y
+      x <- x1
+      x1 <- temp_x
+      y <- y1
+      y1 <- temp_y
+    }
+    if (identical(x, x1)) {
+      if (y > y1) {
+        temp_x <- x
+        temp_y <- y
+        x <- x1
+        x1 <- temp_x
+        y <- y1
+        y1 <- temp_y
+      }
+    }
+  }
+
   r <- sqrt((xend - x)^2 + (yend - y)^2) / 2
   cx <- (x + xend) / 2
   cy <- (y + yend) / 2

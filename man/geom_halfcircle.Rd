@@ -94,4 +94,7 @@ Halfcircle Layer
    }
 }
 
+\author{
+Hou Yun
+}
 \keyword{datasets}
