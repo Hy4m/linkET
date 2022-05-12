@@ -99,6 +99,38 @@ print.marker <- function(x, ...) {
   print(x, ...)
 }
 
+#' @export
+`[.marker` <- function(x, index) {
+  any_duplicate <- anyDuplicated(index)
+  overflow <- index > length(x)
+  grob <- x$grob[index]
+  label <- x$label[index]
+  width <- x$width[index]
+  height <- x$height[index]
+  width_unit <- x$width_unit[index]
+  height_unit <- x$height_unit[index]
+
+  if (any(overflow)) {
+    grob <- lapply(grob, function(.grob) if (is.null(.grob)) nullGrob() else .grob)
+    width <- ifelse(overflow, 0, width)
+    height <- ifelse(overflow, 0, height)
+    width_unit <- ifelse(overflow, "cm", width_unit)
+    height_unit <- ifelse(overflow, "cm", height_unit)
+  }
+
+  if (any_duplicate) {
+    grob <- rename_grob(grob)
+  }
+
+  structure(list(grob = grob,
+                 label = label,
+                 width = width,
+                 height = height,
+                 width_unit = width_unit,
+                 height_unit = height_unit),
+            class = "marker")
+}
+
 #' @method length marker
 #' @export
 length.marker <- function(x, ...) {
@@ -108,6 +140,13 @@ length.marker <- function(x, ...) {
 #' @method rep_len marker
 #' @export
 rep_len.marker <- function(x, length.out) {
+  n <- length(x)
+  if (length.out == n) {
+    return(x)
+  }
+  if (length.out <= n) {
+
+  }
   grob <- rep_len(x$grob, length.out)
   grob <- rename_grob(grob)
   structure(list(grob = grob,
@@ -229,6 +268,8 @@ split_gpar <- function(gp = gpar(), n = 1) {
 
 #' @noRd
 modify_gpar <- function(gp1, gp2) {
+  gp1 <- gp1 %||% as.list()
+  gp2 <- gp2 %||% as.list()
   gp <- utils::modifyList(gp1, gp2)
   class(gp) <- "gpar"
   gp
@@ -326,3 +367,76 @@ rename_grob <- function (grobs, prefix = "MARKER", suffix = "GRID")
 #' @noRd
 all_type <- c("square", "circle", "star", "heart", "ellipse", "cross",
               "triangle", "triangle2")
+
+#' @noRd
+as_marker <- function(x, ...) {
+  UseMethod("as_marker")
+}
+
+#' @method as_marker grob
+as_marker.grob <- function(x, ...) {
+  marker(grob = x, ...)
+}
+
+#' @method as_marker ggplot
+as_marker.ggplot <- function(x, ...) {
+  dim_cm <- grDevices::dev.size("cm")
+  cur <- grDevices::dev.cur()
+  cap <- ragg::agg_capture(width = dim_cm[1],
+                           height = dim_cm[2],
+                           units = "cm",
+                           background = NA,
+                           res = 300,
+                           scaling = 1 )
+  print(x)
+  on.exit({
+    dev.off()
+    dev.set(cur)}, add = TRUE)
+  grob <- grid::rasterGrob(cap(native = TRUE))
+  marker(grob = grob, ...)
+}
+
+#' @method as_marker character
+as_marker.character <- function(x, ...) {
+  id <- x %in% all_type
+  x <- ifelse(is.na(id), NA_character_, x)
+  marker(grob = x, ...)
+}
+
+#' @method as_marker list
+as_marker.list <- function(x, ...) {
+  x <- polygonGrob(x = x$x %||% x[[1]],
+                   y = x$y %||% x[[2]])
+  marker(grob = grob, ...)
+}
+
+#' @method as_marker GridPattern
+as_marker.GridPattern <- function(x, shape = "rect", ...) {
+  .fun <- paste(shape, "Grob", sep = "")
+  marker(grob = do.call(.fun, list(gp = gpar(fill = x))), ...)
+}
+
+#' @method as_marker raster
+as_marker.raster <- function(x, ...) {
+  grob <- grid::rasterGrob(x)
+  marker(grob = grob, ...)
+}
+
+#' @method as_marker formula
+as_marker.formula <- function(x, envir = parent.frame(), ...) {
+  dim_cm <- grDevices::dev.size("cm")
+  cur <- grDevices::dev.cur()
+  cap <- ragg::agg_capture(width = dim_cm[1],
+                           height = dim_cm[2],
+                           units = "cm",
+                           background = NA,
+                           res = 300,
+                           scaling = 1 )
+  .fun <- parse(text = as.character(x)[2])
+  eval(.fun, envir = envir)
+  on.exit({
+    dev.off()
+    dev.set(cur)}, add = TRUE)
+  grob <- grid::rasterGrob(cap(native = TRUE))
+  marker(grob = grob, ...)
+}

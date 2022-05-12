@@ -52,7 +52,7 @@ scale_marker_binned <- function(...) {
 marker_pal <- function ()
 {
   function(n) {
-    if (n > 8) {
+    if (n > length(all_type)) {
       warning("The marker palette can deal with a maximum of 8 discrete.",
               call. = FALSE)
     }
