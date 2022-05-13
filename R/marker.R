@@ -245,7 +245,8 @@ marker2grob <- function(x, r = 0, n = 100, ratio = 0.618) {
             ellipse = ellipseGrob(r = r, nstep = 100),
             cross = crossGrob(),
             triangle = triangleGrob(1),
-            triangle2 = triangleGrob(2)
+            triangle2 = triangleGrob(2),
+            shade = shadeGrob()
     )
   }
 }
@@ -304,6 +305,13 @@ crossGrob <- function() {
   y <- c(0.5 - r, 0.5 + r, 0.5 + r, 0.5 - r)
   id <- rep(c(1, 2), each = 2)
   grid::pathGrob(x = x, y = y, id = id)
+}
+
+#' @noRd
+shadeGrob <- function() {
+  x <- c(0, 0, 0.5, 0.5, 1, 1)
+  y <- c(0.5, 0, 0, 1, 1, 0.5)
+  grid::pathGrob(x = x, y = y, id = rep(1:3, 2))
 }
 
 #' @noRd
@@ -373,7 +381,7 @@ rename_grob <- function (grobs, prefix = "MARKER", suffix = "GRID")
 
 #' @noRd
 all_type <- c("square", "circle", "star", "heart", "ellipse", "cross",
-              "triangle", "triangle2")
+              "triangle", "triangle2", "shade")
 
 #' @noRd
 as_marker <- function(x, ...) {
