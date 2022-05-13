@@ -94,3 +94,6 @@ is_richtext <- function(x, pattern = NULL) {
 }
 
 #' @noRd
+r_version <- function() {
+  strsplit(R.version.string, " ")[[1]][3]
+}

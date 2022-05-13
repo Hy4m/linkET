@@ -75,6 +75,9 @@ geom_shaping <- function(mapping = NULL,
                         height_unit = height_unit,
                         na.rm = na.rm,
                         ...), "shaping" = "marker")
+  if ("shaping" %in% names(params)) {
+    params$shaping <- as_marker(params$shaping)
+  }
 
   layer(
     data = data,
@@ -123,9 +126,8 @@ Geomshaping <- ggproto(
         stop("shaping should be a marker object.", call. = FALSE)
       }
       shaping <- rep_len(shaping, n)
-
-      shaping$width_unit <- width_unit %||% shaping$width_unit
-      shaping$height_unit <- height_unit %||% width_unit %||% shaping$height_unit
+      shaping$width_unit <- rep_len(width_unit %||% shaping$width_unit, n)
+      shaping$height_unit <- rep_len(height_unit %||% width_unit %||% shaping$height_unit, n)
 
       shaping$width <- ifelse(shaping$width_unit == "native",
                               shaping$width / diff(panel_params$x.range),
@@ -144,6 +146,7 @@ Geomshaping <- ggproto(
                         n = data$n,
                         ratio = data$ratio)
     }
+
     markerGrob(marker = shaping,
                x = data$x,
                y = data$y,

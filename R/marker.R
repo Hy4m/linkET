@@ -111,7 +111,7 @@ print.marker <- function(x, ...) {
   height_unit <- x$height_unit[index]
 
   if (any(overflow)) {
-    grob <- lapply(grob, function(.grob) if (is.null(.grob)) nullGrob() else .grob)
+    grob <- lapply(grob, function(.grob) if (is.null(.grob)) grid::nullGrob() else .grob)
     width <- ifelse(overflow, 0, width)
     height <- ifelse(overflow, 0, height)
     width_unit <- ifelse(overflow, "cm", width_unit)
@@ -145,8 +145,9 @@ rep_len.marker <- function(x, length.out) {
     return(x)
   }
   if (length.out <= n) {
-
+    return(x[seq_len(length.out)])
   }
+
   grob <- rep_len(x$grob, length.out)
   grob <- rename_grob(grob)
   structure(list(grob = grob,
@@ -176,6 +177,7 @@ markerGrob <- function(marker,
            length(vjust))
 
   marker <- rep_len(marker, n)
+
   x <- rep_len(x, n)
   y <- rep_len(y, n)
   angle <- rep_len(angle, n)
@@ -253,13 +255,18 @@ marker2grob <- function(x, r = 0, n = 100, ratio = 0.618) {
 split_gpar <- function(gp = gpar(), n = 1) {
   gp2 <- grid::get.gpar(c("col", "fill", "alpha", "lty", "lwd"))
   col <- rep_len(gp$col %||% gp2$col, n)
-  fill <- rep_len(gp$fill %||% gp2$fill, n)
+  fill <- gp$fill %||% gp2$fill
+  if (inherits(fill, "GridPattern")) {
+    fill <- rep_len(list(fill), n)
+  } else {
+    fill <- rep_len(fill, n)
+  }
   alpha <- rep_len(gp$alpha %||% gp2$alpha, n)
   lty <- rep_len(gp$lty %||% gp2$lty, n)
   lwd <- rep_len(gp$lwd %||% gp2$lwd, n)
   lapply(seq_len(n), function(.n) {
     gpar(col = col[.n],
-         fill = fill[.n],
+         fill = if (is.list(fill)) fill[[.n]] else fill[.n],
          alpha = alpha[.n],
          lty = lty[.n],
          lwd = lwd[.n])
@@ -268,8 +275,8 @@ split_gpar <- function(gp = gpar(), n = 1) {
 
 #' @noRd
 modify_gpar <- function(gp1, gp2) {
-  gp1 <- gp1 %||% as.list()
-  gp2 <- gp2 %||% as.list()
+  gp1 <- gp1 %||% as.list(gp1)
+  gp2 <- gp2 %||% as.list(gp2)
   gp <- utils::modifyList(gp1, gp2)
   class(gp) <- "gpar"
   gp
@@ -373,6 +380,11 @@ as_marker <- function(x, ...) {
   UseMethod("as_marker")
 }
 
+#' @method as_marker marker
+as_marker.marker <- function(x, ...) {
+ x
+}
+
 #' @method as_marker grob
 as_marker.grob <- function(x, ...) {
   marker(grob = x, ...)
@@ -380,18 +392,19 @@ as_marker.grob <- function(x, ...) {
 
 #' @method as_marker ggplot
 as_marker.ggplot <- function(x, ...) {
+  agg_capture <- get_function("ragg", "agg_capture")
   dim_cm <- grDevices::dev.size("cm")
   cur <- grDevices::dev.cur()
-  cap <- ragg::agg_capture(width = dim_cm[1],
-                           height = dim_cm[2],
-                           units = "cm",
-                           background = NA,
-                           res = 300,
-                           scaling = 1 )
+  cap <- agg_capture(width = dim_cm[1],
+                     height = dim_cm[2],
+                     units = "cm",
+                     background = NA,
+                     res = 300,
+                     scaling = 1 )
   print(x)
   on.exit({
-    dev.off()
-    dev.set(cur)}, add = TRUE)
+    grDevices::dev.off()
+    grDevices::dev.set(cur)}, add = TRUE)
   grob <- grid::rasterGrob(cap(native = TRUE))
   marker(grob = grob, ...)
 }
@@ -407,11 +420,14 @@ as_marker.character <- function(x, ...) {
 as_marker.list <- function(x, ...) {
   x <- polygonGrob(x = x$x %||% x[[1]],
                    y = x$y %||% x[[2]])
-  marker(grob = grob, ...)
+  marker(grob = x, ...)
 }
 
 #' @method as_marker GridPattern
 as_marker.GridPattern <- function(x, shape = "rect", ...) {
+  if (! r_version() >= "4.1.0") {
+    stop("The R version needs to be higher than 4.1.0.", call. = FALSE)
+  }
   .fun <- paste(shape, "Grob", sep = "")
   marker(grob = do.call(.fun, list(gp = gpar(fill = x))), ...)
 }
@@ -424,19 +440,20 @@ as_marker.raster <- function(x, ...) {
 
 #' @method as_marker formula
 as_marker.formula <- function(x, envir = parent.frame(), ...) {
+  agg_capture <- get_function("ragg", "agg_capture")
   dim_cm <- grDevices::dev.size("cm")
   cur <- grDevices::dev.cur()
-  cap <- ragg::agg_capture(width = dim_cm[1],
-                           height = dim_cm[2],
-                           units = "cm",
-                           background = NA,
-                           res = 300,
-                           scaling = 1 )
+  cap <- agg_capture(width = dim_cm[1],
+                     height = dim_cm[2],
+                     units = "cm",
+                     background = NA,
+                     res = 300,
+                     scaling = 1 )
   .fun <- parse(text = as.character(x)[2])
   eval(.fun, envir = envir)
   on.exit({
-    dev.off()
-    dev.set(cur)}, add = TRUE)
+    grDevices::dev.off()
+    grDevices::dev.set(cur)}, add = TRUE)
   grob <- grid::rasterGrob(cap(native = TRUE))
   marker(grob = grob, ...)
 }
