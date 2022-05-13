@@ -299,7 +299,7 @@ ellipseGrob <- function(r = 0, nstep = 100) {
 
 #' @noRd
 crossGrob <- function() {
-  r <- sqrt(2) * 0.618 / 2
+  r <- 0.3
   x <- c(0.5 - r, 0.5 + r, 0.5 - r, 0.5 + r)
   y <- c(0.5 - r, 0.5 + r, 0.5 + r, 0.5 - r)
   id <- rep(c(1, 2), each = 2)
@@ -399,7 +399,7 @@ as_marker.ggplot <- function(x, ...) {
                      height = dim_cm[2],
                      units = "cm",
                      background = NA,
-                     res = 300,
+                     res = 100,
                      scaling = 1 )
   print(x)
   on.exit({
@@ -429,7 +429,9 @@ as_marker.GridPattern <- function(x, shape = "rect", ...) {
     stop("The R version needs to be higher than 4.1.0.", call. = FALSE)
   }
   .fun <- paste(shape, "Grob", sep = "")
-  marker(grob = do.call(.fun, list(gp = gpar(fill = x))), ...)
+  grob = do.call(.fun, list())
+  grob$gp <- gpar(fill = x)
+  marker(grob = grob, ...)
 }
 
 #' @method as_marker raster
@@ -447,7 +449,7 @@ as_marker.formula <- function(x, envir = parent.frame(), ...) {
                      height = dim_cm[2],
                      units = "cm",
                      background = NA,
-                     res = 300,
+                     res = 100,
                      scaling = 1 )
   .fun <- parse(text = as.character(x)[2])
   eval(.fun, envir = envir)
