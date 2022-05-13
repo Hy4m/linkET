@@ -15,19 +15,6 @@ aes_modify <- function (aes1, aes2)
   aes
 }
 
-#' #' @noRd
-#' set_attrs <- function(x, ...) {
-#'   attrs <- list(...)
-#'   if(length(attrs) == 0L) {
-#'     return(x)
-#'   }
-#'   nm <- names(attrs)
-#'   for(i in nm) {
-#'     attr(x, i) <- attrs[[i]]
-#'   }
-#'   x
-#' }
-
 #' @noRd
 new_data_frame <- getFromNamespace("new_data_frame", "ggplot2")
 
@@ -105,3 +92,5 @@ is_richtext <- function(x, pattern = NULL) {
   x <- gsub("\\s+", "", x)
   any(grepl(pattern, x))
 }
+
+#' @noRd
