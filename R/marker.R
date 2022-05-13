@@ -429,7 +429,7 @@ as_marker.GridPattern <- function(x, shape = "rect", ...) {
     stop("The R version needs to be higher than 4.1.0.", call. = FALSE)
   }
   .fun <- paste(shape, "Grob", sep = "")
-  grob = do.call(.fun, list())
+  grob <- do.call(.fun, list())
   grob$gp <- gpar(fill = x)
   marker(grob = grob, ...)
 }
