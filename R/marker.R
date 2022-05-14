@@ -403,20 +403,21 @@ as_marker.grob <- function(x, ...) {
 
 #' @method as_marker ggplot
 as_marker.ggplot <- function(x, ...) {
-  agg_capture <- get_function("ragg", "agg_capture")
-  dim_cm <- grDevices::dev.size("cm")
-  cur <- grDevices::dev.cur()
-  cap <- agg_capture(width = dim_cm[1],
-                     height = dim_cm[2],
-                     units = "cm",
-                     background = NA,
-                     res = 100,
-                     scaling = 1 )
-  print(x)
-  on.exit({
-    grDevices::dev.off()
-    grDevices::dev.set(cur)}, add = TRUE)
-  grob <- grid::rasterGrob(cap(native = TRUE))
+  # agg_capture <- get_function("ragg", "agg_capture")
+  # dim_cm <- grDevices::dev.size("cm")
+  # cur <- grDevices::dev.cur()
+  # cap <- agg_capture(width = dim_cm[1],
+  #                    height = dim_cm[2],
+  #                    units = "cm",
+  #                    background = NA,
+  #                    res = 100,
+  #                    scaling = 1 )
+  # print(x)
+  # on.exit({
+  #   grDevices::dev.off()
+  #   grDevices::dev.set(cur)}, add = TRUE)
+  # grob <- grid::rasterGrob(cap(native = TRUE))
+  grob <- ggplot2::ggplotGrob(x)
   marker(grob = grob, ...)
 }
 
@@ -469,4 +470,10 @@ as_marker.formula <- function(x, envir = parent.frame(), ...) {
     grDevices::dev.set(cur)}, add = TRUE)
   grob <- grid::rasterGrob(cap(native = TRUE))
   marker(grob = grob, ...)
+}
+
+#' @method as_marker magick-image
+`as_marker.magick-image` <- function(x, ...) {
+  x <- grDevices::as.raster(x)
+  as_marker(x = x, ...)
 }
