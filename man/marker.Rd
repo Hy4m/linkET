@@ -42,6 +42,9 @@ similar to points.
 \examples{
 marker()
 marker(c("square", "circle"))
+m <- marker(c("square", "circle", "star", "heart"))
+m[1:3]
+rep_len(m, 10)
 }
 \author{
 Hou Yun
