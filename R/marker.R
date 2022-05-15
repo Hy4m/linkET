@@ -403,20 +403,6 @@ as_marker.grob <- function(x, ...) {
 
 #' @method as_marker ggplot
 as_marker.ggplot <- function(x, ...) {
-  # agg_capture <- get_function("ragg", "agg_capture")
-  # dim_cm <- grDevices::dev.size("cm")
-  # cur <- grDevices::dev.cur()
-  # cap <- agg_capture(width = dim_cm[1],
-  #                    height = dim_cm[2],
-  #                    units = "cm",
-  #                    background = NA,
-  #                    res = 100,
-  #                    scaling = 1 )
-  # print(x)
-  # on.exit({
-  #   grDevices::dev.off()
-  #   grDevices::dev.set(cur)}, add = TRUE)
-  # grob <- grid::rasterGrob(cap(native = TRUE))
   grob <- ggplot2::ggplotGrob(x)
   marker(grob = grob, ...)
 }
@@ -455,11 +441,11 @@ as_marker.raster <- function(x, ...) {
 #' @method as_marker formula
 as_marker.formula <- function(x, envir = parent.frame(), ...) {
   agg_capture <- get_function("ragg", "agg_capture")
-  dim_cm <- grDevices::dev.size("cm")
+  dim_inch <- grDevices::dev.size("in")
   cur <- grDevices::dev.cur()
-  cap <- agg_capture(width = dim_cm[1],
-                     height = dim_cm[2],
-                     units = "cm",
+  cap <- agg_capture(width = dim_inch[1],
+                     height = dim_inch[2],
+                     units = "in",
                      background = NA,
                      res = 100,
                      scaling = 1 )
