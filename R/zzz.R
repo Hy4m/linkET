@@ -1,29 +1,17 @@
-.onLoad <- function(...) {
-
-  for(g in c("cor_md_tbl", "correlate", "mantel_tbl", "pro_tbl",
-             "easycorrelation", "rcorr", "corr.test")) {
-    register_s3_method("igraph", "as.igraph", g)
-    register_s3_method("tidygraph", "as_tbl_graph", g)
+.onAttach <- function(...) {
+  if (interactive() && ("ggcor" %in% loadedNamespaces())) {
+    msg <- paste0("The `ggcor` package has been loaded, and it's some functions may conflict\n",
+                  "with `linkET`, please detach or uninstall the `ggcor` package first.")
+    packageStartupMessage(msg)
   }
 
-  invisible()
+  if (!("ggcor" %in% loadedNamespaces()) &&
+      ("ggcor" %in% row.names(installed.packages()))) {
+    if (stats::runif(1) > 0.5) {
+      msg <- paste0("`linkET` has almost all of `ggcor`'s features and includes\n",
+                    "many new features, so switching to `linkET` is recommended.")
+      packageStartupMessage(msg)
+    }
+  }
 }
 
-register_s3_method <- function (pkg, generic, class, fun = NULL)
-{
-  stopifnot(is.character(pkg), length(pkg) == 1)
-  stopifnot(is.character(generic), length(generic) == 1)
-  stopifnot(is.character(class), length(class) == 1)
-  if (is.null(fun)) {
-    fun <- get(paste0(generic, ".", class), envir = parent.frame())
-  }
-  else {
-    stopifnot(is.function(fun))
-  }
-  if (pkg %in% loadedNamespaces()) {
-    registerS3method(generic, class, fun, envir = asNamespace(pkg))
-  }
-  setHook(packageEvent(pkg, "onLoad"), function(...) {
-    registerS3method(generic, class, fun, envir = asNamespace(pkg))
-  })
-}
