@@ -206,58 +206,67 @@ markerGrob <- function(marker,
 #' @description This function takes care of updating the marker size based on
 #' device size.
 #' @param x a marker grob object.
-#' @importFrom grid makeContent
+#' @importFrom grid makeContent unit viewport rasterGrob
+#' @importFrom purrr pmap
+#' @importFrom grDevices dev.size dev.cur dev.off dev.set
 #' @author Hou Yun
 #' @rdname makeContent
 #' @export
 makeContent.markerGrob <- function(x) {
   marker <- x$marker
   n <- length(marker)
-  width <- grid::unit(marker$width, marker$width_unit)
-  height <- grid::unit(marker$height, marker$height_unit)
+  width <- unit(marker$width, marker$width_unit)
+  height <- unit(marker$height, marker$height_unit)
   width <- grid::convertWidth(width, "in")
   height <- grid::convertHeight(height, "in")
   grobs <- marker$grob
   gp <- split_gpar(x$gp, n)
 
-  grobs <- purrr::map2(grobs, gp, function(.grob, .gp) {
-    .grob$gp <- .gp
-    .grob
-  })
-
   if (isTRUE(x$rasterize)) {
     agg_capture <- get_function("ragg", "agg_capture")
-    dim_inch <- grDevices::dev.size("in")
-    dim_pt <- grDevices::dev.size("px")
+    dim_inch <- dev.size("in")
+    dim_pt <- dev.size("px")
     res <- dim_pt[1] / dim_inch[1]
-    grobs <- lapply(seq_len(n), function(.n) {
-      cur <- grDevices::dev.cur()
-      cap <- agg_capture(width = width[.n],
-                         height = height[.n],
-                         units = "in",
-                         background = NA,
-                         res = res,
-                         scaling = 1 )
-      grid.draw(grobs[[.n]])
-      grob <- grid::rasterGrob(cap(native = TRUE))
-      try(grDevices::dev.off(), silent = TRUE)
-      grDevices::dev.set(cur)
-      grob
-    })
-  }
 
-  grobs <- purrr::pmap(list(grobs, x$x, x$y, width, height, x$angle, x$hjust, x$vjust),
-                       function(.grob, .x, .y, .width, .height, .angle, .hjust, .vjust) {
-                         vp <- grid::viewport(x = .x,
-                                              y = .y,
-                                              width = .width,
-                                              height = .height,
-                                              angle = .angle,
-                                              just = c(.hjust, .vjust),
-                                              default.units = x$default.units)
-                         .grob$vp <- vp
-                         .grob
-                       })
+    grobs <- pmap(list(grobs, gp, x$x, x$y, width, height, x$angle, x$hjust, x$vjust),
+                  function(.grob, .gp, .x, .y, .width, .height, .angle, .hjust, .vjust) {
+                    cur <- dev.cur()
+                    cap <- agg_capture(width = .width,
+                                       height = .height,
+                                       units = "in",
+                                       background = NA,
+                                       res = res,
+                                       scaling = 1 )
+                    .grob$gp <- .gp
+                    grid.draw(.grob)
+                    .grob <- rasterGrob(cap(native = TRUE))
+                    try(dev.off(), silent = TRUE)
+                    dev.set(cur)
+                    vp <- viewport(x = .x,
+                                   y = .y,
+                                   width = .width,
+                                   height = .height,
+                                   angle = .angle,
+                                   just = c(.hjust, .vjust),
+                                   default.units = x$default.units)
+                    .grob$vp <- vp
+                    .grob
+                  })
+  } else {
+    grobs <- pmap(list(grobs, gp, x$x, x$y, width, height, x$angle, x$hjust, x$vjust),
+                  function(.grob, .gp, .x, .y, .width, .height, .angle, .hjust, .vjust) {
+                    vp <- grid::viewport(x = .x,
+                                         y = .y,
+                                         width = .width,
+                                         height = .height,
+                                         angle = .angle,
+                                         just = c(.hjust, .vjust),
+                                         default.units = x$default.units)
+                    .grob$gp <- .gp
+                    .grob$vp <- vp
+                    .grob
+                  })
+  }
 
   grid::setChildren(x, do.call(grid::gList, grobs))
 }
@@ -463,8 +472,8 @@ as_marker.raster <- function(x, ...) {
 #' @method as_marker formula
 as_marker.formula <- function(x, envir = parent.frame(), ...) {
   agg_capture <- get_function("ragg", "agg_capture")
-  dim_inch <- grDevices::dev.size("in")
-  cur <- grDevices::dev.cur()
+  dim_inch <- dev.size("in")
+  cur <- dev.cur()
   cap <- agg_capture(width = dim_inch[1],
                      height = dim_inch[2],
                      units = "in",
@@ -474,8 +483,8 @@ as_marker.formula <- function(x, envir = parent.frame(), ...) {
   .fun <- parse(text = as.character(x)[2])
   eval(.fun, envir = envir)
   on.exit({
-    grDevices::dev.off()
-    grDevices::dev.set(cur)}, add = TRUE)
+    dev.off()
+    dev.set(cur)}, add = TRUE)
   grob <- grid::rasterGrob(cap(native = TRUE))
   marker(grob = grob, ...)
 }
