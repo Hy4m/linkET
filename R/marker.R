@@ -170,6 +170,7 @@ markerGrob <- function(marker,
                        hjust = 0.5,
                        vjust = 0.5,
                        rasterize = FALSE,
+                       res = 100,
                        default.units = "npc",
                        gp = gpar(),
                        name = NULL,
@@ -195,6 +196,7 @@ markerGrob <- function(marker,
               hjust = hjust,
               vjust = vjust,
               rasterize = rasterize,
+              res = res,
               default.units = default.units,
               gp = gp,
               name = name,
@@ -224,9 +226,10 @@ makeContent.markerGrob <- function(x) {
 
   if (isTRUE(x$rasterize)) {
     agg_capture <- get_function("ragg", "agg_capture")
-    dim_inch <- dev.size("in")
-    dim_pt <- dev.size("px")
-    res <- dim_pt[1] / dim_inch[1]
+    res <- dev.size("px")[1] / dev.size("in")[1]
+    if (x$res > res) {
+      res <- x$res
+    }
 
     grobs <- pmap(list(grobs, gp, x$x, x$y, width, height, x$angle, x$hjust, x$vjust),
                   function(.grob, .gp, .x, .y, .width, .height, .angle, .hjust, .vjust) {

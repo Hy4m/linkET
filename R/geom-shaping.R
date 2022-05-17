@@ -36,6 +36,7 @@ draw_key_marker <- function(data, params, size) {
 #' @inheritParams ggplot2::geom_polygon
 #' @param width_unit,height_unit units of width or height.
 #' @param rasterize logical, whether to convert raster image before drawing.
+#' @param res positive numeric, used to set the resolution of raster.
 #' @section Aesthetics:
 #' \code{geom_shaping()} understands the following aesthetics (required aesthetics are in bold):
 #'     \itemize{
@@ -70,12 +71,14 @@ geom_shaping <- function(mapping = NULL,
                          width_unit = "native",
                          height_unit = width_unit,
                          rasterize = FALSE,
+                         res = 100,
                          na.rm = FALSE,
                          show.legend = NA,
                          inherit.aes = TRUE) {
   params <- rename(list(width_unit = width_unit,
                         height_unit = height_unit,
                         rasterize = rasterize,
+                        res = res,
                         na.rm = na.rm,
                         ...), "shaping" = "marker")
   if ("shaping" %in% names(params)) {
@@ -106,7 +109,8 @@ Geomshaping <- ggproto(
   required_aes = c("x", "y"),
 
   draw_panel = function(self, data, panel_params, coord, shaping = NULL,
-                        width_unit = NULL, height_unit = NULL, rasterize = FALSE) {
+                        width_unit = NULL, height_unit = NULL, rasterize = FALSE,
+                        res = 100) {
     if (empty(data)) {
       return(nullGrob())
     }
@@ -157,6 +161,7 @@ Geomshaping <- ggproto(
                hjust = data$hjust,
                vjust = data$vjust,
                rasterize = rasterize,
+               res = res,
                default.units = "native",
                gp = gpar(col  = scales::alpha(data$colour, data$alpha),
                          fill = scales::alpha(data$fill, data$alpha),
