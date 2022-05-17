@@ -40,6 +40,7 @@ gdist <- function(.data,
     if(.FUN != "gowdis") {
       message("The data contains factors, I recommend setting:\n",
               "`.FUN = \"gowdis\"`\n")
+      .FUN <- "gowdis"
     }
   } else {
     if(is.null(.FUN)) .FUN <- "dist"
