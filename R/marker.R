@@ -169,6 +169,7 @@ markerGrob <- function(marker,
                        angle = 0,
                        hjust = 0.5,
                        vjust = 0.5,
+                       rasterize = FALSE,
                        default.units = "npc",
                        gp = gpar(),
                        name = NULL,
@@ -193,6 +194,7 @@ markerGrob <- function(marker,
               angle = angle,
               hjust = hjust,
               vjust = vjust,
+              rasterize = rasterize,
               default.units = default.units,
               gp = gp,
               name = name,
@@ -209,26 +211,53 @@ markerGrob <- function(marker,
 #' @rdname makeContent
 #' @export
 makeContent.markerGrob <- function(x) {
-  n <- length(x$marker)
   marker <- x$marker
-  width <- grid::unit(x$marker$width, x$marker$width_unit)
-  height <- grid::unit(x$marker$height, x$marker$height_unit)
-  width <- grid::convertWidth(width, "cm")
-  height <- grid::convertHeight(height, "cm")
-
+  n <- length(marker)
+  width <- grid::unit(marker$width, marker$width_unit)
+  height <- grid::unit(marker$height, marker$height_unit)
+  width <- grid::convertWidth(width, "in")
+  height <- grid::convertHeight(height, "in")
+  grobs <- marker$grob
   gp <- split_gpar(x$gp, n)
 
-  grobs <- lapply(seq_len(n), function(.n) {
-    vp <- grid::viewport(x = x$x[.n],
-                         y = x$y[.n],
-                         width = width[.n],
-                         height = height[.n],
-                         angle = x$angle[.n],
-                         just = c(x$hjust[.n], x$vjust[.n]),
-                         default.units = x$default.units)
-
-    modify_grob(marker$grob[[.n]], vp = vp, gp = gp[[.n]])
+  grobs <- purrr::map2(grobs, gp, function(.grob, .gp) {
+    .grob$gp <- .gp
+    .grob
   })
+
+  if (isTRUE(x$rasterize)) {
+    agg_capture <- get_function("ragg", "agg_capture")
+    dim_inch <- grDevices::dev.size("in")
+    dim_pt <- grDevices::dev.size("px")
+    res <- dim_pt[1] / dim_inch[1]
+    grobs <- lapply(seq_len(n), function(.n) {
+      cur <- grDevices::dev.cur()
+      cap <- agg_capture(width = width[.n],
+                         height = height[.n],
+                         units = "in",
+                         background = NA,
+                         res = res,
+                         scaling = 1 )
+      grid.draw(grobs[[.n]])
+      grob <- grid::rasterGrob(cap(native = TRUE))
+      try(grDevices::dev.off(), silent = TRUE)
+      grDevices::dev.set(cur)
+      grob
+    })
+  }
+
+  grobs <- purrr::pmap(list(grobs, x$x, x$y, width, height, x$angle, x$hjust, x$vjust),
+                       function(.grob, .x, .y, .width, .height, .angle, .hjust, .vjust) {
+                         vp <- grid::viewport(x = .x,
+                                              y = .y,
+                                              width = .width,
+                                              height = .height,
+                                              angle = .angle,
+                                              just = c(.hjust, .vjust),
+                                              default.units = x$default.units)
+                         .grob$vp <- vp
+                         .grob
+                       })
 
   grid::setChildren(x, do.call(grid::gList, grobs))
 }
@@ -284,13 +313,6 @@ modify_gpar <- function(gp1, gp2) {
   gp <- utils::modifyList(gp1, gp2)
   class(gp) <- "gpar"
   gp
-}
-
-#' @noRd
-modify_grob <- function(grob, vp = NULL, gp = gpar()) {
-  grob$vp <- vp
-  grob$gp <- modify_gpar(gp, grob$gp)
-  grob
 }
 
 #' @noRd

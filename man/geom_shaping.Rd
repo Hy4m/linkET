@@ -14,6 +14,7 @@ geom_shaping(
   ...,
   width_unit = "native",
   height_unit = width_unit,
+  rasterize = FALSE,
   na.rm = FALSE,
   show.legend = NA,
   inherit.aes = TRUE
@@ -52,6 +53,8 @@ often aesthetics, used to set an aesthetic to a fixed value, like
 to the paired geom/stat.}
 
 \item{width_unit, height_unit}{units of width or height.}
+
+\item{rasterize}{logical, whether to convert raster image before drawing.}
 
 \item{na.rm}{If \code{FALSE}, the default, missing values are removed with
 a warning. If \code{TRUE}, missing values are silently removed.}
