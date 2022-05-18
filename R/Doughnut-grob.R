@@ -1,4 +1,4 @@
-#' @title Draw Doughnut
+#' @title Draw doughnut plot
 #' @description These functions create and draw doughnut.
 #' @param x,y a numeric value or unit object.
 #' @param r0,r1 a non-negtive numeric value.
