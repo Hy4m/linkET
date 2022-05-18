@@ -1,3 +1,5 @@
+## TODO: can add labels, and can calculate the position of labels.
+
 #' @title Draw doughnut plot
 #' @description These functions create and draw doughnut.
 #' @param x,y a numeric value or unit object.
