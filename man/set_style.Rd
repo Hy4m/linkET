@@ -44,6 +44,12 @@ qcorrplot(mtcars) + geom_shaping(marker = "circle")
 ## use custom colour palee
 set_corrplot_style(colours = c("red", "white", "blue"))
 qcorrplot(mtcars) + geom_shaping(marker = "circle")
+## use custom scale
+set_corrplot_style(scale = ggplot2::scale_fill_viridis_c(limits = c(-1, 1)))
+qcorrplot(mtcars) + geom_shaping(marker = "circle")
+## reset to default scale
+set_default_style()
+qcorrplot(mtcars) + geom_shaping(marker = "circle")
 }
 \author{
 Hou Yun
