@@ -41,7 +41,7 @@ Set default color pallete for \code{\link{qcorrplot}}.
 ## use corrplot style
 set_corrplot_style()
 qcorrplot(mtcars) + geom_shaping(marker = "circle")
-## use custom colour palee
+## use custom colour palette
 set_corrplot_style(colours = c("red", "white", "blue"))
 qcorrplot(mtcars) + geom_shaping(marker = "circle")
 ## use custom scale
