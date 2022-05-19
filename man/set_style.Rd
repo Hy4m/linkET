@@ -37,6 +37,14 @@ set_default_style()
 \description{
 Set default color pallete for \code{\link{qcorrplot}}.
 }
+\examples{
+## use corrplot style
+set_corrplot_style()
+qcorplot(mtcars) + geom_shaping(marker = "circle")
+## use custom colour palee
+set_corrplot_style(colours = c("red", "white", "blue"))
+qcorplot(mtcars) + geom_shaping(marker = "circle")
+}
 \author{
 Hou Yun
 }

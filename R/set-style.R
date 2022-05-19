@@ -10,6 +10,13 @@
 #' @rdname set_style
 #' @author Hou Yun
 #' @export
+#' @examples
+#' ## use corrplot style
+#' set_corrplot_style()
+#' qcorplot(mtcars) + geom_shaping(marker = "circle")
+#' ## use custom colour palee
+#' set_corrplot_style(colours = c("red", "white", "blue"))
+#' qcorplot(mtcars) + geom_shaping(marker = "circle")
 print.hyplot <- function(x, ...) {
   if (inherits(x$data, "cor_md_tbl") &&
       !is.null(getOption("linkET.corrplot.style")) &&
