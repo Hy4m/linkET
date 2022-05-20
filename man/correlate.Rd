@@ -71,15 +71,21 @@ m2 <- matrix(rnorm(60), nrow = 10)
 correlate(m1, m2)
 
 ## adjust p value
-correlate(m1, m2, cor.test = TRUE, adjust = TRUE)
+correlate(m1, m2, adjust = TRUE)
 
-## fast compute correlation
+## other package engine
 \dontrun{
-require(WGCNA)
-fast_correlate(m1, m2)
+## use psych engine
+correlate(m1, engine = "psych")
 
-require(picante)
-  fast_correlate2(m1)
+## use Hmisc engine
+correlate(m1, engine = "Hmisc")
+
+## use WGCNA engine
+correlate(m1, m2, engine = "WGCNA")
+
+## use picante engine
+correlate(m1, engine = "picante")
 }
 m <- correlate(mtcars, cor.test = TRUE)
 print(m)

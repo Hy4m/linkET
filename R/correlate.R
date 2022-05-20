@@ -27,15 +27,21 @@
 #' correlate(m1, m2)
 #'
 #' ## adjust p value
-#' correlate(m1, m2, cor.test = TRUE, adjust = TRUE)
+#' correlate(m1, m2, adjust = TRUE)
 #'
-#' ## fast compute correlation
+#' ## other package engine
 #' \dontrun{
-#' require(WGCNA)
-#' fast_correlate(m1, m2)
+#' ## use psych engine
+#' correlate(m1, engine = "psych")
 #'
-#' require(picante)
-#'   fast_correlate2(m1)
+#' ## use Hmisc engine
+#' correlate(m1, engine = "Hmisc")
+#'
+#' ## use WGCNA engine
+#' correlate(m1, m2, engine = "WGCNA")
+#'
+#' ## use picante engine
+#' correlate(m1, engine = "picante")
 #' }
 #' @seealso \code{\link[stats]{cor}}, \code{\link[stats]{cor.test}}.
 #' @author Hou Yun
@@ -100,6 +106,8 @@ correlate <- function(x,
       }
     } else {
       corr.test <- get_function("psych", "corr.test")
+      x <- as.data.frame(x)
+      y <- if (is.null(y)) y else as.data.frame(y)
       out <- as_correlate(corr.test(x = x,
                                     y = y,
                                     use = if (use == "everything") "complete" else "pairwise",
