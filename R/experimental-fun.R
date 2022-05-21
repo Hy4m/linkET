@@ -100,9 +100,9 @@ ggplot_add.geom_ggplot <- function(object, plot, object_name) {
     class(plot) <- c("gggplot", class(plot))
   }
 
-  gglist <- lapply(gglist, ggplotGrob)
   params <- c(list(mapping = mapping,
-                   marker = marker(grob = gglist),
+                   data = data,
+                   marker = marker(grob = lapply(gglist, ggplotGrob)),
                    show.legend = FALSE,
                    width_unit = object$width_unit,
                    height_unit = object$height_unit,
@@ -119,6 +119,7 @@ ggplot_build.gggplot <- function(plot) {
   gdefs <- attr(plot, "guides")
   if (is.null(gdefs) || length(gdefs) < 1) {
     plot <- NextMethod()
+    plot <- ggplot2::ggplot_gtable(plot)
   } else {
     plot <- .rebuild_guides(plot)
   }
@@ -128,6 +129,7 @@ ggplot_build.gggplot <- function(plot) {
 #' @export
 print.gggplot <- function(x, ...) {
   x <- ggplot_build(x)
+  grid::grid.newpage()
   grid.draw(x)
 }
 
@@ -142,6 +144,9 @@ plot.gggplot <- print.gggplot
 #' @noRd
 .get_guides <- function(gg) {
   if (!inherits(gg, "gtable")) {
+    if (inherits(gg, "gggplot")) {
+      class(gg) <- setdiff(class(gg), "gggplot")
+    }
     gg <- ggplot2::ggplotGrob(gg)
   }
 

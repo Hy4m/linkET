@@ -124,9 +124,9 @@ Geomshaping <- ggproto(
     }
 
     data <- coord$transform(data, panel_params)
-    if (!tibble::is_tibble(data)) {
-      data <- as_tibble(data)
-    }
+    # if (!tibble::is_tibble(data)) {
+    #   data <- as_tibble(data)
+    # }
     n <- nrow(data)
     if (!is.null(shaping)) {
       if (!inherits(shaping, "marker")) {

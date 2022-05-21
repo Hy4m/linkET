@@ -55,7 +55,7 @@ marker <- function(grob = "square",
   grob_is_na <- vapply(grob, function(.grob) {
     if (is.atomic(.grob) && is.na(.grob)) TRUE else FALSE
   }, logical(1))
-  grob <- rep_len(grob, ll)
+  grob <- rename_grob(rep_len(grob, ll))
   label <- rep_len(grob, ll)
   width <- rep_len(width, ll)
   height <- rep_len(height, ll)
