@@ -22,6 +22,7 @@ Imports:
     ggplot2 (>= 3.0.0), 
     glue, 
     grDevices,
+    gtable,
     igraph,
     magrittr, 
     rlang, 
