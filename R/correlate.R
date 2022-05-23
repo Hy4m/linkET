@@ -1,3 +1,5 @@
+## TODO: add partial and semi-partial correlation?
+
 #' Matrix of Correlations, P-values and confidence intervals
 #' @title Correlate
 #' @param x,y a matrix object or NULL.
