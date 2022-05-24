@@ -62,7 +62,22 @@ draw_key_marker <- function(data, params, size) {
 #' @importFrom ggplot2 Geom
 #' @export
 #' @examples
+#' set_corrplot_style()
+#'
+#' ## heart marker
 #' qcorrplot(mtcars) + geom_shaping(marker = marker("heart"))
+#'
+#' ## square marker
+#' qcorrplot(mtcars) + geom_shaping(marker = marker("square"))
+#'
+#' ## ellipse marker
+#' qcorrplot(mtcars) + geom_shaping(marker = marker("ellipse"))
+#'
+#' ## square and shade marker
+#' qcorrplot(mtcars) +
+#'   geom_shaping(marker = marker("square")) +
+#'   geom_shaping(aes(angle = ifelse(r > 0, 0, 180)), marker = marker("shade"),
+#'                colour = "white", size = 0.3)
 geom_shaping <- function(mapping = NULL,
                          data = NULL,
                          stat = "identity",

@@ -100,7 +100,21 @@ It can be used to draw custom marker on ggplot.
 }
 
 \examples{
+set_corrplot_style()
+
+## heart marker
 qcorrplot(mtcars) + geom_shaping(marker = marker("heart"))
+
+## square marker
+qcorrplot(mtcars) + geom_shaping(marker = marker("square"))
+
+## ellipse marker
+qcorrplot(mtcars) + geom_shaping(marker = marker("ellipse"))
+
+## square and shade marker
+qcorrplot(mtcars) +
+  geom_shaping(marker = marker("square")) +
+  geom_shade(aes(angle = r > 0), colour = "white", size = 0.3)
 }
 \author{
 Hou Yun
