@@ -102,7 +102,7 @@ ggplot_add.geom_ggplot <- function(object, plot, object_name) {
 
   params <- c(list(mapping = mapping,
                    data = data,
-                   marker = marker(grob = lapply(gglist, ggplotGrob)),
+                   marker = marker(x = lapply(gglist, ggplotGrob)),
                    show.legend = FALSE,
                    width_unit = object$width_unit,
                    height_unit = object$height_unit,

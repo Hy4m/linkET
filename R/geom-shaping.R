@@ -8,7 +8,7 @@
 #' @rdname draw_key_marker
 #' @export
 draw_key_marker <- function(data, params, size) {
-  marker <- marker(grob = data$marker %||% "square",
+  marker <- marker(x = data$marker %||% "square",
                    width = data$width %||% 1,
                    height = data$height %||% 1,
                    width_unit = params$width_unit,
@@ -97,7 +97,7 @@ geom_shaping <- function(mapping = NULL,
                         na.rm = na.rm,
                         ...), "shaping" = "marker")
   if ("shaping" %in% names(params)) {
-    params$shaping <- as_marker(params$shaping)
+    params$shaping <- marker(params$shaping)
   }
 
   layer(
@@ -144,9 +144,6 @@ Geomshaping <- ggproto(
     # }
     n <- nrow(data)
     if (!is.null(shaping)) {
-      if (!inherits(shaping, "marker")) {
-        stop("shaping should be a marker object.", call. = FALSE)
-      }
       shaping <- rep_len(shaping, n)
       shaping$width_unit <- rep_len(width_unit %||% shaping$width_unit, n)
       shaping$height_unit <- rep_len(height_unit %||% width_unit %||% shaping$height_unit, n)
@@ -159,7 +156,7 @@ Geomshaping <- ggproto(
                                shaping$height)
 
     } else {
-      shaping <- marker(grob = data$marker,
+      shaping <- marker(x = data$marker,
                         width = data$width,
                         height = data$height,
                         width_unit = width_unit %||% "native",

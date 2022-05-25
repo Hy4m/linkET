@@ -114,7 +114,8 @@ qcorrplot(mtcars) + geom_shaping(marker = marker("ellipse"))
 ## square and shade marker
 qcorrplot(mtcars) +
   geom_shaping(marker = marker("square")) +
-  geom_shade(aes(angle = r > 0), colour = "white", size = 0.3)
+  geom_shaping(aes(angle = ifelse(r > 0, 0, 180)), marker = marker("shade"),
+               colour = "white", size = 0.3)
 }
 \author{
 Hou Yun
