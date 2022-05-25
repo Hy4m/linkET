@@ -1,7 +1,7 @@
 #' @title Custom marker for heatmap plot
 #' @description This set of functions makes it easy to define shapes, and it
 #' similar to points.
-#' @param grob grob object, list or character.
+#' @param x any R object can be converted to marker.
 #' \itemize{
 #'      \item{\strong{grob}: a \code{grob}, \code{gList}, \code{gTree} object.}
 #'      \item{\strong{list}: a list of x and y.}
@@ -12,79 +12,283 @@
 #' @param width_unit,height_unit units of width or height.
 #' @param r only be used for ellipse marker.
 #' @param n,ratio only be used for star marker.
+#' @param ... ignore.
 #' @return a marker object.
 #' @author Hou Yun
 #' @rdname marker
 #' @importFrom grid is.grob gpar get.gpar polygonGrob
 #' @export
 #' @examples
-#' marker()
+#' marker("square")
 #' marker(c("square", "circle"))
 #' m <- marker(c("square", "circle", "star", "heart"))
 #' m[1:3]
 #' rep_len(m, 10)
-marker <- function(grob = "square",
-                   width = 1,
-                   height = 1,
-                   width_unit = "cm",
-                   height_unit = width_unit,
-                   r = 0,
-                   n = 5,
-                   ratio = 0.618) {
-  if (is.list(grob)) {
-    grob <- tryCatch(suppressWarnings(list(customGrob(grob))),
-                     error = function(e) grob)
-  }
-  if (is.grob(grob)) {
-    grob <- list(grob)
-    label <- "custom"
-  }
-  if (is.atomic(grob)) {
-    if (!all(grob %in% all_type)) {
-      stop("Invalid marker.", call. = FALSE)
-    }
-    label <- grob
-    grob <- as.list(grob)
-  }
+marker <- function(x, ...) {
+  UseMethod("marker")
+}
 
-  if (!is.list(grob)) {
-    stop("Invalid marker.", call. = FALSE)
-  }
-
-  ll <- max(length(grob), length(width), length(height))
-  grob_is_na <- vapply(grob, function(.grob) {
-    if (is.atomic(.grob) && is.na(.grob)) TRUE else FALSE
-  }, logical(1))
-  grob <- rename_grob(rep_len(grob, ll))
-  label <- rep_len(grob, ll)
-  width <- rep_len(width, ll)
-  height <- rep_len(height, ll)
-  width_unit <- rep_len(width_unit, ll)
-  height_unit <- rep_len(height_unit, ll)
-  r <- rep_len(r, ll)
-  n <- rep_len(n, ll)
-  ratio <- rep_len(ratio, ll)
-
-  width[grob_is_na] <- 0
-  height[grob_is_na] <- 0
-
-  is_custom <- vapply(grob, function(.grob) {
-    is.grob(.grob) || is.list(.grob)
-  }, logical(1))
-  label <- ifelse(is_custom, "custom", grob)
-
-  grob <- lapply(seq_len(ll), function(.id) {
-    if (is.grob(grob[[.id]])) {
-      grob[[.id]]
-    } else if (is.list(grob[[.id]])) {
-      customGrob(grob[[.id]])
-    } else {
-      marker2grob(grob[[.id]], r = r[.id], n = n[.id], ratio = ratio[.id])
-    }
-  })
-
+#' @method marker grob
+#' @rdname marker
+#' @export
+marker.grob <- function(x,
+                        width = 1,
+                        height = 1,
+                        width_unit = "cm",
+                        height_unit = width_unit,
+                        ...) {
+  grob <- list(x)
+  n <- max(length(grob), length(width), length(height), length(width_unit),
+           length(height_unit))
+  grob <- rename_grobs(rep_len(grob, n))
+  width <- rep_len(width, n)
+  height <- rep_len(height, n)
+  width_unit <- rep_len(width_unit, n)
+  height_unit <- rep_len(height_unit, n)
+  name <- rep_len("custom", n)
   structure(list(grob = grob,
-                 label = label,
+                 name = name,
+                 width = width,
+                 height = height,
+                 width_unit = width_unit,
+                 height_unit = height_unit),
+            class = "marker")
+}
+
+#' @method marker gList
+#' @rdname marker
+#' @export
+marker.gList <- function(x,
+                         width = 1,
+                         height = 1,
+                         width_unit = "cm",
+                         height_unit = width_unit,
+                         ...) {
+  grob <- list(grid::gTree(x))
+  marker(x = x,
+         width = width,
+         height = height,
+         width_unit = width_unit,
+         height_unit = height_unit)
+}
+
+#' @method marker ggplot
+#' @rdname marker
+#' @export
+marker.ggplot <- function(x,
+                          width = 1,
+                          height = 1,
+                          width_unit = "cm",
+                          height_unit = width_unit,
+                          ...) {
+  grob <- list(ggplotGrob(x))
+  marker(x = x,
+         width = width,
+         height = height,
+         width_unit = width_unit,
+         height_unit = height_unit)
+}
+
+#' @method marker raster
+#' @rdname marker
+#' @export
+marker.raster <- function(x,
+                          width = 1,
+                          height = 1,
+                          width_unit = "cm",
+                          height_unit = width_unit,
+                          ...) {
+  grob <- list(grid::rasterGrob(x))
+  marker(x = x,
+         width = width,
+         height = height,
+         width_unit = width_unit,
+         height_unit = height_unit)
+}
+
+#' @method marker magick-image
+#' @rdname marker
+#' @export
+`marker.magick-image` <- function(x,
+                                  width = 1,
+                                  height = 1,
+                                  width_unit = "cm",
+                                  height_unit = width_unit,
+                                  ...) {
+  grob <- list(grid::rasterGrob(grDevices::as.raster(x)))
+  marker(x = x,
+         width = width,
+         height = height,
+         width_unit = width_unit,
+         height_unit = height_unit)
+}
+
+#' @method marker formula
+#' @rdname marker
+#' @export
+marker.formula<- function(x,
+                          width = 1,
+                          height = 1,
+                          width_unit = "cm",
+                          height_unit = width_unit,
+                          ...) {
+  echoGrob <- get_function("gridGraphics", "echoGrob")
+  cur <- dev.cur()
+  eval(parse(text = as.character(x)[2]), envir = parent.env())
+  x <- echoGrob()
+  on.exit({
+    try(dev.off(), silent = TRUE)
+    dev.set(cur)
+  })
+  marker(x = x,
+         width = width,
+         height = height,
+         width_unit = width_unit,
+         height_unit = height_unit)
+}
+
+#' @method marker character
+#' @rdname marker
+#' @export
+marker.character<- function(x,
+                            width = 1,
+                            height = 1,
+                            width_unit = "cm",
+                            height_unit = width_unit,
+                            r = 0,
+                            n = 5,
+                            ratio = 0.618,
+                            ...) {
+  nn <- max(length(x), length(width), length(height), length(width_unit),
+           length(height_unit))
+  x <- rep_len(x, nn)
+  width <- rep_len(width, nn)
+  height <- rep_len(height, nn)
+  width_unit <- rep_len(width_unit, nn)
+  height_unit <- rep_len(height_unit, nn)
+  r <- rep_len(r, nn)
+  n <- rep_len(n, nn)
+  ratio <- rep_len(ratio, nn)
+  grob <- vector("list", nn)
+  nm <- character(nn)
+  for (ii in seq_len(nn)) {
+    if (is.na(x[ii])) {
+      nm[ii] <- "null"
+      grob[[ii]] <- grid::nullGrob()
+    } else if (!x[ii] %in% all_type) {
+      nm[ii] <- "null"
+      grob[[ii]] <- grid::textGrob(x[ii])
+    } else {
+      grob[[ii]] <- switch (x[ii],
+                            square = polygonGrob(x = c(0, 1, 1, 0, 0),
+                                                 y = c(0, 0, 1, 1, 0)),
+                            circle = grid::circleGrob(),
+                            star = starGrob(n = n[ii], ratio = ratio[ii]),
+                            heart = heartGrob(nstep = 100),
+                            ellipse = ellipseGrob(r = r[ii], nstep = 100),
+                            cross = crossGrob(),
+                            triangle = triangleGrob(1),
+                            triangle2 = triangleGrob(2),
+                            shade = shadeGrob())
+    }
+  }
+  structure(list(grob = grob,
+                 name = nm,
+                 width = width,
+                 height = height,
+                 width_unit = width_unit,
+                 height_unit = height_unit),
+            class = "marker")
+}
+
+#' @method marker list
+#' @rdname marker
+#' @export
+marker.list <- function(x,
+                        width = 1,
+                        height = 1,
+                        width_unit = "cm",
+                        height_unit = width_unit,
+                        r = 0,
+                        n = 5,
+                        ratio = 0.618,
+                        ...) {
+  all_num <- all(vapply(x, is.numeric, logical(1)))
+  if (all_num) {
+    if (!length(x) %in% c(2, 3)) {
+      stop("Marker needs 2 or 3 numeric elements in list.", call. = FALSE)
+    }
+
+    if (length(x) == 2) {
+      grob <- grid::polygonGrob(x = x$x %||% x[[1]],
+                                y = x$y %||% x[[2]])
+    } else {
+      grob <- grid::polygonGrob(x = x$x %||% x[[1]],
+                                y = x$y %||% x[[2]],
+                                id = x$id %||% x[[3]])
+    }
+    out <- marker(x = grob,
+                  width = width,
+                  height = height,
+                  width_unit = width_unit,
+                  height_unit = height_unit)
+  } else {
+    nn <- max(length(x), length(width), length(height), length(width_unit),
+              length(height_unit))
+    x <- rep_len(x, nn)
+    width <- rep_len(width, nn)
+    height <- rep_len(height, nn)
+    width_unit <- rep_len(width_unit, nn)
+    height_unit <- rep_len(height_unit, nn)
+    r <- rep_len(r, nn)
+    n <- rep_len(n, nn)
+    ratio <- rep_len(ratio, nn)
+
+    out <- vector("list", nn)
+    for (ii in seq_len(nn)) {
+      out[[ii]] <- tryCatch(marker(x = x[[ii]],
+                                  width = width[ii],
+                                  height = height[ii],
+                                  width_unit = width_unit[ii],
+                                  height_unit = height_unit[ii],
+                                  r = r[ii],
+                                  n = n[ii],
+                                  ratio = ratio[ii],
+                                  ...), error = function(e) {
+                               stop("Invalid marker.", call. = FALSE)
+                             })
+    }
+    out <- do.call("c", out)
+  }
+  out
+}
+
+#' @method marker marker
+#' @rdname marker
+#' @export
+marker.marker <- function(x, ...) {
+  x
+}
+
+#' @export
+c.marker <- function(...) {
+  ll <- list(...)
+  grob <- list()
+  name <- NULL
+  width <- NULL
+  height <- NULL
+  width_unit <- NULL
+  height_unit <- NULL
+  for (ii in seq_along(ll)) {
+    grob <- c(grob, ll[[ii]]$grob)
+    name <- c(name, ll[[ii]]$name)
+    width <- c(width, ll[[ii]]$width)
+    height <- c(height, ll[[ii]]$height)
+    width_unit <- c(width_unit, ll[[ii]]$width_unit)
+    height_unit <- c(height_unit, ll[[ii]]$height_unit)
+  }
+  structure(list(grob = rename_grobs(grob),
+                 name = name,
                  width = width,
                  height = height,
                  width_unit = width_unit,
@@ -96,8 +300,7 @@ marker <- function(grob = "square",
 #' @export
 print.marker <- function(x, ...) {
   n <- length(x)
-  label <- ifelse(is.na(x$label), "empty", x$label)
-  x <- paste0(label, "(", x$width, x$width_unit, ", ",
+  x <- paste0(x$name, "(", x$width, x$width_unit, ", ",
               x$height, x$height_unit, ")")
   print(x, ...)
 }
@@ -107,7 +310,7 @@ print.marker <- function(x, ...) {
   any_duplicate <- anyDuplicated(index)
   overflow <- index > length(x)
   grob <- x$grob[index]
-  label <- x$label[index]
+  name <- x$name[index]
   width <- x$width[index]
   height <- x$height[index]
   width_unit <- x$width_unit[index]
@@ -115,18 +318,15 @@ print.marker <- function(x, ...) {
 
   if (any(overflow)) {
     grob <- lapply(grob, function(.grob) if (is.null(.grob)) grid::nullGrob() else .grob)
+    name <- ifelse(overflow, "null", name)
     width <- ifelse(overflow, 0, width)
     height <- ifelse(overflow, 0, height)
     width_unit <- ifelse(overflow, "cm", width_unit)
     height_unit <- ifelse(overflow, "cm", height_unit)
   }
 
-  if (any_duplicate) {
-    grob <- rename_grob(grob)
-  }
-
-  structure(list(grob = grob,
-                 label = label,
+  structure(list(grob = rename_grobs(grob),
+                 name = name,
                  width = width,
                  height = height,
                  width_unit = width_unit,
@@ -151,15 +351,8 @@ rep_len.marker <- function(x, length.out) {
     return(x[seq_len(length.out)])
   }
 
-  grob <- rep_len(x$grob, length.out)
-  grob <- rename_grob(grob)
-  structure(list(grob = grob,
-                 label = rep_len(x$label, length.out),
-                 width = rep_len(x$width, length.out),
-                 height = rep_len(x$height, length.out),
-                 width_unit = rep_len(x$width_unit, length.out),
-                 height_unit = rep_len(x$height_unit, length.out)),
-            class = "marker")
+  id <- rep_len(seq_len(n), length.out)
+  x[id]
 }
 
 #' @noRd
@@ -217,6 +410,11 @@ markerGrob <- function(marker,
 makeContent.markerGrob <- function(x) {
   marker <- x$marker
   n <- length(marker)
+  xx <- x$x
+  yy <- x$y
+  angle <- x$angle
+  hjust <- x$hjust
+  vjust <- x$vjust
   width <- unit(marker$width, marker$width_unit)
   height <- unit(marker$height, marker$height_unit)
   width <- grid::convertWidth(width, "in")
@@ -231,70 +429,44 @@ makeContent.markerGrob <- function(x) {
       res <- x$res
     }
 
-    grobs <- pmap(list(grobs, gp, x$x, x$y, width, height, x$angle, x$hjust, x$vjust),
-                  function(.grob, .gp, .x, .y, .width, .height, .angle, .hjust, .vjust) {
-                    cur <- dev.cur()
-                    cap <- agg_capture(width = .width,
-                                       height = .height,
-                                       units = "in",
-                                       background = NA,
-                                       res = res,
-                                       scaling = 1 )
-                    .grob$gp <- .gp
-                    grid.draw(.grob)
-                    .grob <- rasterGrob(cap(native = TRUE))
-                    try(dev.off(), silent = TRUE)
-                    dev.set(cur)
-                    vp <- viewport(x = .x,
-                                   y = .y,
-                                   width = .width,
-                                   height = .height,
-                                   angle = .angle,
-                                   just = c(.hjust, .vjust),
-                                   default.units = x$default.units)
-                    .grob$vp <- vp
-                    .grob
-                  })
+    for (ii in seq_len(n)) {
+      cur <- dev.cur()
+      cap <- agg_capture(width = width[ii],
+                         height = height[ii],
+                         units = "in",
+                         background = NA,
+                         res = res,
+                         scaling = 1 )
+      grobs[[ii]]$gp <- gp[[ii]]
+      grid.draw(grobs[[ii]])
+      grobs[[ii]] <- rasterGrob(cap(native = TRUE))
+      try(dev.off(), silent = TRUE)
+      dev.set(cur)
+      vp <- viewport(x = xx[ii],
+                     y = yy[ii],
+                     width = width[ii],
+                     height = height[ii],
+                     angle = angle[ii],
+                     just = c(hjust[ii], vjust[ii]),
+                     default.units = x$default.units)
+      grobs[[ii]]$vp <- vp
+    }
   } else {
-    grobs <- pmap(list(grobs, gp, x$x, x$y, width, height, x$angle, x$hjust, x$vjust),
-                  function(.grob, .gp, .x, .y, .width, .height, .angle, .hjust, .vjust) {
-                    vp <- grid::viewport(x = .x,
-                                         y = .y,
-                                         width = .width,
-                                         height = .height,
-                                         angle = .angle,
-                                         just = c(.hjust, .vjust),
-                                         default.units = x$default.units)
-                    .grob$gp <- .gp
-                    .grob$vp <- vp
-                    .grob
-                  })
+    for (ii in seq_len(n)) {
+      vp <- viewport(x = xx[ii],
+                     y = yy[ii],
+                     width = width[ii],
+                     height = height[ii],
+                     angle = angle[ii],
+                     just = c(hjust[ii], vjust[ii]),
+                     default.units = x$default.units)
+      grobs[[ii]]$gp <- gp[[ii]]
+      grobs[[ii]]$vp <- vp
+    }
   }
 
   grid::setChildren(x, do.call(grid::gList, grobs))
 }
-
-#' @noRd
-marker2grob <- function(x, r = 0, n = 100, ratio = 0.618) {
-  if (is.na(x)) {
-    grid::nullGrob()
-  } else {
-    switch (x,
-            square = polygonGrob(x = c(0, 1, 1, 0, 0),
-                                 y = c(0, 0, 1, 1, 0)),
-            circle = grid::circleGrob(),
-            star = starGrob(n = n,
-                            ratio = ratio),
-            heart = heartGrob(nstep = 100),
-            ellipse = ellipseGrob(r = r, nstep = 100),
-            cross = crossGrob(),
-            triangle = triangleGrob(1),
-            triangle2 = triangleGrob(2),
-            shade = shadeGrob()
-    )
-  }
-}
-
 
 #' @noRd
 split_gpar <- function(gp = gpar(), n = 1) {
@@ -393,107 +565,23 @@ triangleGrob <- function(type = 1) {
 }
 
 #' @noRd
-customGrob <- function(x) {
-  if (!is.grob(x)) {
-    x <- polygonGrob(x = x$x %||% x[[1]],
-                     y = x$y %||% x[[2]])
-  }
-  x
-}
-
-#' @noRd
-rename_grob <- function (grobs, prefix = "MARKER", suffix = "GRID")
-{
-  n <- length(grobs)
-  index <- paste(ceiling(abs(stats::rnorm(n)) * 1000),
-                 ceiling(abs(stats::rnorm(n)) * 1000),
-                 ceiling(abs(stats::rnorm(n)) * 1000), sep = ".")
-  ll <- paste(prefix, suffix, index, sep = ".")
-
-  for (i in seq_len(n)) {
-    grobs[[i]]$name <- ll[i]
-  }
-  grobs
-}
-
-#' @noRd
 all_type <- c("square", "circle", "star", "heart", "ellipse", "cross",
               "triangle", "triangle2", "shade")
 
 #' @noRd
-as_marker <- function(x, ...) {
-  UseMethod("as_marker")
-}
-
-#' @method as_marker marker
-as_marker.marker <- function(x, ...) {
- x
-}
-
-#' @method as_marker grob
-as_marker.grob <- function(x, ...) {
-  marker(grob = x, ...)
-}
-
-#' @method as_marker ggplot
-as_marker.ggplot <- function(x, ...) {
-  grob <- ggplot2::ggplotGrob(x)
-  marker(grob = grob, ...)
-}
-
-#' @method as_marker character
-as_marker.character <- function(x, ...) {
-  id <- x %in% all_type
-  x <- ifelse(is.na(id), NA_character_, x)
-  marker(grob = x, ...)
-}
-
-#' @method as_marker list
-as_marker.list <- function(x, ...) {
-  x <- polygonGrob(x = x$x %||% x[[1]],
-                   y = x$y %||% x[[2]])
-  marker(grob = x, ...)
-}
-
-#' @method as_marker GridPattern
-as_marker.GridPattern <- function(x, shape = "rect", ...) {
-  if (! r_version() >= "4.1.0") {
-    stop("The R version needs to be higher than 4.1.0.", call. = FALSE)
+rename_grobs <- function(x) {
+  hash <- vapply(x, digest::digest, character(1))
+  dup <- duplicated(hash)
+  if (any(dup)) {
+    n <- sum(dup)
+    index <- paste(ceiling(abs(stats::rnorm(n)) * 1000),
+                   ceiling(abs(stats::rnorm(n)) * 1000),
+                   ceiling(abs(stats::rnorm(n)) * 1000), sep = ".")
+    nm <- paste("MARKER", "GROB", index, sep = ".")
+    id <- which(dup)
+    for (ii in seq_along(id)) {
+      x[[id[ii]]]$name <- nm[ii]
+    }
   }
-  .fun <- paste(shape, "Grob", sep = "")
-  grob <- do.call(.fun, list())
-  grob$gp <- gpar(fill = x)
-  marker(grob = grob, ...)
-}
-
-#' @method as_marker raster
-as_marker.raster <- function(x, ...) {
-  grob <- grid::rasterGrob(x)
-  marker(grob = grob, ...)
-}
-
-#' @method as_marker formula
-as_marker.formula <- function(x, envir = parent.frame(), ...) {
-  agg_capture <- get_function("ragg", "agg_capture")
-  dim_inch <- dev.size("in")
-  cur <- dev.cur()
-  cap <- agg_capture(width = dim_inch[1],
-                     height = dim_inch[2],
-                     units = "in",
-                     background = NA,
-                     res = 100,
-                     scaling = 1 )
-  .fun <- parse(text = as.character(x)[2])
-  eval(.fun, envir = envir)
-  on.exit({
-    dev.off()
-    dev.set(cur)}, add = TRUE)
-  grob <- grid::rasterGrob(cap(native = TRUE))
-  marker(grob = grob, ...)
-}
-
-#' @method as_marker magick-image
-`as_marker.magick-image` <- function(x, ...) {
-  x <- grDevices::as.raster(x)
-  as_marker(x = x, ...)
+  x
 }

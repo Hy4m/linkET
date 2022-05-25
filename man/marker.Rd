@@ -2,27 +2,109 @@
 % Please edit documentation in R/marker.R
 \name{marker}
 \alias{marker}
+\alias{marker.grob}
+\alias{marker.gList}
+\alias{marker.ggplot}
+\alias{marker.raster}
+\alias{marker.magick-image}
+\alias{marker.formula}
+\alias{marker.character}
+\alias{marker.list}
+\alias{marker.marker}
 \title{Custom marker for heatmap plot}
 \usage{
-marker(
-  grob = "square",
+marker(x, ...)
+
+\method{marker}{grob}(
+  x,
+  width = 1,
+  height = 1,
+  width_unit = "cm",
+  height_unit = width_unit,
+  ...
+)
+
+\method{marker}{gList}(
+  x,
+  width = 1,
+  height = 1,
+  width_unit = "cm",
+  height_unit = width_unit,
+  ...
+)
+
+\method{marker}{ggplot}(
+  x,
+  width = 1,
+  height = 1,
+  width_unit = "cm",
+  height_unit = width_unit,
+  ...
+)
+
+\method{marker}{raster}(
+  x,
+  width = 1,
+  height = 1,
+  width_unit = "cm",
+  height_unit = width_unit,
+  ...
+)
+
+\method{marker}{`magick-image`}(
+  x,
+  width = 1,
+  height = 1,
+  width_unit = "cm",
+  height_unit = width_unit,
+  ...
+)
+
+\method{marker}{formula}(
+  x,
+  width = 1,
+  height = 1,
+  width_unit = "cm",
+  height_unit = width_unit,
+  ...
+)
+
+\method{marker}{character}(
+  x,
   width = 1,
   height = 1,
   width_unit = "cm",
   height_unit = width_unit,
   r = 0,
   n = 5,
-  ratio = 0.618
+  ratio = 0.618,
+  ...
 )
+
+\method{marker}{list}(
+  x,
+  width = 1,
+  height = 1,
+  width_unit = "cm",
+  height_unit = width_unit,
+  r = 0,
+  n = 5,
+  ratio = 0.618,
+  ...
+)
+
+\method{marker}{marker}(x, ...)
 }
 \arguments{
-\item{grob}{grob object, list or character.
+\item{x}{any R object can be converted to marker.
 \itemize{
      \item{\strong{grob}: a \code{grob}, \code{gList}, \code{gTree} object.}
      \item{\strong{list}: a list of x and y.}
      \item{\strong{character}: one of "square", "circle", "star", "heart",
      "ellipse", "cross", "triangle", "triangle2".}
 }}
+
+\item{...}{ignore.}
 
 \item{width, height}{width or height of marker.}
 
@@ -40,7 +122,7 @@ This set of functions makes it easy to define shapes, and it
 similar to points.
 }
 \examples{
-marker()
+marker("square")
 marker(c("square", "circle"))
 m <- marker(c("square", "circle", "star", "heart"))
 m[1:3]
