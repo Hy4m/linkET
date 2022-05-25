@@ -424,10 +424,10 @@ makeContent.markerGrob <- function(x) {
 
   if (isTRUE(x$rasterize)) {
     agg_capture <- get_function("ragg", "agg_capture")
-    res <- dev.size("px")[1] / dev.size("in")[1]
-    if (x$res > res) {
-      res <- x$res
-    }
+    # res <- dev.size("px")[1] / dev.size("in")[1]
+    # if (x$res > res) {
+    #   res <- x$res
+    # }
 
     for (ii in seq_len(n)) {
       cur <- dev.cur()
@@ -435,7 +435,7 @@ makeContent.markerGrob <- function(x) {
                          height = height[ii],
                          units = "in",
                          background = NA,
-                         res = res,
+                         res = x$res,
                          scaling = 1 )
       grobs[[ii]]$gp <- gp[[ii]]
       grid.draw(grobs[[ii]])
