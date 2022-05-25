@@ -17,6 +17,7 @@ LazyData: TRUE
 Encoding: UTF-8
 Depends: R (>= 3.5.0)
 Imports: 
+    digest,
     dplyr, 
     geomtextpath,
     ggplot2 (>= 3.0.0), 
@@ -40,6 +41,7 @@ Suggests:
     FD,
     ggraph,
     ggtext,
+    gridGraphics,
     Hmisc,
     knitr,
     picante,
