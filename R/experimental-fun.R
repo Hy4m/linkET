@@ -1,3 +1,87 @@
+#' @noRd
+.pairs_tbl <- function(data,
+                       data2 = NULL,
+                       type = "full",
+                       diag = TRUE) {
+  data <- as.data.frame(data)
+  if (is.null(data2)) {
+    data2 <- data
+  } else {
+    data2 <- as.data.frame(data2)
+  }
+  if (any(empty(data), empty(data2))) {
+    stop("Input data is empty.", call. = FALSE)
+  }
+  if (nrow(data) != nrow(data2)) {
+    stop("data2 should have same rows as data.", call. = FALSE)
+  }
+
+  d_type <- ifelse(vapply(data, is_binary, logical(1)), "d", "c")
+  d2_type <- ifelse(vapply(data2, is_binary, logical(1)), "d", "c")
+
+  rnm <- rep(names(data), each = ncol(data2))
+  cnm <- rep(names(data2), ncol(data))
+  df <- tibble::tibble(ID = paste(rnm, cnm, sep = "-"),
+                       .rownames = rnm,
+                       .colnames = cnm,
+                       .type = paste0(rep(d_type, each = ncol(data2)),
+                                      rep(d2_type, ncol(data)))
+  )
+
+  if (identical(data, data2)) {
+    source_data <- data
+  } else {
+    source_data <- cbind(data, data2[setdiff(names(data2), names(data))])
+  }
+
+  df <- structure(df,
+                  row_names = names(data),
+                  col_names = names(data2),
+                  type = type,
+                  diag = diag,
+                  class = c("scattermatrix", "md_tbl", class(df)))
+  if (!identical(data, data2)) {
+    type <- "full"
+    diag <- TRUE
+  }
+  if(type == "upper") {
+    df <- extract_upper(df, diag = diag)
+  } else if(type == "lower") {
+    df <- extract_lower(df, diag = diag)
+  } else {
+    if(isFALSE(diag)) {
+      df <- trim_diag(df)
+    }
+  }
+  df <- .set_position(df)
+  df$.plot <- lapply(seq_len(nrow(df)), function(ii) {
+    mapping <- aes_string(x = df$.colnames[ii], y = df$.rownames[ii])
+    ggplot(data = source_data, mapping = mapping)
+  })
+  df
+}
+
+#' @noRd
+.set_position <- function(md) {
+  if (!identical(row_names(md), col_names(md))) {
+    pos <- rep_len("full", nrow(md))
+  } else {
+    x <- as.integer(factor(md$.rownames, levels = rev(row_names(md))))
+    y <- as.integer(factor(md$.colnames, levels = col_names(md)))
+    pos <- rep_len("upper", nrow(md))
+    pos <- ifelse(x + y < nrows(md) + 1, "lower", pos)
+    pos <- ifelse(x + y == nrows(md) + 1, "diag", pos)
+  }
+  md$.pos <- pos
+  md
+}
+
+#' @noRd
+is_binary <- function(x) {
+  is.factor(x) || is.character(x) || is.logical(x)
+}
+
+
 ## STOLEN: ggh4x::guide_dendro
 #' @title Children axis guide
 #' @description This function can be used to add children axis on a ggplot.
