@@ -18,6 +18,10 @@ latex_richtext(x, sup = "^", sub = "_", br = "\\n")
 \description{
 Helper function to convert a LaTeX string to a rich text.
 }
+\examples{
+name <- c("A_2", "B^3", "C_2", "D^{123 + x}")
+name <- latex_richtext(name)
+}
 \author{
 Hou Yun
 }

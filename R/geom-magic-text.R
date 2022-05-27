@@ -88,6 +88,10 @@ ggplot_add.magic_text <- function(object, plot, object_name) {
 #' @rdname latex_richtext
 #' @author Hou Yun
 #' @export
+#' @examples
+#' name <- c("A_2", "B^3", "C_2", "D^{123 + x}")
+#' name <- latex_richtext(name)
+
 latex_richtext <- function(x,
                            sup = "^",
                            sub = "_",
