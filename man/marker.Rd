@@ -127,6 +127,8 @@ marker(c("square", "circle"))
 m <- marker(c("square", "circle", "star", "heart"))
 m[1:3]
 rep_len(m, 10)
+library(grid)
+marker(circleGrob())
 }
 \author{
 Hou Yun
