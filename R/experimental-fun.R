@@ -1,4 +1,68 @@
+#' Pairs Later
+#' @description This function can be used to add plot on a scattermatrix plot.
+#' @inheritParams geom_ggplot
+#' @param ID character, used to add elements based on ID.
+#' @param theme a ggplot theme object.
+#' @rdname geom_pairs
+#' @author Hou Yun
+#' @export
+geom_pairs <- function(mapping = NULL,
+                       data = NULL,
+                       stat = "identity",
+                       position = "identity",
+                       ...,
+                       ID = NULL,
+                       theme = NULL,
+                       rasterize = FALSE,
+                       res = 100,
+                       na.rm = FALSE,
+                       show.legend = "collect",
+                       inherit.aes = TRUE) {
+  structure(list(mapping = mapping,
+                 data = data,
+                 stat = stat,
+                 position = position,
+                 ID = ID,
+                 theme = theme,
+                 rasterize = rasterize,
+                 res = res,
+                 na.rm = na.rm,
+                 show.legend = show.legend,
+                 inherit.aes = inherit.aes), class = "geom_pairs")
+}
 
+#' @method ggplot_add geom_pairs
+#' @export
+ggplot_add.geom_pairs <- function(object, plot, object_name) {
+  data <- object$data %||% plot$data
+  if (is.function(data)) {
+    data <- data(plot$data)
+  }
+  if (!is.null(object$ID)) {
+    id <- grepl(object$ID, data$ID)
+    data <- data[id, , drop = FALSE]
+  }
+
+  if (empty(data)) {
+    return(plot)
+  }
+
+  theme <- ggplot2::theme_get() + (object$theme %||% plot$theme) + theme_no_axis()
+  theme$plot.margin <- ggplot2::margin()
+
+  gglist <- lapply(seq_len(nrow(data)), function(ii) {
+    .build_plot(plot = data$.plot[[ii]],
+                type = data$.type[ii],
+                pos = data$.type[ii],
+                ptype = ptype,
+                theme = theme)
+  })
+  object <- object[setdiff(names(object), c("ID", "theme"))]
+  object$data <- data
+  object$gglist <- gglist
+  object <- do.call(geom_ggplot, object)
+  ggplot_add(plot, object, object_name)
+}
 
 #' @noRd
 .pairs_tbl <- function(data,
