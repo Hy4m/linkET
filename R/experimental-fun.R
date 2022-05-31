@@ -1,20 +1,14 @@
 qpairs <- function(data,
                    mapping = NULL,
+
                    data2 = NULL,
-                   ptype = plot_type(),
                    type = "full",
                    diag = TRUE,
-                   corr = NULL,
                    rasterize = TRUE,
                    res = NULL,
                    grid_col = "grey50",
                    grid_size = 0.25,
                    ...) {
-  ptype <- ptype %||% plot_type()
-  if (!inherits(ptype, "plot_type")) {
-    stop("`plot_type` should be created with `plot_type()`.", call. = FALSE)
-  }
-
   df <- .pairs_tbl(data = data,
                    data2 = data2,
                    type = type,
