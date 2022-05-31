@@ -571,18 +571,29 @@ all_type <- c("square", "circle", "star", "heart", "ellipse", "cross",
               "triangle", "triangle2", "shade")
 
 #' @noRd
-rename_grobs <- function(x) {
-  hash <- vapply(x, digest::digest, character(1))
-  dup <- duplicated(hash)
-  if (any(dup)) {
-    n <- sum(dup)
+rename_grobs <- function(x, force = FALSE) {
+  if (isFALSE(force)) {
+    hash <- vapply(x, digest::digest, character(1))
+    dup <- duplicated(hash)
+    if (any(dup)) {
+      n <- sum(dup)
+      index <- paste(ceiling(abs(stats::rnorm(n)) * 1000),
+                     ceiling(abs(stats::rnorm(n)) * 1000),
+                     ceiling(abs(stats::rnorm(n)) * 1000), sep = ".")
+      nm <- paste("MARKER", "GROB", index, sep = ".")
+      id <- which(dup)
+      for (ii in seq_along(id)) {
+        x[[id[ii]]]$name <- nm[ii]
+      }
+    }
+  } else {
+    n <- length(x)
     index <- paste(ceiling(abs(stats::rnorm(n)) * 1000),
                    ceiling(abs(stats::rnorm(n)) * 1000),
                    ceiling(abs(stats::rnorm(n)) * 1000), sep = ".")
     nm <- paste("MARKER", "GROB", index, sep = ".")
-    id <- which(dup)
-    for (ii in seq_along(id)) {
-      x[[id[ii]]]$name <- nm[ii]
+    for (ii in seq_len(n)) {
+      x[[ii]]$name <- nm[ii]
     }
   }
   x
