@@ -35,37 +35,3 @@ theme_hy <- function(..., use_md = FALSE)
     )
   }
 }
-
-#' @noRd
-theme_no_axis <- function() {
-  theme(
-    axis.title = element_blank(),
-    axis.title.x = element_blank(),
-    axis.title.x.top = element_blank(),
-    axis.title.x.bottom = element_blank(),
-    axis.title.y = element_blank(),
-    axis.title.y.left = element_blank(),
-    axis.title.y.right = element_blank(),
-    axis.text = element_blank(),
-    axis.text.x = element_blank(),
-    axis.text.x.top = element_blank(),
-    axis.text.x.bottom = element_blank(),
-    axis.text.y = element_blank(),
-    axis.text.y.left = element_blank(),
-    axis.text.y.right = element_blank(),
-    axis.ticks = element_blank(),
-    axis.ticks.x = element_blank(),
-    axis.ticks.x.top = element_blank(),
-    axis.ticks.x.bottom = element_blank(),
-    axis.ticks.y = element_blank(),
-    axis.ticks.y.left = element_blank(),
-    axis.ticks.y.right = element_blank(),
-    axis.line = element_blank(),
-    axis.line.x = element_blank(),
-    axis.line.x.top = element_blank(),
-    axis.line.x.bottom = element_blank(),
-    axis.line.y = element_blank(),
-    axis.line.y.left = element_blank(),
-    axis.line.y.right = element_blank(),
-  )
-}
