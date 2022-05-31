@@ -1,6 +1,39 @@
+qpairs <- function(data,
+                   mapping = NULL,
+                   data2 = NULL,
+                   ptype = plot_type(),
+                   type = "full",
+                   diag = TRUE,
+                   corr = NULL,
+                   rasterize = TRUE,
+                   res = NULL,
+                   grid_col = "grey50",
+                   grid_size = 0.25,
+                   ...) {
+  ptype <- ptype %||% plot_type()
+  if (!inherits(ptype, "plot_type")) {
+    stop("`plot_type` should be created with `plot_type()`.", call. = FALSE)
+  }
+
+  df <- .pairs_tbl(data = data,
+                   data2 = data2,
+                   type = type,
+                   diag = diag,
+                   mapping = mapping)
+
+  ## init and add panel grid
+  p <- hyplot(df, ...) +
+    geom_panel_grid(colour = grid_col, size = grid_size) +
+    ggplot2::coord_fixed(expand = FALSE) +
+    theme(panel.background = element_blank())
+
+  p
+}
+
 #' Pairs Later
 #' @description This function can be used to add plot on a scattermatrix plot.
 #' @inheritParams geom_ggplot
+#' @param ptype plot type.
 #' @param ID character, used to add elements based on ID.
 #' @param theme a ggplot theme object.
 #' @rdname geom_pairs
@@ -11,8 +44,8 @@ geom_pairs <- function(mapping = NULL,
                        stat = "identity",
                        position = "identity",
                        ...,
+                       ptype = plot_type(),
                        ID = NULL,
-                       theme = NULL,
                        rasterize = FALSE,
                        res = 100,
                        na.rm = FALSE,
@@ -22,13 +55,14 @@ geom_pairs <- function(mapping = NULL,
                  data = data,
                  stat = stat,
                  position = position,
+                 ptype = ptype,
                  ID = ID,
-                 theme = theme,
                  rasterize = rasterize,
                  res = res,
                  na.rm = na.rm,
                  show.legend = show.legend,
-                 inherit.aes = inherit.aes), class = "geom_pairs")
+                 inherit.aes = inherit.aes,
+                 ...), class = "geom_pairs")
 }
 
 #' @method ggplot_add geom_pairs
@@ -47,28 +81,135 @@ ggplot_add.geom_pairs <- function(object, plot, object_name) {
     return(plot)
   }
 
-  theme <- ggplot2::theme_get() + (object$theme %||% plot$theme) + theme_no_axis()
-  theme$plot.margin <- ggplot2::margin()
-
   gglist <- lapply(seq_len(nrow(data)), function(ii) {
     .build_plot(plot = data$.plot[[ii]],
                 type = data$.type[ii],
-                pos = data$.type[ii],
-                ptype = ptype,
-                theme = theme)
+                pos = data$.pos[ii],
+                ptype = object$ptype)
   })
-  object <- object[setdiff(names(object), c("ID", "theme"))]
-  object$data <- data
-  object$gglist <- gglist
+  object <- object[setdiff(names(object), c("ID", "ptype"))]
+  object <- modifyList(object,
+                       list(data = data,
+                            mapping = plot$mapping,
+                            gglist = gglist,
+                            inherit.aes = FALSE,
+                            width = 1,
+                            height = 1,
+                            width_unit = "native",
+                            height_unit = "native"))
   object <- do.call(geom_ggplot, object)
-  ggplot_add(plot, object, object_name)
+  ggplot_add(object, plot, object_name)
 }
+
+#' @noRd
+.build_plot <- function(plot, type, pos, ptype) {
+  ptype <- .get_plot_type(type, pos, ptype)
+  layers <- lapply(ptype, function(pt) {
+    if (pt == "density") {
+      if (pos == "diag") {
+        ggplot2::geom_density(aes_string(y = "..density.."))
+      } else {
+        ggplot2::geom_density2d()
+      }
+    } else if (pt == "lm") {
+      ggplot2::geom_smooth(method = "lm")
+    } else if (pt == "bar") {
+      if (is_binary(rlang::eval_tidy(plot$mapping$x, plot$data))) {
+        mp <- plot$mapping[setdiff(names(plot$mapping), "y")]
+        ggplot2::geom_bar(mapping = mp, inherit.aes = FALSE)
+      } else {
+        mp <- plot$mapping[setdiff(names(plot$mapping), "x")]
+        ggplot2::geom_bar(mapping = mp, inherit.aes = FALSE)
+      }
+    } else {
+      .FUN <- match.fun(paste0("geom_", pt))
+      do.call(.FUN, list())
+    }
+  })
+  p <- plot + layers
+  p
+}
+
+#' Set Plot Type
+#' @description This function can be used to set plot type of scatter matrix plot.
+#' @param ... arguments in \code{tag = value} form.
+#' @return a list of plot type.
+#' @rdname plot_type
+#' @author Hou Yun
+#' @export
+plot_type <- function(...) {
+  params <- list(...)
+  if (length(params) >= 1) {
+    nm <- names(params)
+    if (!all(nm %in% c("cd", "dc", "cc", "dd", "diag", "upper", "lower"))) {
+      stop("Invalid plot type params in `plot_type()`.", call. = FALSE)
+    }
+    vv <- vapply(params, function(p) {
+      is.atomic(p) || is.function(p) || inherits(p, "plot_type")
+    }, logical(1))
+    if (!all(vv)) {
+      stop("All elements of plot_type should a atomic vecter, a function\n",
+           "or a plot_type object.", call. = FALSE)
+    }
+
+    not_fun <- !vapply(params, is.function, logical(1))
+    if (!all(unlist(params[not_fun]) %in% c("point", "histogram", "bar", "boxplot", "violin",
+                                            "density", "lm", "smooth", "path", "line"))) {
+      stop("Invalid plot type values in plot_type().", call. = FALSE)
+    }
+  }
+  class(params) <- "plot_type"
+  params
+}
+
+#' @noRd
+.get_plot_type <- function(type, pos, ptype) {
+
+  if (pos == "diag") {
+    diag <- ptype[["diag"]] %||% list()
+    out <- diag[[type]] %||% ptype[[type]] %||% .default_plot_type[["diag"]][[type]]
+  }
+  if (pos == "upper") {
+    upper <- ptype[["upper"]] %||% list()
+    out <- upper[[type]] %||% ptype[[type]] %||% .default_plot_type[["upper"]][[type]]
+  }
+  if (pos == "lower") {
+    lower <- ptype[["lower"]] %||% list()
+    out <- lower[[type]] %||% ptype[[type]] %||% .default_plot_type[["lower"]][[type]]
+  }
+  if (pos == "full") {
+    full <- ptype[["full"]]
+    out <- full[[type]] %||% ptype[[type]] %||% .default_plot_type[["full"]][[type]]
+  }
+  out
+}
+
+#' @noRd
+.default_plot_type <- list(diag = plot_type(dd = "bar",
+                                            cc = "density"),
+                           full = plot_type(dd = "bar",
+                                            cc = "point",
+                                            cd = "boxplot",
+                                            dc = "boxplot"),
+                           lower = plot_type(dd = "bar",
+                                             cc = "point",
+                                             cd = "boxplot",
+                                             dc = "boxplot"),
+                           upper = plot_type(dd = "bar",
+                                             cc = "point",
+                                             cd = "boxplot",
+                                             dc = "boxplot"),
+                           dd = "point",
+                           cc = "point",
+                           cd = "boxplot",
+                           dc = "boxplot")
 
 #' @noRd
 .pairs_tbl <- function(data,
                        data2 = NULL,
                        type = "full",
-                       diag = TRUE) {
+                       diag = TRUE,
+                       mapping = NULL) {
   data <- as.data.frame(data)
   if (is.null(data2)) {
     data2 <- data
@@ -121,8 +262,9 @@ ggplot_add.geom_pairs <- function(object, plot, object_name) {
   }
   df <- .set_position(df)
   df$.plot <- lapply(seq_len(nrow(df)), function(ii) {
-    mapping <- aes_string(x = df$.colnames[ii], y = df$.rownames[ii])
-    ggplot(data = source_data, mapping = mapping)
+    mapping2 <- aes_string(x = df$.colnames[ii], y = df$.rownames[ii])
+    mapping <- aes_modify(mapping2, mapping)
+    ggplot(data = source_data, mapping = mapping) + ggplot2::theme_void()
   })
   df
 }
@@ -508,9 +650,10 @@ ggplot_add.geom_ggplot <- function(object, plot, object_name) {
     class(plot) <- c("gggplot", class(plot))
   }
 
+  mk <- rename_grobs(x = lapply(gglist, ggplotGrob), force = TRUE)
   params <- c(list(mapping = mapping,
                    data = data,
-                   marker = marker(x = lapply(gglist, ggplotGrob)),
+                   marker = mk,
                    show.legend = FALSE,
                    width_unit = object$width_unit,
                    height_unit = object$height_unit,
