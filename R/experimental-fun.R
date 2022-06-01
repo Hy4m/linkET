@@ -1,6 +1,7 @@
+#' @export
 qpairs <- function(data,
                    mapping = NULL,
-
+                   axis_child = TRUE,
                    data2 = NULL,
                    type = "full",
                    diag = TRUE,
@@ -13,19 +14,24 @@ qpairs <- function(data,
                    data2 = data2,
                    type = type,
                    diag = diag,
-                   mapping = mapping)
+                   mapping = mapping,
+                   ...)
 
   ## init and add panel grid
-  p <- hyplot(df, ...) +
+  p <- hyplot(df) +
     geom_panel_grid(colour = grid_col, size = grid_size) +
-    ggplot2::coord_fixed(expand = FALSE) +
+    ggplot2::coord_fixed() +
     theme(panel.background = element_blank())
 
+  ## add child axis
+  if (isTRUE(axis_child)) {
+    p <- p
+  }
   p
 }
 
 #' Pairs Later
-#' @description This function can be used to add plot on a scattermatrix plot.
+#' @description This function can be used to add plot on a scatter matrix plot.
 #' @inheritParams geom_ggplot
 #' @param ptype plot type.
 #' @param ID character, used to add elements based on ID.
@@ -203,7 +209,8 @@ plot_type <- function(...) {
                        data2 = NULL,
                        type = "full",
                        diag = TRUE,
-                       mapping = NULL) {
+                       mapping = NULL,
+                       ...) {
   data <- as.data.frame(data)
   if (is.null(data2)) {
     data2 <- data
@@ -255,10 +262,26 @@ plot_type <- function(...) {
     }
   }
   df <- .set_position(df)
+  params <- list(...)
+  nm <- names(params)
   df$.plot <- lapply(seq_len(nrow(df)), function(ii) {
     mapping2 <- aes_string(x = df$.colnames[ii], y = df$.rownames[ii])
     mapping <- aes_modify(mapping2, mapping)
-    ggplot(data = source_data, mapping = mapping) + ggplot2::theme_void()
+    p <- ggplot(data = source_data, mapping = mapping) + ggplot2::theme_void()
+    if (length(params) >= 1) {
+      if (is.null(nm)) {
+        p <- p + params
+      } else {
+        if (!is.null(params[[df$.type[ii]]])) {
+          p <- p + params[[df$.type[ii]]]
+        }
+        if (!is.null(params[[df$.pos[ii]]])) {
+          p <- p + params[[df$.pos[ii]]]
+        }
+        p <- p + params[nm == ""]
+      }
+    }
+    p
   })
   df
 }
