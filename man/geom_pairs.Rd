@@ -10,8 +10,8 @@ geom_pairs(
   stat = "identity",
   position = "identity",
   ...,
+  ptype = plot_type(),
   ID = NULL,
-  theme = NULL,
   rasterize = FALSE,
   res = 100,
   na.rm = FALSE,
@@ -51,9 +51,9 @@ often aesthetics, used to set an aesthetic to a fixed value, like
 \code{colour = "red"} or \code{size = 3}. They may also be parameters
 to the paired geom/stat.}
 
-\item{ID}{character, used to add elements based on ID.}
+\item{ptype}{plot type.}
 
-\item{theme}{a ggplot theme object.}
+\item{ID}{character, used to add elements based on ID.}
 
 \item{rasterize}{logical, whether to convert raster image before drawing.}
 
@@ -72,9 +72,11 @@ display.}
 rather than combining with them. This is most useful for helper functions
 that define both data and aesthetics and shouldn't inherit behaviour from
 the default plot specification, e.g. \code{\link[ggplot2:borders]{borders()}}.}
+
+\item{theme}{a ggplot theme object.}
 }
 \description{
-This function can be used to add plot on a scattermatrix plot.
+This function can be used to add plot on a scatter matrix plot.
 }
 \author{
 Hou Yun
