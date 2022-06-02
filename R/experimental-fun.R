@@ -20,13 +20,14 @@ qpairs <- function(data,
   ## init and add panel grid
   p <- hyplot(df) +
     geom_panel_grid(colour = grid_col, size = grid_size) +
-    ggplot2::coord_fixed() +
+    ggplot2::coord_fixed(expand = FALSE) +
     theme(panel.background = element_blank())
 
   ## add child axis
   if (isTRUE(axis_child)) {
     p <- p
   }
+  class(p) <- c("qpairs", class(p))
   p
 }
 
