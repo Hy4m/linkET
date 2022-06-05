@@ -152,6 +152,11 @@ ggplot_add.geom_pairs <- function(object, plot, object_name) {
     }
   }
 
+  if ("corr" %in% ptype && type != "cc") {
+    warning("'corr' can only be applied to continuous variables.", call. = FALSE)
+    ptype[which(ptype == "corr")] <- "blank"
+  }
+
   if (any(c("histogram", "density", "bar") %in% ptype)) {
     if (pos == "diag") {
       p <- plot + ggplot2::scale_x_discrete(expand = expansion$discrete)
@@ -182,14 +187,25 @@ ggplot_add.geom_pairs <- function(object, plot, object_name) {
     )
   }
   layers <- .get_layer(ptype)
-  id <- which(ptype == "bar")
-  if (length(id) > 0) {
-    for (i in id) {
+  id_bar <- which(ptype == "bar")
+  if (length(id_bar) > 0) {
+    for (i in id_bar) {
       if (type == "dc") {
         layers[[i]]$mapping <- aes_modify(layers[[i]]$mapping, aes_string(x = "..count.."))
       } else {
         layers[[i]]$mapping <- aes_modify(layers[[i]]$mapping, aes_string(y = "..count.."))
       }
+    }
+  }
+
+  id_corr <- which(ptype == "corr")
+  if (length(id_corr) > 0) {
+    for (i in id_corr) {
+      mp <- aes_modify(plot$mapping, layers[[i]]$mapping)
+      if ("colour" %in% names(mp)) {
+        mp$label <- mp$colour
+      }
+      layers[[i]]$mapping <- mp
     }
   }
 
@@ -219,7 +235,9 @@ register_pairs_plot <- function(...) {
              "path" = ggplot2::geom_path(),
              "line" = ggplot2::geom_line(),
              "hex" = ggplot2::geom_hex(),
-             "blank" = ggplot2::geom_blank())
+             "blank" = ggplot2::geom_blank(),
+             "jitter" = ggplot2::geom_jitter(),
+             "corr" = geom_corr())
   ll <- utils::modifyList(ll, list(...))
   ll <- utils::modifyList(options("linkET.pairs.plot"), ll)
   options("linkET.pairs.plot" = ll)
@@ -287,19 +305,19 @@ plot_type <- function(...) {
 #' @noRd
 .default_plot_type <- list(diag = plot_type(dd = "bar",
                                             cc = "density"),
-                           full = plot_type(dd = "bar",
+                           full = plot_type(dd = "jitter",
                                             cc = "point",
                                             cd = "boxplot",
                                             dc = "boxplot"),
-                           lower = plot_type(dd = "bar",
+                           lower = plot_type(dd = "jitter",
+                                             cc = "corr",
+                                             cd = "boxplot",
+                                             dc = "boxplot"),
+                           upper = plot_type(dd = "jitter",
                                              cc = "point",
                                              cd = "boxplot",
                                              dc = "boxplot"),
-                           upper = plot_type(dd = "bar",
-                                             cc = "point",
-                                             cd = "boxplot",
-                                             dc = "boxplot"),
-                           dd = "point",
+                           dd = "jitter",
                            cc = "point",
                            cd = "boxplot",
                            dc = "boxplot")
@@ -1004,9 +1022,123 @@ plot.gggplot <- print.gggplot
   plot
 }
 
-#' @noRd
+#' @title Correlation Layer
+#' @description This function can be used to add corrlation marker on a pairs plot.
+#' @inheritParams ggplot2::layer
+#' @param ... other parameters passed to layer function.
+#' @param na.rm if FALSE, the default, missing values are removed with a warning,
+#' and if TRUE, missing values are silently removed.
+#' @param method method of correlation.
+#' @param digits,nsmall a positive integer to format correlation.
+#' @param nudge_x,nudge_y horizontal and vertical adjustment to nudge labels by.
+#' @return a layer object.
+#' @author Hou Yun
+#' @rdname geom_corr
+#' @export
 ## TODO: add layer function to draw correlation
-# geom_corr <- function(...) {
-#   NULL
-# }
+geom_corr <- function(mapping = NULL,
+                      data = NULL,
+                      stat = "identity",
+                      position = "identity",
+                      ...,
+                      method = "pearson",
+                      digits = 2,
+                      nsmall = 2,
+                      nudge_x = 0,
+                      nudge_y = 0,
+                      na.rm = FALSE,
+                      show.legend = NA,
+                      inherit.aes = TRUE)
+{
+  layer(
+    data = data,
+    mapping = mapping,
+    stat = stat,
+    geom = GeomCorr,
+    position = position,
+    show.legend = show.legend,
+    inherit.aes = inherit.aes,
+    params = list(
+      method = method,
+      digits = digits,
+      nsmall = nsmall,
+      nudge_x = nudge_x,
+      nudge_y = nudge_y,
+      na.rm = na.rm,
+      ...
+    )
+  )
+}
+
+#' @rdname geom_corr
+#' @format NULL
+#' @usage NULL
+#' @export
+GeomCorr <- ggproto(
+  "GeomCorr", GeomText,
+  required_aes = c("x", "y"),
+
+  default_aes = aes(label = "", colour = "black", size = 3.88, alpha = NA,
+                    hjust = 0, angle = 0, vjust = 0.5, family = "",
+                    fontface = 1, lineheight = 1.2),
+
+  draw_panel = function(data,
+                        panel_params,
+                        coord,
+                        method = method,
+                        digits = 2,
+                        nsmall = 2,
+                        nudge_x = 0,
+                        nudge_y = 0,
+                        na.rm = FALSE) {
+    if (empty(data) || any(!is.numeric(data$x), !is.numeric(data$y))) {
+      return(grid::nullGrob())
+    }
+
+
+    ll <- split(data, data$colour)
+    ll <- c(list(Corr = data), ll)
+    less_than_three <- vapply(ll, nrow, numeric(1)) < 3
+    ll <- ll[!less_than_three]
+
+    if (length(ll) < 1) return(grid::nullGrob())
+
+    nm <- names(ll)
+    corr <- purrr::map2_chr(ll, nm, function(.data, .nm) {
+      label <- if (.nm == "Corr") "Corr: " else paste0(.data$label[1], ": ")
+      if (label == ": ") label <- ""
+      r <- as.vector(stats::cor(x = .data$x, y = .data$y, method = method))
+      p <- stats::cor.test(x = .data$x, y = .data$y, method = method)$p.value
+      mark <- sig_mark(p)
+      if (mark != "") {
+        mark <- paste0("\\", unlist(strsplit(mark, split = "")),
+                       collapse = "")
+      }
+      text <- paste(format(r, nsmall = nsmall, digits = digits),
+                    mark, sep = "")
+      col <- if (.nm == "Corr") "black" else .nm
+      paste("<span style='color:", col, "'>", paste0(label, text),
+            "</span>", sep = "")
+    })
+
+    first_row <- data[1, , drop = FALSE]
+    first_row$x <- panel_params$x.range[1] + 0.1 * diff(panel_params$x.range) +
+                   nudge_x
+    first_row$y <- mean(panel_params$y.range) + nudge_y
+    first_row <- coord$transform(first_row, panel_params)
+
+    richtext_grob <- get_function("gridtext", "richtext_grob")
+    richtext_grob(text = paste(corr, collapse = "<br>"),
+                  x = first_row$x,
+                  y = first_row$y,
+                  hjust = first_row$hjust,
+                  vjust = first_row$vjust,
+                  rot = first_row$angle,
+                  gp = gpar(fontsize = first_row$size * ggplot2::.pt,
+                            fontfamily = first_row$family,
+                            fontface = first_row$fontface,
+                            lineheight = first_row$lineheight))
+  },
+  draw_key = ggplot2::draw_key_point
+)
 
