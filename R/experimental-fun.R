@@ -200,12 +200,8 @@ ggplot_add.geom_pairs <- function(object, plot, object_name) {
 
   id_corr <- which(ptype == "corr")
   if (length(id_corr) > 0) {
-    for (i in id_corr) {
-      mp <- aes_modify(plot$mapping, layers[[i]]$mapping)
-      if ("colour" %in% names(mp)) {
-        mp$label <- mp$colour
-      }
-      layers[[i]]$mapping <- mp
+    if ("colour" %in% names(plot$mapping)) {
+      plot$mapping$label <- plot$mapping$colour
     }
   }
 
@@ -1095,9 +1091,12 @@ GeomCorr <- ggproto(
       return(grid::nullGrob())
     }
 
-
-    ll <- split(data, data$colour)
-    ll <- c(list(Corr = data), ll)
+    if (length(unique(data$colour)) == 1) {
+      ll <- list(Corr = data)
+    } else {
+      ll <- split(data, data$colour)
+      ll <- c(list(Corr = data), ll)
+    }
     less_than_three <- vapply(ll, nrow, numeric(1)) < 3
     ll <- ll[!less_than_three]
 
