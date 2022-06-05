@@ -1,7 +1,33 @@
+#' @title Init pairs plot
+#' @description This functions can be used to init pairs plot based on ggplot.
+#' @param data a data frame.
+#' @param mapping default list of aesthetic mappings to use for plot.
+#' @param expansion a list of x/y axis expansion of child plot.
+#' @param axis_child logical, if (TRUE) will add child plot axis.
+#' @param only_child logical, if (TRUE) will draw child axis only.
+#' @param child_size numeric, size of child axis label.
+#' @param data2 NULL or a data frame.
+#' @param type character, "full" (default), "upper" or "lower", display
+#' full matrix, lower triangular or upper triangular matrix.
+#' @param diag logical, if TRUE (default) will keep the diagonal of matrix data.
+#' @param rasterize logical, whether to convert raster image before drawing.
+#' @param res positive numeric, used to set the resolution of raster.
+#' @param grid_col colour of panel grid.
+#' @param grid_size size of panel grid.
+#' @param ... ignore.
+#' @return a ggplot object.
+#' @rdname qpairs
+#' @author Hou Yun
 #' @export
+#' @examples \dontrun{
+#' qpairs(iris) + geom_pairs()
+#' }
 qpairs <- function(data,
                    mapping = NULL,
+                   expansion = NULL,
                    axis_child = TRUE,
+                   only_child = TRUE,
+                   child_size = 8,
                    data2 = NULL,
                    type = "full",
                    diag = TRUE,
@@ -15,7 +41,7 @@ qpairs <- function(data,
                    type = type,
                    diag = diag,
                    mapping = mapping,
-                   ...)
+                   expansion = expansion)
 
   ## init and add panel grid
   p <- hyplot(df) +
@@ -25,7 +51,15 @@ qpairs <- function(data,
 
   ## add child axis
   if (isTRUE(axis_child)) {
-    p <- p
+    axis_info <- attr(df, "axis_info")
+    if (!is.null(axis_info)) {
+      p <- p + ggplot2::guides(x = guide_axis_child(child = axis_info,
+                                                    only_child = only_child,
+                                                    child_size = child_size),
+                               y = guide_axis_child(child = axis_info,
+                                                    only_child = only_child,
+                                                    child_size = child_size))
+    }
   }
   class(p) <- c("qpairs", class(p))
   p
@@ -36,7 +70,6 @@ qpairs <- function(data,
 #' @inheritParams geom_ggplot
 #' @param ptype plot type.
 #' @param ID character, used to add elements based on ID.
-#' @param theme a ggplot theme object.
 #' @rdname geom_pairs
 #' @author Hou Yun
 #' @export
@@ -71,7 +104,7 @@ geom_pairs <- function(mapping = NULL,
 ggplot_add.geom_pairs <- function(object, plot, object_name) {
   data <- object$data %||% plot$data
   if (is.function(data)) {
-    data <- data(plot$data)
+    data <- object$data(plot$data)
   }
   if (!is.null(object$ID)) {
     id <- grepl(object$ID, data$ID)
@@ -86,7 +119,8 @@ ggplot_add.geom_pairs <- function(object, plot, object_name) {
     .build_plot(plot = data$.plot[[ii]],
                 type = data$.type[ii],
                 pos = data$.pos[ii],
-                ptype = object$ptype)
+                ptype = object$ptype,
+                expansion = attr(data, "expansion"))
   })
   object <- object[setdiff(names(object), c("ID", "ptype"))]
   object <- modifyList(object,
@@ -103,34 +137,102 @@ ggplot_add.geom_pairs <- function(object, plot, object_name) {
 }
 
 #' @noRd
-.build_plot <- function(plot, type, pos, ptype) {
+.build_plot <- function(plot, type, pos, ptype, expansion) {
   ptype <- .get_plot_type(type, pos, ptype)
-  layers <- lapply(ptype, function(pt) {
-    if (pt == "density") {
-      if (pos == "diag") {
-        ggplot2::geom_density(aes_string(y = "..density.."))
-      } else {
-        ggplot2::geom_density2d()
-      }
-    } else if (pt == "lm") {
-      ggplot2::geom_smooth(method = "lm")
-    } else if (pt == "bar") {
-      if (is_binary(rlang::eval_tidy(plot$mapping$x, plot$data))) {
-        mp <- plot$mapping[setdiff(names(plot$mapping), "y")]
-        ggplot2::geom_bar(mapping = mp, inherit.aes = FALSE)
-      } else {
-        mp <- plot$mapping[setdiff(names(plot$mapping), "x")]
-        ggplot2::geom_bar(mapping = mp, inherit.aes = FALSE)
+  if (pos != "diag" && ("density" %in% ptype)) {
+    ptype[which(ptype == "density")] <- "density_2d"
+  }
+  if ("histogram" %in% ptype) {
+    if (pos == "diag") {
+      if (type == "cc") {
+        ptype[which(ptype == "histogram")] <- "bar"
       }
     } else {
-      .FUN <- match.fun(paste0("geom_", pt))
-      do.call(.FUN, list())
+      ptype[which(ptype == "histogram")] <- "blank"
     }
-  })
-  p <- plot + layers
-  p
+  }
+
+  if (any(c("histogram", "density", "bar") %in% ptype)) {
+    if (pos == "diag") {
+      p <- plot + ggplot2::scale_x_discrete(expand = expansion$discrete)
+    } else {
+      p <- plot
+    }
+
+    plot <- switch (type,
+                    cc = plot + ggplot2::scale_x_continuous(expand = expansion$continuous),
+                    dc = plot + ggplot2::scale_y_discrete(expand = expansion$discrete),
+                    cd = plot + ggplot2::scale_x_discrete(expand = expansion$discrete),
+                    dd = p
+    )
+  } else {
+    plot <- switch (type,
+                    cc = plot +
+                      ggplot2::scale_x_continuous(expand = expansion$continuous) +
+                      ggplot2::scale_y_continuous(expand = expansion$continuous),
+                    dc = plot +
+                      ggplot2::scale_x_continuous(expand = expansion$continuous) +
+                      ggplot2::scale_y_discrete(expand = expansion$discrete),
+                    cd = plot +
+                      ggplot2::scale_x_discrete(expand = expansion$discrete) +
+                      ggplot2::scale_y_continuous(expand = expansion$continuous),
+                    dd = plot +
+                      ggplot2::scale_x_discrete(expand = expansion$discrete) +
+                      ggplot2::scale_y_discrete(expand = expansion$discrete)
+    )
+  }
+  layers <- .get_layer(ptype)
+  id <- which(ptype == "bar")
+  if (length(id) > 0) {
+    for (i in id) {
+      if (type == "dc") {
+        layers[[i]]$mapping <- aes_modify(layers[[i]]$mapping, aes_string(x = "..count.."))
+      } else {
+        layers[[i]]$mapping <- aes_modify(layers[[i]]$mapping, aes_string(y = "..count.."))
+      }
+    }
+  }
+
+ for (i in seq_along(layers)) {
+   plot <- plot + layers[[i]]
+ }
+  plot
 }
 
+#' @title Register pairs plot
+#' @description Init pairs plot layer function.
+#' @param ... any valid layer parameters.
+#' @return set global options and return NULL.
+#' @author Hou Yun
+#' @rdname register_pairs_plot
+#' @export
+register_pairs_plot <- function(...) {
+  ll <- list("point" = ggplot2::geom_point(),
+             "histogram" = ggplot2::geom_histogram(aes_string(y = "..count..")),
+             "bar" = ggplot2::geom_bar(),
+             "boxplot" = ggplot2::geom_boxplot(),
+             "violin" = ggplot2::geom_violin(),
+             "density" = ggplot2::geom_density(aes_string(y = "..density..")),
+             "density_2d" = ggplot2::geom_density_2d(),
+             "lm" = ggplot2::geom_smooth(method = "lm"),
+             "smooth" = ggplot2::geom_smooth(),
+             "path" = ggplot2::geom_path(),
+             "line" = ggplot2::geom_line(),
+             "blank" = ggplot2::geom_blank())
+  ll <- utils::modifyList(ll, list(...))
+  ll <- utils::modifyList(options("linkET.pairs.plot"), ll)
+  options("linkET.pairs.plot" = ll)
+  invisible(NULL)
+}
+
+#' @noRd
+.get_layer <- function(...) {
+  ll <- options("linkET.pairs.plot")$linkET.pairs.plot
+  layers <- unlist(list(...))
+  lapply(layers, function(x) {
+    ll[[x]] %||% do.call(paste0("geom_", x), list())
+  })
+}
 #' Set Plot Type
 #' @description This function can be used to set plot type of scatter matrix plot.
 #' @param ... arguments in \code{tag = value} form.
@@ -149,14 +251,8 @@ plot_type <- function(...) {
       is.atomic(p) || is.function(p) || inherits(p, "plot_type")
     }, logical(1))
     if (!all(vv)) {
-      stop("All elements of plot_type should a atomic vecter, a function\n",
+      stop("All elements of plot_type should a atomic vecter\n",
            "or a plot_type object.", call. = FALSE)
-    }
-
-    not_fun <- !vapply(params, is.function, logical(1))
-    if (!all(unlist(params[not_fun]) %in% c("point", "histogram", "bar", "boxplot", "violin",
-                                            "density", "lm", "smooth", "path", "line"))) {
-      stop("Invalid plot type values in plot_type().", call. = FALSE)
     }
   }
   class(params) <- "plot_type"
@@ -165,7 +261,6 @@ plot_type <- function(...) {
 
 #' @noRd
 .get_plot_type <- function(type, pos, ptype) {
-
   if (pos == "diag") {
     diag <- ptype[["diag"]] %||% list()
     out <- diag[[type]] %||% ptype[[type]] %||% .default_plot_type[["diag"]][[type]]
@@ -211,7 +306,7 @@ plot_type <- function(...) {
                        type = "full",
                        diag = TRUE,
                        mapping = NULL,
-                       ...) {
+                       expansion = NULL) {
   data <- as.data.frame(data)
   if (is.null(data2)) {
     data2 <- data
@@ -263,42 +358,113 @@ plot_type <- function(...) {
     }
   }
   df <- .set_position(df)
-  params <- list(...)
-  nm <- names(params)
   df$.plot <- lapply(seq_len(nrow(df)), function(ii) {
     mapping2 <- aes_string(x = df$.colnames[ii], y = df$.rownames[ii])
     mapping <- aes_modify(mapping2, mapping)
-    p <- ggplot(data = source_data, mapping = mapping) + ggplot2::theme_void()
-    if (length(params) >= 1) {
-      if (is.null(nm)) {
-        p <- p + params
+    ggplot(data = source_data, mapping = mapping) + ggplot2::theme_void()
+  })
+
+  id <- vapply(source_data, function(x) is.factor(x) || is.character(x) || is.numeric(x),
+               logical(1))
+  source_data <- source_data[id]
+  if (!empty(source_data)) {
+    if (is.null(expansion)) {
+      expansion <- list(continuous = ggplot2::expansion(mult = 0.05),
+                        dicrete = ggplot2::expansion(add = 0.6))
+    } else {
+      if (is.numeric(expansion)) {
+        expansion <- list(continuous = rep_len(expansion, 4),
+                          dicrete = rep_len(expansion, 4))
       } else {
-        if (!is.null(params[[df$.type[ii]]])) {
-          p <- p + params[[df$.type[ii]]]
-        }
-        if (!is.null(params[[df$.pos[ii]]])) {
-          p <- p + params[[df$.pos[ii]]]
-        }
-        p <- p + params[nm == ""]
+        expansion <- list(continuous = expansion$continuous,
+                          dicrete = expansion$discrete)
       }
     }
-    p
-  })
+    ct <- expansion$continuous %||% ggplot2::expansion(mult = 0.05)
+    dc <- expansion$discrete %||% ggplot2::expansion(add = 0.6)
+    ct <- rep_len(ct, 4)
+    dc <- rep_len(dc, 4)
+    axis_info <- purrr::map_dfr(names(source_data), function(vars) {
+      xx <- data[[vars]]
+      limits <- .get_limits(xx, expansion = if (is.numeric(xx)) ct else dc)
+      if (is.numeric(xx)) {
+        breaks <- pretty_in_range(xx)
+      } else {
+        breaks <- if (is.factor(xx)) {
+          levels(xx)[levels(xx) %in% as.character(xx)]
+        } else {
+          unique(xx)[!is.na(unique(xx))]
+        }
+      }
+      tibble(label = vars,
+             limits = list(limits),
+             breaks = list(breaks))
+    })
+    attr(df, "axis_info") <- axis_info
+  }
+  attr(df, "expansion") <- list(continuous = ct,
+                                discrete = dc)
   df
 }
 
 #' @noRd
-.set_position <- function(md) {
-  if (!identical(row_names(md), col_names(md))) {
-    pos <- rep_len("full", nrow(md))
+.get_limits <- function(x, expansion) {
+  if (is.numeric(x)) {
+    rng <- range(x, na.rm = TRUE)
+    if (diff(rng) == 0) {
+      if (all(expansion == 0)) {
+        limits <- c(rng[1] - 0.025, rng[2] + 0.025)
+      } else if (all(expansion[c(2, 4)] == 0)) {
+        limits <- c(rng[1] - expansion[1], rng[2] + expansion[3])
+      } else {
+        if (all(expansion[c(1, 3)] == 0)) {
+          limits <- c(rng[1] - expansion[2], rng[2] + expansion[4])
+        } else {
+          limits <- c(rng[1] - expansion[1] - expansion[2],
+                      rng[2] + expansion[3] + expansion[4])
+        }
+      }
+    } else {
+      limits <- c(rng[1] - diff(rng) * expansion[1] - expansion[2],
+                  rng[2] + diff(rng) * expansion[3] + expansion[4])
+    }
   } else {
+    if (is.factor(x)) {
+      rng <- levels(x)[levels(x) %in% as.character(x)]
+    } else {
+      rng <- unique(x)[!is.na(unique(x))]
+    }
+    if (length(rng) == 1) {
+      if (all(expansion == 0)) {
+        limits <- c(1 - 0.025, 1 + 0.025)
+      } else if (all(expansion[c(2, 4)] == 0)) {
+        limits <- c(1 - expansion[1], 1 + expansion[3])
+      } else {
+        if (all(expansion[c(1, 3)] == 0)) {
+          limits <- c(1 - expansion[2], 1 + expansion[4])
+        } else {
+          limits <- c(1 - expansion[1] - expansion[2],
+                      1 + expansion[3] + expansion[4])
+        }
+      }
+    } else {
+      limits <- c(1 - length(rng) * expansion[1] - expansion[2],
+                  length(rng) + length(rng) * expansion[3] + expansion[4])
+    }
+  }
+  limits
+}
+
+#' @noRd
+.set_position <- function(md) {
+  md$.pos <- "full"
+  md$.pos <- ifelse(md$.rownames == md$.colnames, "diag", md$.pos)
+  if (identical(row_names(md), col_names(md))) {
     x <- as.integer(factor(md$.rownames, levels = rev(row_names(md))))
     y <- as.integer(factor(md$.colnames, levels = col_names(md)))
-    pos <- rep_len("upper", nrow(md))
-    pos <- ifelse(x + y < nrows(md) + 1, "lower", pos)
-    pos <- ifelse(x + y == nrows(md) + 1, "diag", pos)
+    md$.pos <- ifelse(x + y < nrows(md) + 1, "lower", md$.pos)
+    md$.pos <- ifelse(x + y > nrows(md) + 1, "upper", md$.pos)
   }
-  md$.pos <- pos
   md
 }
 
@@ -306,7 +472,6 @@ plot_type <- function(...) {
 is_binary <- function(x) {
   is.factor(x) || is.character(x) || is.logical(x)
 }
-
 
 ## STOLEN: ggh4x::guide_dendro
 #' @title Children axis guide
@@ -410,8 +575,8 @@ guide_transform.guide_child <- function(guide, coord, panel_params) {
 
       pos <- scales::rescale(breaks, c(-0.5, 0.5), limits)
       ch <- dplyr::bind_rows(ch, tibble(!!aesthetics := pos + row[[aesthetics]],
-                                        .value = labels,
-                                        .label = labels))
+                                        .value = as.character(labels),
+                                        .label = as.character(labels)))
     }
   } else {
     MIN <- if (aesthetics == "x") panel_params$x.range[1] else panel_params$y.range[1]
