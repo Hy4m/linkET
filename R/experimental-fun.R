@@ -218,6 +218,7 @@ register_pairs_plot <- function(...) {
              "smooth" = ggplot2::geom_smooth(),
              "path" = ggplot2::geom_path(),
              "line" = ggplot2::geom_line(),
+             "hex" = ggplot2::geom_hex(),
              "blank" = ggplot2::geom_blank())
   ll <- utils::modifyList(ll, list(...))
   ll <- utils::modifyList(options("linkET.pairs.plot"), ll)
@@ -244,7 +245,7 @@ plot_type <- function(...) {
   params <- list(...)
   if (length(params) >= 1) {
     nm <- names(params)
-    if (!all(nm %in% c("cd", "dc", "cc", "dd", "diag", "upper", "lower"))) {
+    if (!all(nm %in% c("cd", "dc", "cc", "dd", "diag", "upper", "lower", "full"))) {
       stop("Invalid plot type params in `plot_type()`.", call. = FALSE)
     }
     vv <- vapply(params, function(p) {
@@ -262,20 +263,23 @@ plot_type <- function(...) {
 #' @noRd
 .get_plot_type <- function(type, pos, ptype) {
   if (pos == "diag") {
-    diag <- ptype[["diag"]] %||% list()
-    out <- diag[[type]] %||% ptype[[type]] %||% .default_plot_type[["diag"]][[type]]
+    diag <- ptype[["diag"]] %||% .default_plot_type[["diag"]]
+    out <- diag[[type]] %||% .default_plot_type[[diag]][[type]]
   }
   if (pos == "upper") {
-    upper <- ptype[["upper"]] %||% list()
-    out <- upper[[type]] %||% ptype[[type]] %||% .default_plot_type[["upper"]][[type]]
+    upper <- ptype[["upper"]] %||% ptype[[type]] %||% .default_plot_type[["upper"]]
+    out <- if (is.list(upper)) upper[[type]] else upper
+    out <- out %||% .default_plot_type[["upper"]][[type]]
   }
   if (pos == "lower") {
-    lower <- ptype[["lower"]] %||% list()
-    out <- lower[[type]] %||% ptype[[type]] %||% .default_plot_type[["lower"]][[type]]
+    lower <- ptype[["lower"]] %||% ptype[[type]] %||% .default_plot_type[["lower"]]
+    out <- if (is.list(lower)) lower[[type]] else lower
+    out <- out %||% .default_plot_type[["lower"]][[type]]
   }
   if (pos == "full") {
-    full <- ptype[["full"]]
-    out <- full[[type]] %||% ptype[[type]] %||% .default_plot_type[["full"]][[type]]
+    full <- ptype[["full"]] %||% ptype[[type]] %||% .default_plot_type[["full"]]
+    out <- if (is.list(full)) full[[type]] else full
+    out <- out %||% .default_plot_type[["full"]][[type]]
   }
   out
 }
