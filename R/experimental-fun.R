@@ -1003,3 +1003,10 @@ plot.gggplot <- print.gggplot
   }
   plot
 }
+
+#' @noRd
+## TODO: add layer function to draw correlation
+# geom_corr <- function(...) {
+#   NULL
+# }
+
