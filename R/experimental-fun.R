@@ -1091,7 +1091,8 @@ GeomCorr <- ggproto(
       return(grid::nullGrob())
     }
 
-    if (length(unique(data$colour)) == 1) {
+    one_length <- length(unique(data$colour)) == 1
+    if (one_length) {
       ll <- list(Corr = data)
     } else {
       ll <- split(data, data$colour)
@@ -1126,6 +1127,11 @@ GeomCorr <- ggproto(
     first_row$y <- mean(panel_params$y.range) + nudge_y
     first_row <- coord$transform(first_row, panel_params)
 
+    if (one_length) {
+      col <- scales::alpha(first_row$colour, first_row$alpha)
+    } else {
+      col <- scales::alpha("black", first_row$alpha)
+    }
     richtext_grob <- get_function("gridtext", "richtext_grob")
     richtext_grob(text = paste(corr, collapse = "<br>"),
                   x = first_row$x,
@@ -1133,7 +1139,8 @@ GeomCorr <- ggproto(
                   hjust = first_row$hjust,
                   vjust = first_row$vjust,
                   rot = first_row$angle,
-                  gp = gpar(fontsize = first_row$size * ggplot2::.pt,
+                  gp = gpar(col = col,
+                            fontsize = first_row$size * ggplot2::.pt,
                             fontfamily = first_row$family,
                             fontface = first_row$fontface,
                             lineheight = first_row$lineheight))
