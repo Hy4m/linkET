@@ -422,8 +422,8 @@ plot_type <- function(...) {
   }
   df <- .set_position(df)
 
-  p <- ggplot(data = source_data) + ggplot2::theme_void()
   gs <- options("linkET.pairs.plot")$linkET.pairs.plot$scale
+  scale <- list(NULL)
   if (!is.null(gs) && !length(gs) < 1) {
     mp <- mapping[intersect(names(mapping), c("fill", "colour", "size", "alpha", "shape"))]
     if (length(mp) > 0) {
@@ -431,13 +431,14 @@ plot_type <- function(...) {
                    function(x) { if (is_binary(source_data[[x]])) "d" else "c"},
                    character(1))
       ls <- gs[paste(names(tp), unname(tp), sep = "_")]
-      p <- Reduce("+", gs[paste(names(tp), unname(tp), sep = "_")], init = p)
+      scale <- gs[paste(names(tp), unname(tp), sep = "_")]
     }
   }
   df$.plot <- lapply(seq_len(nrow(df)), function(ii) {
     mapping2 <- aes_string(x = df$.colnames[ii], y = df$.rownames[ii])
-    p$mapping <- aes_modify(mapping, mapping2)
-    p
+    mapping <- aes_modify(mapping, mapping2)
+    p <- ggplot(data = source_data, mapping = mapping) + ggplot2::theme_void()
+    Reduce("+", scale, init = p)
   })
 
   id <- vapply(source_data, function(x) is.factor(x) || is.character(x) || is.numeric(x),
