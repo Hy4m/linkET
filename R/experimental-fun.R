@@ -1206,38 +1206,3 @@ GeomCorr <- ggproto(
   draw_key = ggplot2::draw_key_point
 )
 
-#' @title Set aesthestic scale
-#' @description Before drawing, you can set the scale function for each plot of pairs.
-#' @param ... scale object.
-#' @param ID specify the ID of the element plot that you want to add.
-#' @return a ggplot.
-#' @rdname set_pairs_scale
-#' @author Hou Yun
-#' @export
-set_pairs_scale <- function(..., ID = NULL) {
-  structure(list(ID = ID, params = list(...)), class = "pairs_scale")
-}
-
-#' @export
-ggplot_add.pairs_scale <- function(object, plot, object_name) {
-  if (!inherits(plot, "qpairs")) {
-    warning("`set_pairs_scale()` can only be added to qpairs plot.", call. = FALSE)
-    return(plot)
-  }
-  data <- plot$data
-  if (empty(data)) return(plot)
-
-  if (is.null(object$ID)) {
-    id <- rep_len(TRUE, nrow(data))
-  } else {
-    id <- grepl(object$ID, data$ID)
-  }
-
-  if (all(isFALSE(id))) return(plot)
-
-  for (ii in which(id)) {
-    data$.plot[[ii]] <- data$.plot[[ii]] + object$params
-  }
-  plot$data <- data
-  plot
-}
