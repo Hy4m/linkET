@@ -1089,7 +1089,7 @@ plot.gggplot <- print.gggplot
 #' @author Hou Yun
 #' @rdname geom_corr
 #' @export
-## TODO: add layer function to draw correlation
+## TODO: add method to support lm model
 geom_corr <- function(mapping = NULL,
                       data = NULL,
                       stat = "identity",
