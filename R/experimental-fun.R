@@ -78,13 +78,15 @@ geom_pairs <- function(mapping = NULL,
                        stat = "identity",
                        position = "identity",
                        ...,
-                       ptype = plot_type(),
+                       ptype = NULL,
                        ID = NULL,
                        rasterize = FALSE,
                        res = 100,
                        na.rm = FALSE,
                        show.legend = "collect",
                        inherit.aes = TRUE) {
+  gptype <- options("linkET.pairs.plot")$linkET.pairs.plot$ptype
+  ptype <- modify_ptype(gptype, ptype)
   structure(list(mapping = mapping,
                  data = data,
                  stat = stat,
@@ -214,30 +216,73 @@ ggplot_add.geom_pairs <- function(object, plot, object_name) {
 #' @title Register pairs plot
 #' @description Init pairs plot layer function.
 #' @param ... any valid layer parameters.
+#' @param scale a list of aesthestic scale.
+#' @param ptype a plot_type object, which can be created by `plot_type()`.
 #' @return set global options and return NULL.
 #' @author Hou Yun
 #' @rdname register_pairs_plot
 #' @export
-register_pairs_plot <- function(...) {
-  ll <- list("point" = ggplot2::geom_point(),
-             "histogram" = ggplot2::geom_histogram(aes_string(y = "..count..")),
-             "bar" = ggplot2::geom_bar(),
-             "boxplot" = ggplot2::geom_boxplot(),
-             "violin" = ggplot2::geom_violin(),
-             "density" = ggplot2::geom_density(aes_string(y = "..density..")),
-             "density_2d" = ggplot2::geom_density_2d(),
-             "lm" = ggplot2::geom_smooth(method = "lm"),
-             "smooth" = ggplot2::geom_smooth(),
-             "path" = ggplot2::geom_path(),
-             "line" = ggplot2::geom_line(),
-             "hex" = ggplot2::geom_hex(),
-             "blank" = ggplot2::geom_blank(),
-             "jitter" = ggplot2::geom_jitter(),
-             "corr" = geom_corr())
-  ll <- utils::modifyList(ll, list(...))
-  ll <- utils::modifyList(options("linkET.pairs.plot"), ll)
-  options("linkET.pairs.plot" = ll)
+register_pairs_plot <- function(...,
+                                ptype = NULL,
+                                scale = list()) {
+  layers <- list("point" = ggplot2::geom_point(),
+                 "histogram" = ggplot2::geom_histogram(aes_string(y = "..count..")),
+                 "bar" = ggplot2::geom_bar(),
+                 "boxplot" = ggplot2::geom_boxplot(),
+                 "violin" = ggplot2::geom_violin(),
+                 "density" = ggplot2::geom_density(aes_string(y = "..density..")),
+                 "density_2d" = ggplot2::geom_density_2d(),
+                 "lm" = ggplot2::geom_smooth(method = "lm"),
+                 "smooth" = ggplot2::geom_smooth(),
+                 "path" = ggplot2::geom_path(),
+                 "line" = ggplot2::geom_line(),
+                 "hex" = ggplot2::geom_hex(),
+                 "blank" = ggplot2::geom_blank(),
+                 "jitter" = ggplot2::geom_jitter(),
+                 "corr" = geom_corr())
+  gl <- options("linkET.pairs.plot")$linkET.pairs.plot
+
+  if (!is.list(scale)) {
+    scale <- as.list(scale)
+  }
+  if (!is.null(names(scale))) {
+    temp <- expand.grid(scale = c("fill", "colour", "color", "alpha", "size", "shape"),
+                        type = c("d", "c"))
+    valid_scale <- paste(temp$scale, temp$type, sep = "_")
+    scale <- scale[names(scale) %in% valid_scale]
+
+    if (length(scale) > 1) {
+      gs <- gl$scale %||% list()
+      layers <- utils::modifyList(gl, utils::modifyList(layers, list(...)))
+      scales <- utils::modifyList(gs, scale)
+      layers$scale <- scales
+    }
+  }
+
+  ## modify plot_type
+  if (!inherits(ptype, "plot_type")) {
+    ptype <- NULL
+  }
+  ptype <- ptype %||% plot_type()
+  if (is.null(gl$ptype) || length(gl$ptype) < 1) {
+    layers$ptype <- ptype
+  } else {
+    layers$ptype <- modify_ptype(gl$ptype, ptype)
+  }
+  options("linkET.pairs.plot" = layers)
   invisible(NULL)
+}
+
+modify_ptype <- function(ptype1, ptype2) {
+  pt <- utils::modifyList(as.list(ptype1), as.list(ptype2))
+  pnm <- intersect(names(ptype2), c("full", "diag", "upper", "lower"))
+  for (ii in pnm) {
+    if (is.null(ptype1[[ii]])) next
+    pt[[ii]] <- structure(utils::modifyList(ptype1[[ii]], ptype2[[ii]]),
+                          class = "plot_type")
+  }
+  class(pt) <- "plot_type"
+  pt
 }
 
 #' @noRd
@@ -376,10 +421,23 @@ plot_type <- function(...) {
     }
   }
   df <- .set_position(df)
+
+  p <- ggplot(data = source_data) + ggplot2::theme_void()
+  gs <- options("linkET.pairs.plot")$linkET.pairs.plot$scale
+  if (!is.null(gs) && !length(gs) < 1) {
+    mp <- mapping[intersect(names(mapping), c("fill", "colour", "size", "alpha", "shape"))]
+    if (length(mp) > 0) {
+      tp <- vapply(vapply(mapping, rlang::as_name, character(1)),
+                   function(x) { if (is_binary(source_data[[x]])) "d" else "c"},
+                   character(1))
+      ls <- gs[paste(names(tp), unname(tp), sep = "_")]
+      p <- Reduce("+", gs[paste(names(tp), unname(tp), sep = "_")], init = p)
+    }
+  }
   df$.plot <- lapply(seq_len(nrow(df)), function(ii) {
     mapping2 <- aes_string(x = df$.colnames[ii], y = df$.rownames[ii])
-    mapping <- aes_modify(mapping2, mapping)
-    ggplot(data = source_data, mapping = mapping) + ggplot2::theme_void()
+    p$mapping <- aes_modify(mapping, mapping2)
+    p
   })
 
   id <- vapply(source_data, function(x) is.factor(x) || is.character(x) || is.numeric(x),
@@ -1148,3 +1206,38 @@ GeomCorr <- ggproto(
   draw_key = ggplot2::draw_key_point
 )
 
+#' @title Set aesthestic scale
+#' @description Before drawing, you can set the scale function for each plot of pairs.
+#' @param ... scale object.
+#' @param ID specify the ID of the element plot that you want to add.
+#' @return a ggplot.
+#' @rdname set_pairs_scale
+#' @author Hou Yun
+#' @export
+set_pairs_scale <- function(..., ID = NULL) {
+  structure(list(ID = ID, params = list(...)), class = "pairs_scale")
+}
+
+#' @export
+ggplot_add.pairs_scale <- function(object, plot, object_name) {
+  if (!inherits(plot, "qpairs")) {
+    warning("`set_pairs_scale()` can only be added to qpairs plot.", call. = FALSE)
+    return(plot)
+  }
+  data <- plot$data
+  if (empty(data)) return(plot)
+
+  if (is.null(object$ID)) {
+    id <- rep_len(TRUE, nrow(data))
+  } else {
+    id <- grepl(object$ID, data$ID)
+  }
+
+  if (all(isFALSE(id))) return(plot)
+
+  for (ii in which(id)) {
+    data$.plot[[ii]] <- data$.plot[[ii]] + object$params
+  }
+  plot$data <- data
+  plot
+}
