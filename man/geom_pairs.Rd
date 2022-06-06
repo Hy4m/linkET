@@ -10,7 +10,7 @@ geom_pairs(
   stat = "identity",
   position = "identity",
   ...,
-  ptype = plot_type(),
+  ptype = NULL,
   ID = NULL,
   rasterize = FALSE,
   res = 100,

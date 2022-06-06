@@ -4,10 +4,14 @@
 \alias{register_pairs_plot}
 \title{Register pairs plot}
 \usage{
-register_pairs_plot(...)
+register_pairs_plot(..., ptype = NULL, scale = list())
 }
 \arguments{
 \item{...}{any valid layer parameters.}
+
+\item{ptype}{a plot_type object, which can be created by `plot_type()`.}
+
+\item{scale}{a list of aesthestic scale.}
 }
 \value{
 set global options and return NULL.
