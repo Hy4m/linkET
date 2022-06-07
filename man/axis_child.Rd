@@ -13,7 +13,7 @@ guide_axis_child(
   position = waiver(),
   child = NULL,
   only_child = FALSE,
-  child_size = 7
+  theme = NULL
 )
 }
 \arguments{

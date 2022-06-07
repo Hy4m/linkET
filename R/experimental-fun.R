@@ -4,8 +4,6 @@
 #' @param mapping default list of aesthetic mappings to use for plot.
 #' @param expansion a list of x/y axis expansion of child plot.
 #' @param axis_child logical, if (TRUE) will add child plot axis.
-#' @param only_child logical, if (TRUE) will draw child axis only.
-#' @param child_size numeric, size of child axis label.
 #' @param data2 NULL or a data frame.
 #' @param type character, "full" (default), "upper" or "lower", display
 #' full matrix, lower triangular or upper triangular matrix.
@@ -14,7 +12,7 @@
 #' @param res positive numeric, used to set the resolution of raster.
 #' @param grid_col colour of panel grid.
 #' @param grid_size size of panel grid.
-#' @param ... ignore.
+#' @param ... passed to \code{guide_child_axis()}.
 #' @return a ggplot object.
 #' @rdname qpairs
 #' @author Hou Yun
@@ -26,8 +24,6 @@ qpairs <- function(data,
                    mapping = NULL,
                    expansion = NULL,
                    axis_child = TRUE,
-                   only_child = TRUE,
-                   child_size = 8,
                    data2 = NULL,
                    type = "full",
                    diag = TRUE,
@@ -47,18 +43,38 @@ qpairs <- function(data,
   p <- hyplot(df) +
     geom_panel_grid(colour = grid_col, size = grid_size) +
     ggplot2::coord_fixed(expand = FALSE) +
-    theme(panel.background = element_blank())
+    theme(panel.background = element_blank(),
+          axis.text = element_text(size = 10.5, colour = "black"),
+          axis.title = element_blank(),
+          axis.ticks = element_blank(),
+          axis.text.y.left = element_text(angle = 90, hjust = 0.5, vjust = 0.5),
+          axis.text.y.right = element_text(angle = 90, hjust = 0.5, vjust = 0.5),
+          axis.text.x.top = element_text(angle = 0, hjust = 0.5, vjust = 0.5),
+          axis.text.x.bottom = element_text(angle = 0, hjust = 0.5, vjust = 0.5))
 
   ## add child axis
   if (isTRUE(axis_child)) {
     axis_info <- attr(df, "axis_info")
     if (!is.null(axis_info)) {
-      p <- p + ggplot2::guides(x = guide_axis_child(child = axis_info,
-                                                    only_child = only_child,
-                                                    child_size = child_size),
-                               y = guide_axis_child(child = axis_info,
-                                                    only_child = only_child,
-                                                    child_size = child_size))
+      params <- list(...)
+      params$child <- axis_info
+      child_theme <- theme(
+        axis.text = element_text(size = 8, colour = "black"),
+        axis.title = element_blank(),
+        axis.line = element_blank(),
+        axis.ticks = ggplot2::element_line(),
+        axis.text.x.top = element_text(angle = 90, hjust = 0, vjust = 0.5),
+        axis.text.x.bottom = element_text(angle = 90, hjust = 1, vjust = 0.5),
+        axis.text.y.left = element_text(angle = 0, hjust = 1, vjust = 0.5),
+        axis.text.y.right = element_text(angle = 0, hjust = 0, vjust = 0.5)
+      )
+      if ("theme" %in% names(params)) {
+        params$theme <- child_theme + params$theme
+      } else {
+        params$theme <- child_theme
+      }
+      p <- p + ggplot2::guides(x = do.call("guide_axis_child", params),
+                               y = do.call("guide_axis_child", params))
     }
   }
   class(p) <- c("qpairs", class(p))
@@ -567,7 +583,7 @@ guide_axis_child <- function(title = waiver(),
                              position = waiver(),
                              child = NULL,
                              only_child = FALSE,
-                             child_size = 7) {
+                             theme = NULL) {
 
   structure(
     list(title = title,
@@ -578,7 +594,7 @@ guide_axis_child <- function(title = waiver(),
          position = position,
          child = child,
          only_child = only_child,
-         child_size = child_size,
+         theme = theme,
          available_aes = c("x", "y"),
          name = "axis"),
     class = c("guide", "guide_child", "axis")
@@ -713,15 +729,7 @@ guide_gengrob.guide_child <- function(guide, theme) {
   aesthetic <- if (axis_position %in% c("bottom", "top")) "x" else "y"
 
   ## child theme not equal theme
-  child_theme <- theme
-  line_element_name <- paste0("axis.line.", aesthetic, ".", axis_position)
-  tick_element_name <- paste0("axis.ticks.", aesthetic, ".", axis_position)
-  label_element_name <- paste0("axis.text.", aesthetic, ".", axis_position)
-
-  child_label_element <- ggplot2::calc_element(label_element_name, child_theme)
-  child_label_element <- child_label_element %||% ggplot2::element_text()
-  child_label_element$size <- guide$child_size
-  child_theme[[label_element_name]] <- child_label_element
+  child_theme <- theme + guide$theme
   child_grobs <- draw_axis(break_positions = guide$child[[aesthetic]],
                            break_labels = guide$child$.label,
                            axis_position = guide$position,
@@ -732,9 +740,6 @@ guide_gengrob.guide_child <- function(guide, theme) {
   if (isTRUE(guide$only_child)) {
     return(child_grobs)
   }
-
-  theme[[tick_element_name]] <- ggplot2::element_blank()
-  theme[[line_element_name]] <- ggplot2::element_blank()
   main_grobs <- draw_axis(break_positions = guide$key[[aesthetic]],
                           break_labels = guide$key$.label,
                           axis_position = guide$position,
@@ -747,33 +752,33 @@ guide_gengrob.guide_child <- function(guide, theme) {
   ## unit main and child axis
   if (axis_position %in% c("left", "right")) {
     width <- if (axis_position == "left") {
-      unit.c(grobWidth(main_grobs), grobWidth(child_grobs))
+      unit.c(grobWidth(main_grobs), grid::unit(3, "mm"), grobWidth(child_grobs))
     } else {
-      unit.c(grobWidth(child_grobs), grobWidth(main_grobs))
+      unit.c(grobWidth(child_grobs), grid::unit(3, "mm"), grobWidth(main_grobs))
     }
     height <- unit(1, "null")
     gt <- gtable(widths = width, heights = height)
     if (axis_position == "left") {
       gt <- gtable_add_grob(gt, grobs = list(main_grobs, child_grobs),
-                            t = c(1, 1), l = c(1, 2))
+                            t = c(1, 1), l = c(1, 3))
     } else {
       gt <- gtable_add_grob(gt, grobs = list(main_grobs, child_grobs),
-                            t = c(1, 1), l = c(2, 1))
+                            t = c(1, 1), l = c(3, 1))
     }
   } else {
     height <- if (axis_position == "top") {
-      unit.c(grobHeight(main_grobs), grobHeight(child_grobs))
+      unit.c(grobHeight(main_grobs), grid::unit(3, "mm"), grobHeight(child_grobs))
     } else {
-      unit.c(grobHeight(child_grobs), grobHeight(main_grobs))
+      unit.c(grobHeight(child_grobs), grid::unit(3, "mm"), grobHeight(main_grobs))
     }
     width <- unit(1, "null")
     gt <- gtable(widths = width, heights = height)
     if (axis_position == "top") {
       gt <- gtable_add_grob(gt, grobs = list(main_grobs, child_grobs),
-                            t = c(1, 2), l = c(1, 1))
+                            t = c(1, 3), l = c(1, 1))
     } else {
       gt <- gtable_add_grob(gt, grobs = list(main_grobs, child_grobs),
-                            t = c(2, 1), l = c(1, 1))
+                            t = c(3, 1), l = c(1, 1))
     }
   }
   gTree(children = gList(gt), width = gtable_width(gt), height = gtable_height(gt),

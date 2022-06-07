@@ -9,8 +9,6 @@ qpairs(
   mapping = NULL,
   expansion = NULL,
   axis_child = TRUE,
-  only_child = TRUE,
-  child_size = 8,
   data2 = NULL,
   type = "full",
   diag = TRUE,
@@ -30,10 +28,6 @@ qpairs(
 
 \item{axis_child}{logical, if (TRUE) will add child plot axis.}
 
-\item{only_child}{logical, if (TRUE) will draw child axis only.}
-
-\item{child_size}{numeric, size of child axis label.}
-
 \item{data2}{NULL or a data frame.}
 
 \item{type}{character, "full" (default), "upper" or "lower", display
@@ -49,7 +43,7 @@ full matrix, lower triangular or upper triangular matrix.}
 
 \item{grid_size}{size of panel grid.}
 
-\item{...}{ignore.}
+\item{...}{passed to \code{guide_child_axis()}.}
 }
 \value{
 a ggplot object.
