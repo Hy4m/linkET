@@ -752,9 +752,9 @@ guide_gengrob.guide_child <- function(guide, theme) {
   ## unit main and child axis
   if (axis_position %in% c("left", "right")) {
     width <- if (axis_position == "left") {
-      unit.c(grobWidth(main_grobs), grid::unit(3, "mm"), grobWidth(child_grobs))
+      unit.c(grobWidth(main_grobs), grid::unit(2, "mm"), grobWidth(child_grobs))
     } else {
-      unit.c(grobWidth(child_grobs), grid::unit(3, "mm"), grobWidth(main_grobs))
+      unit.c(grobWidth(child_grobs), grid::unit(2, "mm"), grobWidth(main_grobs))
     }
     height <- unit(1, "null")
     gt <- gtable(widths = width, heights = height)
@@ -767,9 +767,9 @@ guide_gengrob.guide_child <- function(guide, theme) {
     }
   } else {
     height <- if (axis_position == "top") {
-      unit.c(grobHeight(main_grobs), grid::unit(3, "mm"), grobHeight(child_grobs))
+      unit.c(grobHeight(main_grobs), grid::unit(2, "mm"), grobHeight(child_grobs))
     } else {
-      unit.c(grobHeight(child_grobs), grid::unit(3, "mm"), grobHeight(main_grobs))
+      unit.c(grobHeight(child_grobs), grid::unit(2, "mm"), grobHeight(main_grobs))
     }
     width <- unit(1, "null")
     gt <- gtable(widths = width, heights = height)
