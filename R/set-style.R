@@ -6,7 +6,7 @@
 #' @param labels a character vector giving labels (must be same length as breaks).
 #' @param limits a numeric vector of length two providing limits of the scale.
 #' @param scale NULL or a \code{Scale} object.
-#' @param ... other parameters passing to \code{\link[ggplot2]{scale_fill_gradientn}}.
+#' @param ... other parameters passing to \code{scale_fill_gradientn}.
 #' @rdname set_style
 #' @author Hou Yun
 #' @export

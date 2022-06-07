@@ -22,7 +22,7 @@ set_default_style()
 \arguments{
 \item{x}{a hyplot object.}
 
-\item{...}{other parameters passing to \code{\link[ggplot2]{scale_fill_gradientn}}.}
+\item{...}{other parameters passing to \code{scale_fill_gradientn}.}
 
 \item{colours}{vector of colours to use for n-colour gradient.}
 
