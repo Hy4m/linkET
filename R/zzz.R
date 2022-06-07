@@ -7,5 +7,5 @@
 }
 
 .onLoad <- function(...) {
-  register_pairs_plot()
+  register_pairs_plot(reset = TRUE)
 }
