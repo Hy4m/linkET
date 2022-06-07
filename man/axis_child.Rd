@@ -43,8 +43,11 @@ left, or right.}
 
 \item{only_child}{if TRUE, will remove main axis elements.}
 
-\item{child_size}{size of child axis label.}
+\item{theme}{a ggplot theme object for child axis.}
 }
 \description{
 This function can be used to add children axis on a ggplot.
+}
+\author{
+Hou Yun
 }

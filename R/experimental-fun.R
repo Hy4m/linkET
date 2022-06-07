@@ -578,8 +578,9 @@ is_binary <- function(x) {
 #' @inheritParams ggplot2::guide_axis
 #' @param child a tibble of child axis information, see examples.
 #' @param only_child if TRUE, will remove main axis elements.
-#' @param child_size size of child axis label.
+#' @param theme a ggplot theme object for child axis.
 #' @rdname axis_child
+#' @author Hou Yun
 #' @export
 guide_axis_child <- function(title = waiver(),
                              check.overlap = FALSE,
