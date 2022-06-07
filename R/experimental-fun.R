@@ -234,13 +234,15 @@ ggplot_add.geom_pairs <- function(object, plot, object_name) {
 #' @param ... any valid layer parameters.
 #' @param scale a list of aesthestic scale.
 #' @param ptype a plot_type object, which can be created by `plot_type()`.
+#' @param reset logical, if TRUE will reset pairs plot parameters.
 #' @return set global options and return NULL.
 #' @author Hou Yun
 #' @rdname register_pairs_plot
 #' @export
 register_pairs_plot <- function(...,
                                 ptype = NULL,
-                                scale = list()) {
+                                scale = list(),
+                                reset = FALSE) {
   layers <- list("point" = ggplot2::geom_point(),
                  "histogram" = ggplot2::geom_histogram(aes_string(y = "..count..")),
                  "bar" = ggplot2::geom_bar(),
@@ -256,6 +258,10 @@ register_pairs_plot <- function(...,
                  "blank" = ggplot2::geom_blank(),
                  "jitter" = ggplot2::geom_jitter(),
                  "corr" = geom_corr())
+  if (isTRUE(reset)) {
+    options("linkET.pairs.plot" = layers)
+    return(invisible(NULL))
+  }
   gl <- options("linkET.pairs.plot")$linkET.pairs.plot
 
   if (!is.list(scale)) {
