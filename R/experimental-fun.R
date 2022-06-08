@@ -42,8 +42,8 @@ qpairs <- function(data,
   ## init and add panel grid
   p <- hyplot(df) +
     geom_panel_grid(colour = grid_col, size = grid_size) +
-    ggplot2::coord_fixed(expand = FALSE) +
-    theme(panel.background = element_blank(),
+    theme(aspect.ratio = 1,
+          panel.background = element_blank(),
           axis.text = element_text(size = 10.5, colour = "black"),
           axis.title = element_blank(),
           axis.ticks = element_blank(),
