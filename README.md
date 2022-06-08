@@ -222,6 +222,14 @@ qcorrplot(correlate(varechem), type = "lower", diag = FALSE) +
 
 <img src="man/figures/README-mantel-1.png" width="100%" />
 
+## pairs plot
+
+``` r
+qpairs(iris) + geom_pairs()
+```
+
+<img src="man/figures/README-unnamed-chunk-2-1.png" width="100%" />
+
 ## network
 
 ``` r
@@ -230,4 +238,4 @@ correlate(mtcars) %>%
   plot(layout = layout_with_circular)
 ```
 
-<img src="man/figures/README-unnamed-chunk-2-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-3-1.png" width="100%" />
