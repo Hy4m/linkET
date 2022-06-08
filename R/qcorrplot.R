@@ -5,13 +5,12 @@
 #' @param drop logical.
 #' @param grid_col colour of panel grid.
 #' @param grid_size size of panel grid.
-#' @param fixed if TRUE (default), the coordinates will have a fixed aspect ratio.
+#' @param fixed if TRUE (default), will add \code{coord_fixed()} to plot.
 #' @param use_md logical. if TRUE, will use \code{ggtext::element_markdown()} to
 #' draw the axis labels.
 #' @param facets NULL or a parameters list of \code{facet_wrap}.
 #' @param ... other parameters.
 #' @return a gg object.
-#' @importFrom ggplot2 coord_fixed
 #' @rdname qcorrplot
 #' @author Hou Yun
 #' @export
@@ -58,7 +57,7 @@ qcorrplot.cor_md_tbl <- function(data,
 
   ## coord fixed?
   if(isTRUE(fixed)) {
-    p <- p + coord_fixed()
+    p <- p + ggplot2::coord_fixed()
   }
 
   ## remove the panel background

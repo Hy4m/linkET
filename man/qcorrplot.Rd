@@ -72,7 +72,7 @@ qcorrplot(data, ...)
 
 \item{grid_size}{size of panel grid.}
 
-\item{fixed}{if TRUE (default), the coordinates will have a fixed aspect ratio.}
+\item{fixed}{if TRUE (default), will add \code{coord_fixed()} to plot.}
 
 \item{use_md}{logical. if TRUE, will use \code{ggtext::element_markdown()} to
 draw the axis labels.}
