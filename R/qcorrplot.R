@@ -5,11 +5,7 @@
 #' @param drop logical.
 #' @param grid_col colour of panel grid.
 #' @param grid_size size of panel grid.
-<<<<<<< HEAD
 #' @param fixed if TRUE (default), will add \code{coord_fixed()} to plot.
-=======
-#' @param fixed if TRUE (default), will set plot aspect to 1.
->>>>>>> 42c9525c24b3f4a0c42422a1d4bd1ddec606e041
 #' @param use_md logical. if TRUE, will use \code{ggtext::element_markdown()} to
 #' draw the axis labels.
 #' @param facets NULL or a parameters list of \code{facet_wrap}.
