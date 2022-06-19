@@ -11,6 +11,8 @@
 #' @rdname geom_diag_label
 #' @author Hou Yun
 #' @export
+#' @examples
+#' qcorrplot(correlate(mtcars)) + geom_diag_label()
 geom_diag_label <- function(..., geom = NULL)
 {
   structure(.Data = list(geom = geom, params = list(...)),

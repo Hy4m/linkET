@@ -41,11 +41,6 @@ as.igraph.mantel_tbl <- function(x, ...) {
 }
 
 #' @rdname network
-as.igraph.pro_tbl <- function(x, ...) {
-  as.igraph(as_md_tbl(x), ...)
-}
-
-#' @rdname network
 as.igraph.easycorrelation <- function(x, ...) {
   as.igraph(as_md_tbl(x), ...)
 }
@@ -72,11 +67,6 @@ as_tbl_graph.correlate <- function(x, ...) {
 
 #' @rdname network
 as_tbl_graph.mantel_tbl <- function(x, ...) {
-  as_tbl_graph(as.igraph(x, ...))
-}
-
-#' @rdname network
-as_tbl_graph.pro_tbl <- function(x, ...) {
   as_tbl_graph(as.igraph(x, ...))
 }
 

@@ -87,7 +87,7 @@ geom_mark <- function(mapping = NULL,
   )
 }
 
-#' @rdname geom_mark
+#' @rdname linkET-extensions
 #' @format NULL
 #' @usage NULL
 #' @export

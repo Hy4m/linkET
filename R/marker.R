@@ -32,7 +32,6 @@ marker <- function(x, ...) {
 
 #' @method marker grob
 #' @rdname marker
-#' @export
 marker.grob <- function(x,
                         width = 1,
                         height = 1,
@@ -59,7 +58,6 @@ marker.grob <- function(x,
 
 #' @method marker gList
 #' @rdname marker
-#' @export
 marker.gList <- function(x,
                          width = 1,
                          height = 1,
@@ -76,7 +74,6 @@ marker.gList <- function(x,
 
 #' @method marker ggplot
 #' @rdname marker
-#' @export
 marker.ggplot <- function(x,
                           width = 1,
                           height = 1,
@@ -93,7 +90,6 @@ marker.ggplot <- function(x,
 
 #' @method marker raster
 #' @rdname marker
-#' @export
 marker.raster <- function(x,
                           width = 1,
                           height = 1,
@@ -110,7 +106,6 @@ marker.raster <- function(x,
 
 #' @method marker magick-image
 #' @rdname marker
-#' @export
 `marker.magick-image` <- function(x,
                                   width = 1,
                                   height = 1,
@@ -127,13 +122,12 @@ marker.raster <- function(x,
 
 #' @method marker formula
 #' @rdname marker
-#' @export
-marker.formula<- function(x,
-                          width = 1,
-                          height = 1,
-                          width_unit = "cm",
-                          height_unit = width_unit,
-                          ...) {
+marker.formula <- function(x,
+                           width = 1,
+                           height = 1,
+                           width_unit = "cm",
+                           height_unit = width_unit,
+                           ...) {
   echoGrob <- get_function("gridGraphics", "echoGrob")
   cur <- dev.cur()
   eval(parse(text = as.character(x)[2]), envir = parent.env())
@@ -151,16 +145,15 @@ marker.formula<- function(x,
 
 #' @method marker character
 #' @rdname marker
-#' @export
-marker.character<- function(x,
-                            width = 1,
-                            height = 1,
-                            width_unit = "cm",
-                            height_unit = width_unit,
-                            r = 0,
-                            n = 5,
-                            ratio = 0.618,
-                            ...) {
+marker.character <- function(x,
+                             width = 1,
+                             height = 1,
+                             width_unit = "cm",
+                             height_unit = width_unit,
+                             r = 0,
+                             n = 5,
+                             ratio = 0.618,
+                             ...) {
   nn <- max(length(x), length(width), length(height), length(width_unit),
            length(height_unit))
   x <- rep_len(x, nn)
@@ -205,7 +198,6 @@ marker.character<- function(x,
 
 #' @method marker list
 #' @rdname marker
-#' @export
 marker.list <- function(x,
                         width = 1,
                         height = 1,
@@ -267,7 +259,6 @@ marker.list <- function(x,
 
 #' @method marker marker
 #' @rdname marker
-#' @export
 marker.marker <- function(x, ...) {
   x
 }
@@ -571,7 +562,7 @@ all_type <- c("square", "circle", "star", "heart", "ellipse", "cross",
               "triangle", "triangle2", "shade")
 
 #' @noRd
-rename_grobs <- function(x, force = FALSE) {
+rename_grobs <- function(x, force = TRUE) {
   if (isFALSE(force)) {
     hash <- vapply(x, digest::digest, character(1))
     dup <- duplicated(hash)

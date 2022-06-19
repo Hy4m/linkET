@@ -21,7 +21,6 @@ as_md_tbl <- function(x, ...) {
 
 #' @method as_md_tbl matrix_data
 #' @rdname as_md_tbl
-#' @export
 as_md_tbl.matrix_data <- function(x, ...)
 {
   type <- attr(x, "type")
@@ -50,7 +49,6 @@ as_md_tbl.matrix_data <- function(x, ...)
 
 #' @method as_md_tbl grouped_matrix_data
 #' @rdname as_md_tbl
-#' @export
 as_md_tbl.grouped_matrix_data <- function(x, ...)
 {
   type <- vapply(x, attr, character(1), "type")
@@ -92,33 +90,8 @@ as_md_tbl.grouped_matrix_data <- function(x, ...)
             class = clss)
 }
 
-#' @method as_md_tbl pro_tbl
-#' @rdname as_md_tbl
-#' @export
-as_md_tbl.pro_tbl <- function(x, byrow = TRUE, ...) {
-  class(x) <- class(x)[-1L]
-  grouped <- attr(x, "grouped")
-  spec <- env <- NULL
-  if(isTRUE(byrow)) {
-    x <- as_md_tbl(x,
-                   row_vars = spec,
-                   col_vars = env,
-                   is_corr = TRUE)
-  } else {
-    x <- as_md_tbl(x,
-                   row_vars = env,
-                   col_vars = spec,
-                   is_corr = TRUE)
-  }
-  if (isTRUE(grouped)) {
-    class(x) <- c("cor_md_tbl", "grouped_md_tbl", "md_tbl", "tbl_df", "tbl", "data.frame")
-  }
-  x
-}
-
 #' @method as_md_tbl mantel_tbl
 #' @rdname as_md_tbl
-#' @export
 as_md_tbl.mantel_tbl <- function(x, byrow = TRUE, ...) {
   class(x) <- class(x)[-1L]
   grouped <- attr(x, "grouped")
@@ -142,7 +115,6 @@ as_md_tbl.mantel_tbl <- function(x, byrow = TRUE, ...) {
 
 #' @method as_md_tbl easycorrelation
 #' @rdname as_md_tbl
-#' @export
 as_md_tbl.easycorrelation <- function(x,
                                       type = "full",
                                       diag = TRUE,
@@ -228,7 +200,6 @@ as_md_tbl.easycorrelation <- function(x,
 
 #' @method as_md_tbl correlate
 #' @rdname as_md_tbl
-#' @export
 as_md_tbl.correlate <- function(x, ...) {
   x <- as_md_tbl(as_matrix_data(x, ...))
   class(x) <- c("cor_md_tbl", class(x))
@@ -237,7 +208,6 @@ as_md_tbl.correlate <- function(x, ...) {
 
 #' @method as_md_tbl grouped_correlate
 #' @rdname as_md_tbl
-#' @export
 as_md_tbl.grouped_correlate <- function(x, ...) {
   x <- as_md_tbl(as_matrix_data(x, ...))
   class(x) <- c("cor_md_tbl", class(x))
@@ -246,7 +216,6 @@ as_md_tbl.grouped_correlate <- function(x, ...) {
 
 #' @method as_md_tbl rcorr
 #' @rdname as_md_tbl
-#' @export
 as_md_tbl.rcorr <- function(x, ...) {
   as_md_tbl(as_correlate(x), ...)
 }
@@ -266,7 +235,6 @@ as_md_tbl.corr.test <- function(x, ...) {
 #' @param p_vars variable name of p value column.
 #' @method as_md_tbl data.frame
 #' @rdname as_md_tbl
-#' @export
 as_md_tbl.data.frame <- function(x,
                                  name = NULL,
                                  row_vars = NULL,
@@ -332,7 +300,6 @@ as_md_tbl.data.frame <- function(x,
 
 #' @method as_md_tbl matrix
 #' @rdname as_md_tbl
-#' @export
 as_md_tbl.matrix <- function(x, ...) {
   x <- as.data.frame(x)
   as_md_tbl(x, ...)
@@ -340,8 +307,17 @@ as_md_tbl.matrix <- function(x, ...) {
 
 #' @method as_md_tbl md_tbl
 #' @rdname as_md_tbl
-#' @export
 as_md_tbl.md_tbl <- function(x, ...) {
   x
+}
+
+#' @method as_md_tbl md_tbl
+#' @rdname as_md_tbl
+as_md_tbl.default <- function(x, ...) {
+  x <- tryCatch(as.matrix(x), error = function(e) {
+    msg <- paste("Cannot convert a", class(x)[1L], "object to md_tbl.")
+    stop(msg, call. = FALSE)
+  })
+  as_md_tbl(x, ...)
 }
 

@@ -7,11 +7,39 @@
 }
 
 .onLoad <- function(...) {
+  ### register pairs plot parameters
   register_pairs_plot(reset = TRUE)
-  for(g in c("cor_md_tbl", "correlate", "mantel_tbl", "pro_tbl",
+
+  ### register S3 method about network
+  for(g in c("cor_md_tbl", "correlate", "mantel_tbl",
              "easycorrelation", "rcorr", "corr.test")) {
     register_s3_method("igraph", "as.igraph", g)
     register_s3_method("tidygraph", "as_tbl_graph", g)
+  }
+
+  ### register S3 method about qcorrplot
+  for (g in c("cor_md_tbl", "matrix", "data.frame", "default")) {
+    register_s3_method("linkET", "qcorrplot", g)
+  }
+
+  ### register S3 method about as_matrix_data
+  for (g in c("matrix", "data.frame", "correlate", "grouped_correlate",
+              "rcorr", "corr.test", "default")) {
+    register_s3_method("linkET", "as_matrix_data", g)
+  }
+
+  ### register S3 method about as_md_tbl
+  for (g in c("matrix_data", "grouped_matrix_data", "mantel_tbl",
+              "easycorrelation", "correlate", "grouped_correlate",
+              "rcorr", "corr.test", "data.frame", "matrix", "md_tbl",
+              "default")) {
+    register_s3_method("linkET", "as_md_tbl", g)
+  }
+
+  ### register S3 method about marker
+  for (g in c("grob", "gList", "ggplot", "raster", "magick-image", "formula",
+              "character", "list", "marker")) {
+    register_s3_method("linkET", "marker", g)
   }
 }
 

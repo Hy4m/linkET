@@ -4,14 +4,12 @@
 \alias{as.igraph.cor_md_tbl}
 \alias{as.igraph.correlate}
 \alias{as.igraph.mantel_tbl}
-\alias{as.igraph.pro_tbl}
 \alias{as.igraph.easycorrelation}
 \alias{as.igraph.rcorr}
 \alias{as.igraph.corr.test}
 \alias{as_tbl_graph.cor_md_tbl}
 \alias{as_tbl_graph.correlate}
 \alias{as_tbl_graph.mantel_tbl}
-\alias{as_tbl_graph.pro_tbl}
 \alias{as_tbl_graph.easycorrelation}
 \alias{as_tbl_graph.rcorr}
 \alias{as_tbl_graph.corr.test}
@@ -22,8 +20,6 @@
 \method{as.igraph}{correlate}(x, ...)
 
 \method{as.igraph}{mantel_tbl}(x, ...)
-
-\method{as.igraph}{pro_tbl}(x, ...)
 
 \method{as.igraph}{easycorrelation}(x, ...)
 
@@ -36,8 +32,6 @@
 \method{as_tbl_graph}{correlate}(x, ...)
 
 \method{as_tbl_graph}{mantel_tbl}(x, ...)
-
-\method{as_tbl_graph}{pro_tbl}(x, ...)
 
 \method{as_tbl_graph}{easycorrelation}(x, ...)
 

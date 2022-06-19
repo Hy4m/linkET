@@ -193,7 +193,7 @@ geom_doughnut_temp <- function(mapping = NULL,
   )
 }
 
-#' @rdname geom_doughnut
+#' @rdname linkET-extensions
 #' @format NULL
 #' @usage NULL
 #' @export

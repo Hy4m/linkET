@@ -30,7 +30,6 @@ qcorrplot <- function(data, ...) {
 
 #' @rdname qcorrplot
 #' @method qcorrplot cor_md_tbl
-#' @export
 qcorrplot.cor_md_tbl <- function(data,
                                  mapping = NULL,
                                  drop = FALSE,
@@ -70,7 +69,6 @@ qcorrplot.cor_md_tbl <- function(data,
 
 #' @rdname qcorrplot
 #' @method qcorrplot matrix
-#' @export
 qcorrplot.matrix <- function(data,
                              mapping = NULL,
                              drop = FALSE,
@@ -94,7 +92,6 @@ qcorrplot.matrix <- function(data,
 
 #' @rdname qcorrplot
 #' @method qcorrplot data.frame
-#' @export
 qcorrplot.data.frame <- function(data,
                                  mapping = NULL,
                                  drop = FALSE,
@@ -118,7 +115,6 @@ qcorrplot.data.frame <- function(data,
 
 #' @rdname qcorrplot
 #' @method qcorrplot default
-#' @export
 qcorrplot.default <- function(data,
                               mapping = NULL,
                               drop = FALSE,
