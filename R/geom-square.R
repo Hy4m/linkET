@@ -44,7 +44,7 @@ geom_square <- function(mapping = NULL,
   )
 }
 
-#' @rdname geom_square
+#' @rdname linkET-extensions
 #' @format NULL
 #' @usage NULL
 #' @export

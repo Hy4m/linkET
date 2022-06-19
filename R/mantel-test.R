@@ -185,7 +185,7 @@ mantel_test <- function(spec,
     spec_select <- list(spec = 1:ncol(spec))
   }
   if(is.null(env_select)) {
-    env_select <- as.list(setNames(1:ncol(env), names(env)))
+    env_select <- as.list(stats::setNames(1:ncol(env), names(env)))
   }
 
   if(mantel_fun == "mantel.partial") {

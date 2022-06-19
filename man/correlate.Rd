@@ -96,6 +96,4 @@ print(m, TRUE)
 }
 \author{
 Hou Yun
-
-Hou Yun
 }

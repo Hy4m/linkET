@@ -221,6 +221,7 @@ correlate <- function(x,
 #' @export
 fast_correlate <- function(...)
 {
+  ## Note: will be removed in next version
   warning("fast_correlate() is soft deprecated,\n",
           "please use correlate() instead.", call. = FALSE)
   correlate(..., engine = "WGCNA")
@@ -230,6 +231,7 @@ fast_correlate <- function(...)
 #' @export
 fast_correlate2 <- function (...)
 {
+  ## Note: will be removed in next version
   warning("fast_correlate2() is soft deprecated,\n",
           "please use correlate() instead.", call. = FALSE)
   correlate(..., engine = "picante")
@@ -245,7 +247,6 @@ fast_correlate2 <- function (...)
 #' m <- correlate(mtcars, cor.test = TRUE)
 #' print(m)
 #' print(m, TRUE)
-#' @author Hou Yun
 #' @export
 print.correlate <- function(x, all = FALSE, ...) {
   if (all) print(x, ...) else print(x$r, ...)

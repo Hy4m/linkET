@@ -21,7 +21,6 @@
 #' @importFrom grid gTree
 #' @rdname geom_curve2
 #' @author Hou Yun
-#' @export
 geom_curve2 <- function(mapping = NULL,
                         data = NULL,
                         stat = "identity",
@@ -55,10 +54,9 @@ geom_curve2 <- function(mapping = NULL,
   )
 }
 
-#' @rdname geom_curve2
+#' @rdname linkET-extensions
 #' @format NULL
 #' @usage NULL
-#' @export
 GeomCurve2 <- ggproto(
   "GeomCurve2", GeomCurve,
   default_aes = aes(colour = "grey35", size = 0.5, linetype = 1,

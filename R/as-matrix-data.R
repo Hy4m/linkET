@@ -15,7 +15,6 @@ as_matrix_data <- function(x, ...)
 }
 
 #' @rdname as_matrix_data
-#' @export
 #' @method as_matrix_data matrix
 as_matrix_data.matrix <- function(x,
                                   name = NULL,
@@ -32,7 +31,6 @@ as_matrix_data.matrix <- function(x,
 
 #' @param include one of "numeric" (default), "character" or "factor".
 #' @rdname as_matrix_data
-#' @export
 #' @method as_matrix_data data.frame
 as_matrix_data.data.frame <- function(x,
                                       name = NULL,
@@ -53,7 +51,6 @@ as_matrix_data.data.frame <- function(x,
 }
 
 #' @rdname as_matrix_data
-#' @export
 #' @method as_matrix_data correlate
 as_matrix_data.correlate <- function(x,
                                      extra_mat = list(),
@@ -72,7 +69,6 @@ as_matrix_data.correlate <- function(x,
 }
 
 #' @rdname as_matrix_data
-#' @export
 #' @method as_matrix_data grouped_correlate
 as_matrix_data.grouped_correlate <- function(x,
                                              extra_mat = list(),
@@ -95,7 +91,6 @@ as_matrix_data.grouped_correlate <- function(x,
 }
 
 #' @rdname as_matrix_data
-#' @export
 #' @method as_matrix_data rcorr
 as_matrix_data.rcorr <- function(x,
                                  extra_mat = list(),
@@ -105,7 +100,6 @@ as_matrix_data.rcorr <- function(x,
 }
 
 #' @rdname as_matrix_data
-#' @export
 #' @method as_matrix_data corr.test
 as_matrix_data.corr.test <- function(x,
                                      extra_mat = list(),
@@ -115,7 +109,6 @@ as_matrix_data.corr.test <- function(x,
 }
 
 #' @rdname as_matrix_data
-#' @export
 #' @method as_matrix_data default
 as_matrix_data.default <- function(x, ...)
 {

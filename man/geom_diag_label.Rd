@@ -20,6 +20,9 @@ Add diagnoal labels on correlation plot
     \code{qcorrplot()} functions to add diagnoal labels on correct position
     base on different type of cor_tbl object.
 }
+\examples{
+qcorrplot(correlate(mtcars)) + geom_diag_label()
+}
 \author{
 Hou Yun
 }

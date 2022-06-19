@@ -4,7 +4,6 @@
 \alias{as_md_tbl}
 \alias{as_md_tbl.matrix_data}
 \alias{as_md_tbl.grouped_matrix_data}
-\alias{as_md_tbl.pro_tbl}
 \alias{as_md_tbl.mantel_tbl}
 \alias{as_md_tbl.easycorrelation}
 \alias{as_md_tbl.correlate}
@@ -14,6 +13,7 @@
 \alias{as_md_tbl.data.frame}
 \alias{as_md_tbl.matrix}
 \alias{as_md_tbl.md_tbl}
+\alias{as_md_tbl.default}
 \title{Coerce matrix_data to data frames}
 \usage{
 as_md_tbl(x, ...)
@@ -21,8 +21,6 @@ as_md_tbl(x, ...)
 \method{as_md_tbl}{matrix_data}(x, ...)
 
 \method{as_md_tbl}{grouped_matrix_data}(x, ...)
-
-\method{as_md_tbl}{pro_tbl}(x, byrow = TRUE, ...)
 
 \method{as_md_tbl}{mantel_tbl}(x, byrow = TRUE, ...)
 
@@ -51,6 +49,8 @@ as_md_tbl(x, ...)
 )
 
 \method{as_md_tbl}{matrix}(x, ...)
+
+\method{as_md_tbl}{md_tbl}(x, ...)
 
 \method{as_md_tbl}{md_tbl}(x, ...)
 }

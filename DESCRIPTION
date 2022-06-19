@@ -19,7 +19,6 @@ Depends: R (>= 3.5.0)
 Imports: 
     digest,
     dplyr, 
-    geomtextpath,
     ggplot2 (>= 3.0.0), 
     glue, 
     grDevices,

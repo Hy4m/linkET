@@ -113,7 +113,7 @@ geom_shaping <- function(mapping = NULL,
   )
 }
 
-#' @rdname geom_shaping
+#' @rdname linkET-extensions
 #' @format NULL
 #' @usage NULL
 #' @export
