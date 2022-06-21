@@ -66,7 +66,7 @@ qcorrplot(data, ...)
 
 \item{mapping}{default list of aesthetic mappings to use for plot.}
 
-\item{drop}{logical.}
+\item{drop}{logical, if TRUE will drop unused axis labels.}
 
 \item{grid_col}{colour of panel grid.}
 

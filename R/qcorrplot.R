@@ -2,7 +2,7 @@
 #' This functions can be used to visualize simply and directly a correlation matrix.
 #' @param data one of 'correlate', 'rcorr' or 'corr.test' object.
 #' @param mapping default list of aesthetic mappings to use for plot.
-#' @param drop logical.
+#' @param drop logical, if TRUE will drop unused axis labels.
 #' @param grid_col colour of panel grid.
 #' @param grid_size size of panel grid.
 #' @param fixed if TRUE (default), will add \code{coord_fixed()} to plot.
