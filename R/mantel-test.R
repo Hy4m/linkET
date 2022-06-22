@@ -101,6 +101,7 @@ mantel_test <- function(spec,
   }
 
   if(!is.null(group)) {
+    ## TODO: set group by regex
     if(length(group) != nrow(spec)) {
       stop("Length of 'group' and rows of 'spec' must be same.", call. = FALSE)
     }
