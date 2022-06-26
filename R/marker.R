@@ -182,6 +182,8 @@ marker.character <- function(x,
                             heart = heartGrob(nstep = 100),
                             ellipse = ellipseGrob(r = r[ii], nstep = 100),
                             cross = crossGrob(),
+                            cross0 = cross2Grob(),
+                            cross2 = cross2Grob(FALSE),
                             triangle = triangleGrob(1),
                             triangle2 = triangleGrob(2),
                             shade = shadeGrob())
@@ -558,8 +560,25 @@ triangleGrob <- function(type = 1) {
 }
 
 #' @noRd
+cross2Grob <- function(round = TRUE) {
+  cross <- grid::polygonGrob(
+    x = c(1/3, 1/3, 0, 0, 1/3, 1/3, 2/3, 2/3, 1, 1, 2/3, 2/3, 1/3),
+    y = c(1, 2/3, 2/3, 1/3, 1/3, 0, 0, 1/3, 1/3, 2/3, 2/3, 1, 1)
+  )
+  if (isTRUE(round)) {
+    tt <- seq(0, 2*pi, length.out = 360)
+    circle <- grid::polygonGrob(
+      x = 0.5 * cos(tt) + 0.5,
+      y = 0.5 * sin(tt) + 0.5
+    )
+    cross <- gridGeometry::polyclipGrob(circle, cross)
+  }
+  cross
+}
+
+#' @noRd
 all_type <- c("square", "circle", "star", "heart", "ellipse", "cross",
-              "triangle", "triangle2", "shade")
+              "triangle", "triangle2", "shade", "cross2", "cross0")
 
 #' @noRd
 rename_grobs <- function(x, force = TRUE) {

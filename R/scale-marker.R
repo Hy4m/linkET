@@ -53,8 +53,8 @@ marker_pal <- function ()
 {
   function(n) {
     if (n > length(all_type)) {
-      warning("The marker palette can deal with a maximum of 8 discrete.",
-              call. = FALSE)
+      warning(paste0("The marker palette can deal with a maximum of ",
+                     length(all_type), " discrete."), call. = FALSE)
     }
     all_type[seq_len(n)]
   }
