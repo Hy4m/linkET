@@ -5,6 +5,7 @@
 #' @param expansion a list of x/y axis expansion of child plot.
 #' @param axis_child logical, if (TRUE) will add child plot axis.
 #' @param data2 NULL or a data frame.
+#' @param except character, which variable will not be contained in plot.
 #' @param type character, "full" (default), "upper" or "lower", display
 #' full matrix, lower triangular or upper triangular matrix.
 #' @param diag logical, if TRUE (default) will keep the diagonal of matrix data.
@@ -25,6 +26,7 @@ qpairs <- function(data,
                    expansion = NULL,
                    axis_child = TRUE,
                    data2 = NULL,
+                   except = NULL,
                    type = "full",
                    diag = TRUE,
                    rasterize = TRUE,
@@ -34,6 +36,7 @@ qpairs <- function(data,
                    ...) {
   df <- .pairs_tbl(data = data,
                    data2 = data2,
+                   except = except,
                    type = type,
                    diag = diag,
                    mapping = mapping,
@@ -42,8 +45,8 @@ qpairs <- function(data,
   ## init and add panel grid
   p <- hyplot(df) +
     geom_panel_grid(colour = grid_col, size = grid_size) +
-    theme(aspect.ratio = 1,
-          panel.background = element_blank(),
+    ggplot2::coord_fixed(expand = FALSE) +
+    theme(panel.background = element_blank(),
           axis.text = element_text(size = 10.5, colour = "black"),
           axis.title = element_blank(),
           axis.ticks = element_blank(),
@@ -388,6 +391,7 @@ plot_type <- function(...) {
 #' @noRd
 .pairs_tbl <- function(data,
                        data2 = NULL,
+                       except = NULL,
                        type = "full",
                        diag = TRUE,
                        mapping = NULL,
@@ -417,15 +421,28 @@ plot_type <- function(...) {
                                       rep(d2_type, ncol(data)))
   )
 
+  if (!is.null(except)) {
+    .rownames <- .colnames <- NULL
+    df <- dplyr::filter(df, !(.rownames %in% except), !(.colnames %in% except))
+  }
+
   if (identical(data, data2)) {
     source_data <- data
   } else {
     source_data <- cbind(data, data2[setdiff(names(data2), names(data))])
   }
 
+  if (!is.null(except)) {
+    row_names <- names(data)[!names(data) %in% except]
+    col_names <- names(data2)[!names(data2) %in% except]
+  } else {
+    row_names <- names(data)
+    col_names <- names(data2)
+  }
+
   df <- structure(df,
-                  row_names = names(data),
-                  col_names = names(data2),
+                  row_names = row_names,
+                  col_names = col_names,
                   type = type,
                   diag = diag,
                   class = c("scattermatrix", "md_tbl", class(df)))
@@ -501,8 +518,7 @@ plot_type <- function(...) {
     })
     attr(df, "axis_info") <- axis_info
   }
-  attr(df, "expansion") <- list(continuous = ct,
-                                discrete = dc)
+  attr(df, "expansion") <- list(continuous = ct, discrete = dc)
   df
 }
 

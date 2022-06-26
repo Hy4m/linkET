@@ -10,6 +10,7 @@ qpairs(
   expansion = NULL,
   axis_child = TRUE,
   data2 = NULL,
+  except = NULL,
   type = "full",
   diag = TRUE,
   rasterize = TRUE,
@@ -29,6 +30,8 @@ qpairs(
 \item{axis_child}{logical, if (TRUE) will add child plot axis.}
 
 \item{data2}{NULL or a data frame.}
+
+\item{except}{character, which variable will not be contained in plot.}
 
 \item{type}{character, "full" (default), "upper" or "lower", display
 full matrix, lower triangular or upper triangular matrix.}
