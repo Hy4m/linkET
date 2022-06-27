@@ -17,6 +17,8 @@ qpairs(
   res = NULL,
   grid_col = "grey50",
   grid_size = 0.25,
+  drop = TRUE,
+  use_md = NULL,
   ...
 )
 }
@@ -45,6 +47,11 @@ full matrix, lower triangular or upper triangular matrix.}
 \item{grid_col}{colour of panel grid.}
 
 \item{grid_size}{size of panel grid.}
+
+\item{drop}{logical. If TRUE, the unused labels will be removed.}
+
+\item{use_md}{logical. if TRUE, will use \code{ggtext::element_markdown()} to
+draw the axis labels.}
 
 \item{...}{passed to \code{guide_child_axis()}.}
 }

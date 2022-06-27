@@ -13,6 +13,9 @@
 #' @param res positive numeric, used to set the resolution of raster.
 #' @param grid_col colour of panel grid.
 #' @param grid_size size of panel grid.
+#' @param drop logical. If TRUE, the unused labels will be removed.
+#' @param use_md logical. if TRUE, will use \code{ggtext::element_markdown()} to
+#' draw the axis labels.
 #' @param ... passed to \code{guide_child_axis()}.
 #' @return a ggplot object.
 #' @rdname qpairs
@@ -33,6 +36,8 @@ qpairs <- function(data,
                    res = NULL,
                    grid_col = "grey50",
                    grid_size = 0.25,
+                   drop = TRUE,
+                   use_md = NULL,
                    ...) {
   df <- .pairs_tbl(data = data,
                    data2 = data2,
@@ -43,7 +48,7 @@ qpairs <- function(data,
                    expansion = expansion)
 
   ## init and add panel grid
-  p <- hyplot(df) +
+  p <- hyplot(df, drop = drop, use_md = use_md) +
     geom_panel_grid(colour = grid_col, size = grid_size) +
     ggplot2::coord_fixed(expand = FALSE) +
     theme(panel.background = element_blank(),
