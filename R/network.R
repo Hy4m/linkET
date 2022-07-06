@@ -84,3 +84,45 @@ as_tbl_graph.rcorr <- function(x, ...) {
 as_tbl_graph.corr.test <- function(x, ...) {
   as_tbl_graph(as.igraph(x, ...))
 }
+
+#' @noRd
+adjacency_matrix <- function(x, ...) {
+  UseMethod("adjacency_matrix")
+}
+
+#' @method adjacency_matrix cor_md_tbl
+adjacency_matrix.cor_md_tbl <- function(x, ...) {
+  if (isTRUE(attr(x, "grouped"))) {
+    stop("Cannot convert a grouped md_tbl to a adjacency_matrix.", call. = FALSE)
+  }
+  rnm <- row_names(x)
+  cnm <- col_names(x)
+  x <- dplyr::filter(x, ...)
+  df_to_matrix(x, "r", row_id = ".rownames", col_id = ".colnames",
+               row_names = rnm, col_names = cnm, missing = 0)
+}
+
+#' @method adjacency_matrix default
+adjacency_matrix.default <- function(x, ...) {
+  adjacency_matrix(as_md_tbl(x), ...)
+}
+
+#' @noRd
+df_to_matrix <- function(x,
+                         value,
+                         row_id = NULL,
+                         col_id = NULL,
+                         row_names = NULL,
+                         col_names = NULL,
+                         missing = NA) {
+  row_id <- row_id %||% names(x)[1]
+  col_id <- col_id %||% names(x)[2]
+  rnm <- row_names %||% unique(x[[row_id]])
+  cnm <- col_names %||% unique(x[[col_id]])
+  ID <- paste(rep(rnm, length(cnm)), rep(cnm, each = length(rnm)), sep = "--")
+  vv <- rep(missing, length(ID))
+  ii <- match(paste(x[[row_id]], x[[col_id]], sep = "--"), ID)
+  vv[ii] <- x[[value]]
+  matrix(vv, nrow = length(rnm), ncol = length(cnm),
+         dimnames = list(rnm, cnm))
+}
