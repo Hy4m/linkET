@@ -57,13 +57,12 @@ correlate <- function(x,
                       adjust_method = "holm",
                       engine = "default",
                       ...) {
-  engine <- match.arg(engine, c("default", "WGCNA", "picante", "Hmisc", "psych"))
+  engine <- match.arg(engine, c("default", "WGCNA", "picante", "Hmisc", "psych",
+                                "correlation"))
   if (engine == "picante" && !is.null(y)) {
     warning("`y` will be abandoned when 'engine = picante'.", call. = FALSE)
     y <- NULL
   }
-
-
 
   if (is.null(group)) {
     if (engine == "default") {
@@ -106,7 +105,7 @@ correlate <- function(x,
         adjust_method <- match.arg(adjust_method, p.adjust.methods)
         out$p <- p.adjust(out$p, adjust_method)
       }
-    } else {
+    } else if (engine == "psych") {
       corr.test <- get_function("psych", "corr.test")
       x <- as.data.frame(x)
       y <- if (is.null(y)) y else as.data.frame(y)
@@ -114,7 +113,18 @@ correlate <- function(x,
                                     y = y,
                                     use = if (use == "everything") "complete" else "pairwise",
                                     method = method,
-                                    adjust = if (isTRUE(adjust)) adjust_method else "none"))
+                                    adjust = if (isTRUE(adjust)) adjust_method else "none",
+                                    ...))
+    } else {
+      correlation <- get_function("correlation", "correlation")
+      x <- as.data.frame(x)
+      y <- if (is.null(y)) y else as.data.frame(y)
+      p_adjust <- if (isTRUE(adjust)) adjust_method else "none"
+      out <- as_correlate(correlation(data = x,
+                                      data2 = y,
+                                      method = method,
+                                      p_adjust = p_adjust,
+                                      ...))
     }
   } else {
     if (length(group) != nrow(x)) {

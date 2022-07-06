@@ -55,6 +55,60 @@ as_correlate.data.frame <- function(x, ...) {
   as_correlate(as.matrix(x), ...)
 }
 
+#' @method as_correlate easycorrelation
+#' @rdname as_correlate
+as_correlate.easycorrelation <- function(x, ...) {
+  if(nrow(x) < 1) {
+    stop("Empty data.", call. = FALSE)
+  }
+
+  grouped <- inherits(x, "grouped_easycorrelation")
+  is_null_data2 <- is.null(attr(x, "data2"))
+  row_names <- unique(x$Parameter1)
+  col_names <- unique(x$Parameter2)
+
+  if(isFALSE(is_null_data2)) {
+    corr <- tibble(.rownames = x$Parameter1,
+                   .colnames = x$Parameter2,
+                   r = x$r,
+                   p = x$p)
+    if (isTRUE(grouped)) {
+      corr$.group <- x$Group
+    }
+  } else {
+    corr <- tibble(.rownames = c(x$Parameter1, x$Parameter2),
+                   .colnames = c(x$Parameter2, x$Parameter1),
+                   r = c(x$r, x$r),
+                   p = c(x$p, x$p))
+    if (isTRUE(grouped)) {
+      corr$.group <- c(x$Group, x$Group)
+    }
+  }
+  mat <- matrix(nrow = length(row_names),
+                ncol = length(col_names),
+                dimnames = list(row_names, col_names))
+  corr$.rownames <- as.integer(factor(corr$.rownames, levels = row_names))
+  corr$.colnames <- as.integer(factor(corr$.colnames, levels = col_names))
+
+  if (isTRUE(grouped)) {
+    out <- lapply(split(corr, corr$.group), function(.corr) {
+      r <- mat
+      p <- mat
+      r[.corr$.rownames, .corr$.colnames] <- .corr$r
+      p[.corr$.rownames, .corr$.colnames] <- .corr$p
+      as_correlate(x = r, p = p, is_corr = TRUE)
+    })
+    class(out) <- "grouped_correlate"
+  } else {
+    r <- mat
+    p <- mat
+    r[corr$.rownames, corr$.colnames] <- corr$r
+    p[corr$.rownames, corr$.colnames] <- corr$p
+    out <- as_correlate(x = r, p = p, is_corr = TRUE)
+  }
+  out
+}
+
 
 #' @noRd
 check_corr <- function(x) {
