@@ -84,26 +84,21 @@ as_correlate.easycorrelation <- function(x, ...) {
       corr$.group <- c(x$Group, x$Group)
     }
   }
-  mat <- matrix(nrow = length(row_names),
-                ncol = length(col_names),
-                dimnames = list(row_names, col_names))
-  corr$.rownames <- as.integer(factor(corr$.rownames, levels = row_names))
-  corr$.colnames <- as.integer(factor(corr$.colnames, levels = col_names))
 
   if (isTRUE(grouped)) {
     out <- lapply(split(corr, corr$.group), function(.corr) {
-      r <- mat
-      p <- mat
-      r[.corr$.rownames, .corr$.colnames] <- .corr$r
-      p[.corr$.rownames, .corr$.colnames] <- .corr$p
+      r <- df_to_matrix(.corr, "r", row_id = ".rownames", col_id = ".colnames",
+                        row_names = row_names, col_names = col_names)
+      p <- df_to_matrix(.corr, "p", row_id = ".rownames", col_id = ".colnames",
+                        row_names = row_names, col_names = col_names)
       as_correlate(x = r, p = p, is_corr = TRUE)
     })
     class(out) <- "grouped_correlate"
   } else {
-    r <- mat
-    p <- mat
-    r[corr$.rownames, corr$.colnames] <- corr$r
-    p[corr$.rownames, corr$.colnames] <- corr$p
+    r <- df_to_matrix(corr, "r", row_id = ".rownames", col_id = ".colnames",
+                      row_names = row_names, col_names = col_names)
+    p <- df_to_matrix(corr, "p", row_id = ".rownames", col_id = ".colnames",
+                      row_names = row_names, col_names = col_names)
     out <- as_correlate(x = r, p = p, is_corr = TRUE)
   }
   out
