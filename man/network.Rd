@@ -15,7 +15,14 @@
 \alias{as_tbl_graph.corr.test}
 \title{Coerce to a Graph}
 \usage{
-\method{as.igraph}{cor_md_tbl}(x, ..., simplify = TRUE, directed = FALSE)
+\method{as.igraph}{cor_md_tbl}(
+  x,
+  ...,
+  use_adjacency = FALSE,
+  diag = FALSE,
+  simplify = TRUE,
+  directed = FALSE
+)
 
 \method{as.igraph}{correlate}(x, ...)
 
@@ -43,6 +50,10 @@
 \item{x}{any \code{R} object.}
 
 \item{...}{other parameters.}
+
+\item{use_adjacency}{logical, if TRUE will build graph from adjacency matrix.}
+
+\item{diag}{logical, if TRUE will keep the diagonal of adjacency matrix data.}
 
 \item{simplify}{if TRUE, Simple graphs are graphs which do not contain loop
 and multiple edges.}
