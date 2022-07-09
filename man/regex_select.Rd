@@ -8,7 +8,7 @@
 \title{Subset columns using regular expression
 Subset columns from a data frame if column names match the regular pattern.}
 \usage{
-regex_select(prefix = "", suffix = NULL, regex = NULL, ..., byrow = FALSE)
+regex_select(prefix = NULL, suffix = NULL, regex = NULL, ..., byrow = FALSE)
 
 prefix_with(data, chr = "", ..., byrow = FALSE)
 

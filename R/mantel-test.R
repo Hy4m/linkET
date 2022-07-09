@@ -347,7 +347,7 @@ check_env_ctrl <- function(env, env_ctrl, env_select) {
 #' @examples
 #' prefix_with(mtcars, "m")
 #' @export
-regex_select <- function(prefix = "",
+regex_select <- function(prefix = NULL,
                          suffix = NULL,
                          regex = NULL,
                          ...,
@@ -362,6 +362,7 @@ regex_select <- function(prefix = "",
   } else {
     regex <- regex
   }
+
   function(data) {
     if (!is.data.frame(data)) {
       data <- as.data.frame(data)
