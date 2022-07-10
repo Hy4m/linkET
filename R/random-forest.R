@@ -1,3 +1,4 @@
+## TODO: rand_forest and calc_relimp will be merged in feature importance function.
 #' Random forests
 #' @title Random forests
 #' @param spec,env a data.frame object.
