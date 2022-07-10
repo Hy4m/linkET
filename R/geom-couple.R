@@ -45,6 +45,7 @@ geom_couple <- function(data,
 #' @rdname geom_couple
 #' @export
 anno_link <- function(...) {
+  ## Note: will be removed in next version
   warning("`anno_link()` has been deprecated,\n",
           "please use `geom_couple()` instead.", call. = FALSE)
   geom_couple(...)
