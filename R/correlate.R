@@ -127,14 +127,14 @@ correlate <- function(x,
                                       ...))
     }
   } else {
-    if (length(group) != nrow(x)) {
-      stop("group should have same length as rows of x.", call. = FALSE)
-    }
+    # if (length(group) != nrow(x)) {
+    #   stop("group should have same length as rows of x.", call. = FALSE)
+    # }
     x <- tryCatch(as.data.frame(x), error = function(e) as.data.frame(as.matrix(x)))
-    x <- split(x, group)
+    x <- split_by_group(x, group)
     if (!is.null(y)) {
       y <- tryCatch(as.data.frame(y), error = function(e) as.data.frame(as.matrix(y)))
-      y <- split(y, group)
+      y <- split_by_group(y, group)
     } else {
       y <- rep_len(list(NULL), length(x))
     }

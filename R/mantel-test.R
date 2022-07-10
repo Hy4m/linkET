@@ -101,17 +101,17 @@ mantel_test <- function(spec,
   }
 
   if(!is.null(group)) {
-    ## TODO: set group by regex
-    if(length(group) != nrow(spec)) {
-      stop("Length of 'group' and rows of 'spec' must be same.", call. = FALSE)
-    }
+    # ## TODO: set group by regex
+    # if(length(group) != nrow(spec)) {
+    #   stop("Length of 'group' and rows of 'spec' must be same.", call. = FALSE)
+    # }
 
-    spec <- split(spec, group, drop = FALSE)
-    env <- split(env, group, drop = FALSE)
+    spec <- split_by_group(spec, group)
+    env <- split_by_group(env, group)
 
     if(mantel_fun == "mantel.partial") {
       if(is.data.frame(env_ctrl)) {
-        env_ctrl <- split(env_ctrl, group, drop = FALSE)
+        env_ctrl <- split_by_group(env_ctrl, group)
       }
       if(is.list(env_ctrl)) {
         env_ctrl <- env_ctrl[names(spec)]
