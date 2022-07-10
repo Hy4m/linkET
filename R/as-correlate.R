@@ -64,8 +64,8 @@ as_correlate.easycorrelation <- function(x, ...) {
 
   grouped <- inherits(x, "grouped_easycorrelation")
   is_null_data2 <- is.null(attr(x, "data2"))
-  row_names <- unique(x$Parameter1)
-  col_names <- unique(x$Parameter2)
+  row_names <- colnames(attr(x, "data"))
+  col_names <- if (is_null_data2) row_names else colnames(attr(x, "data2"))
 
   if(isFALSE(is_null_data2)) {
     corr <- tibble(.rownames = x$Parameter1,
@@ -82,6 +82,18 @@ as_correlate.easycorrelation <- function(x, ...) {
                    p = c(x$p, x$p))
     if (isTRUE(grouped)) {
       corr$.group <- c(x$Group, x$Group)
+      diag <- tibble(.rownames = rep(row_names, length(unique(x$Group))),
+                     .colnames = rep(col_names, length(unique(x$Group))),
+                     r = 1,
+                     p = 0,
+                     .group = rep(unique(x$Group), each = length(row_names)))
+      corr <- dplyr::bind_rows(corr, diag)
+    } else {
+      diag <- tibble(.rownames = row_names,
+                     .colnames = col_names,
+                     r = 1,
+                     p = 0)
+      corr <- dplyr::bind_rows(corr, diag)
     }
   }
 
