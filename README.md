@@ -239,3 +239,10 @@ correlate(mtcars) %>%
 ```
 
 <img src="man/figures/README-unnamed-chunk-3-1.png" width="100%" />
+
+## Citation
+
+To cite linkET in publications use:
+
+Houyun Huang(2021). linkET: Everything is Linkable. R package version
+0.0.3.

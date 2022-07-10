@@ -143,3 +143,8 @@ correlate(mtcars) %>%
   plot(layout = layout_with_circular)
 ```
 
+## Citation
+
+To cite linkET in publications use:
+
+Houyun Huang(2021). linkET: Everything is Linkable. R package version 0.0.3.
