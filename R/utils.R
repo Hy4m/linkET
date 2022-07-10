@@ -97,3 +97,39 @@ is_richtext <- function(x, pattern = NULL) {
 r_version <- function() {
   strsplit(R.version.string, " ")[[1]][3]
 }
+
+#' @noRd
+split_by_group <- function(data, group) {
+  n <- nrow(data)
+  if (is.list(group)) {
+    nm <- names(group) %||% rep("", length(group))
+    out <- vector("list", length = length(group))
+
+    for (ii in seq_along(group)) {
+      g <- group[[ii]]
+      if (is.function(g)) {
+        if (nm[ii] == "") {
+          stop("Invalid group parameters: should be a named list.", call. = FALSE)
+        } else {
+          out[[ii]] <- g(data)
+        }
+      } else {
+        if (!is.atomic(g)) {
+          stop("Invalid group parameters: should be a named list.", call. = FALSE)
+        }
+        if (length(g) == 1L) {
+          if (nm[ii] == "") {
+            nm[ii] <- g
+          }
+          out[[ii]] <- regex_select(regex = g, byrow = TRUE)(data)
+        } else {
+          out[[ii]] <- data[rownames(data) %in% g, , drop = FALSE]
+        }
+      }
+    }
+    names(out) <- nm
+  } else {
+    out <- split(data, group)
+  }
+  out
+}
