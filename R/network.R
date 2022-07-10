@@ -138,23 +138,3 @@ adjacency_matrix.cor_md_tbl <- function(x, ...) {
 adjacency_matrix.default <- function(x, ...) {
   adjacency_matrix(as_md_tbl(x, ...))
 }
-
-#' @noRd
-df_to_matrix <- function(x,
-                         value,
-                         row_id = NULL,
-                         col_id = NULL,
-                         row_names = NULL,
-                         col_names = NULL,
-                         missing = NA) {
-  row_id <- row_id %||% names(x)[1]
-  col_id <- col_id %||% names(x)[2]
-  rnm <- row_names %||% unique(x[[row_id]])
-  cnm <- col_names %||% unique(x[[col_id]])
-  ID <- paste(rep(rnm, length(cnm)), rep(cnm, each = length(rnm)), sep = "--")
-  vv <- rep(missing, length(ID))
-  ii <- match(paste(x[[row_id]], x[[col_id]], sep = "--"), ID)
-  vv[ii] <- x[[value]]
-  matrix(vv, nrow = length(rnm), ncol = length(cnm),
-         dimnames = list(rnm, cnm))
-}
