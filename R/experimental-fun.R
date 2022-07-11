@@ -267,10 +267,11 @@ register_pairs_plot <- function(...,
                  "jitter" = ggplot2::geom_jitter(),
                  "corr" = geom_corr())
   if (isTRUE(reset)) {
-    options("linkET.pairs.plot" = layers)
-    return(invisible(NULL))
+    gl <- list()
+  } else {
+    gl <- options("linkET.pairs.plot")$linkET.pairs.plot
   }
-  gl <- options("linkET.pairs.plot")$linkET.pairs.plot
+
   layers <- utils::modifyList(gl, utils::modifyList(layers, list(...)))
 
   if (!is.list(scale)) {
