@@ -507,7 +507,7 @@ plot_type <- function(...) {
     ct <- rep_len(ct, 4)
     dc <- rep_len(dc, 4)
     axis_info <- purrr::map_dfr(names(source_data), function(vars) {
-      xx <- data[[vars]]
+      xx <- source_data[[vars]]
       limits <- .get_limits(xx, expansion = if (is.numeric(xx)) ct else dc)
       if (is.numeric(xx)) {
         breaks <- pretty_in_range(xx)
