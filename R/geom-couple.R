@@ -75,8 +75,14 @@ ggplot_add.geom_couple <- function(object, plot, object_name) {
     }
   }
 
+  facets <- get_facet_vars(plot)
+  if (length(facets) > 1L) {
+    stop("Multi facets has not been implemented.", call. = FALSE)
+  }
+  if (!is.null(facets) && !facets %in% names(object$data)) {
+    stop("Not contain facets vars in data of geom_couple().", call. = FALSE)
+  }
   link_data <- link_tbl(data = object$data,
-                        md = md,
                         row_names = rev(row_names(md)),
                         col_names = col_names(md),
                         type = type,
@@ -85,7 +91,8 @@ ggplot_add.geom_couple <- function(object, plot, object_name) {
                         to = to,
                         drop = object$drop,
                         offset_x = object$offset_x,
-                        offset_y = object$offset_y)
+                        offset_y = object$offset_y,
+                        facets = facets)
 
   .isEdge <- NULL
   edge <- dplyr::filter(link_data, .isEdge)
@@ -178,7 +185,6 @@ nice_curvature <- function(curvature, by = "to") {
 
 #' @noRd
 link_tbl <- function(data,
-                     md,
                      row_names,
                      col_names,
                      type,
@@ -187,113 +193,127 @@ link_tbl <- function(data,
                      to = NULL,
                      drop = TRUE,
                      offset_x = NULL,
-                     offset_y = NULL)
+                     offset_y = NULL,
+                     facets = NULL)
 {
-  if(!is_md_tbl(md)) {
-    stop("Need a md_tbl.", call. = FALSE)
-  }
-
-
-  from <- if(is.null(from)) {
-    data[[1]]
-  } else {
-    eval_tidy(from, data)
-  }
-  to <- if(is.null(to)) {
-    data[[2]]
-  } else {
-    eval_tidy(to, data)
-  }
-  if(is.factor(from)) {
-    unique_from <- levels(from)
-    from <- as.character(from)
-    if(isTRUE(drop)) {
-      unique_from <- unique_from[unique_from %in% from]
+  if (is.null(facets)) {
+    from <- if(is.null(from)) {
+      data[[1]]
+    } else {
+      eval_tidy(from, data)
     }
-  } else {
-    from <- as.character(from)
-    unique_from <- unique(from[!is.na(from)])
-  }
-
-  if(!is.character(to)) {
-    to <- as.character(to)
-  }
-
-  n <- length(row_names)
-  m <- length(unique_from)
-  if(type == "full") {
-    l <- length(col_names)
-    x <- rep(l + 1 + max(l, n) * 0.382, m)
-    y <- seq(n + 0.5, 0.5, length.out = m + 2)[-c(1, m + 2)]
-    xend <- rep_len(l + 1, n)
-    yend <- 1:n
-  } else {
-    if(type == "upper") {
-      if(m == 1) {
-        x <- 0.5 + 0.18 * n
-        y <- 0.5 + 0.3 * n
-      } else if(m == 2) {
-        x <- c(0.5 - 0.02 * n, 0.5 + 0.2 * n)
-        y <- c(0.5 + 0.46 * n, 0.5 + 0.2 * n)
-      } else {
-        y <- seq(0.5 + n * (1 - 0.3), 0.5 + n * 0.1, length.out = m)
-        x <- seq(0.5 - 0.25 * n, 0.5 + 0.3 * n, length.out = m)
+    to <- if(is.null(to)) {
+      data[[2]]
+    } else {
+      eval_tidy(to, data)
+    }
+    if(is.factor(from)) {
+      unique_from <- levels(from)
+      from <- as.character(from)
+      if(isTRUE(drop)) {
+        unique_from <- unique_from[unique_from %in% from]
       }
     } else {
-      if(m == 1) {
-        x <- 0.5 + 0.82 * n
-        y <- 0.5 + 0.7 * n
-      } else if(m == 2) {
-        x <- c(0.5 + 0.8 * n, 0.5 + 1.02 * n)
-        y <- c(0.5 + 0.8 * n, 0.5 + 0.54 * n)
-      } else {
-        y <- seq(0.5 + n * (1 - 0.1), 0.5 + n * 0.3, length.out = m)
-        x <- seq(0.5 + 0.75 * n, 0.5 + 1.3 * n, length.out = m)
-      }
+      from <- as.character(from)
+      unique_from <- unique(from[!is.na(from)])
     }
-    xend <- n:1
-    yend <- 1:n
-    if(type == "upper") {
-      if(isTRUE(diag)) {
-        xend <- xend - 1
-      }
+
+    if(!is.character(to)) {
+      to <- as.character(to)
+    }
+
+    n <- length(row_names)
+    m <- length(unique_from)
+    if(type == "full") {
+      l <- length(col_names)
+      x <- rep(l + 1 + max(l, n) * 0.382, m)
+      y <- seq(n + 0.5, 0.5, length.out = m + 2)[-c(1, m + 2)]
+      xend <- rep_len(l + 1, n)
+      yend <- 1:n
     } else {
-      if(isTRUE(diag)) {
-        xend <- xend + 1
+      if(type == "upper") {
+        if(m == 1) {
+          x <- 0.5 + 0.18 * n
+          y <- 0.5 + 0.3 * n
+        } else if(m == 2) {
+          x <- c(0.5 - 0.02 * n, 0.5 + 0.2 * n)
+          y <- c(0.5 + 0.46 * n, 0.5 + 0.2 * n)
+        } else {
+          y <- seq(0.5 + n * (1 - 0.3), 0.5 + n * 0.1, length.out = m)
+          x <- seq(0.5 - 0.25 * n, 0.5 + 0.3 * n, length.out = m)
+        }
+      } else {
+        if(m == 1) {
+          x <- 0.5 + 0.82 * n
+          y <- 0.5 + 0.7 * n
+        } else if(m == 2) {
+          x <- c(0.5 + 0.8 * n, 0.5 + 1.02 * n)
+          y <- c(0.5 + 0.8 * n, 0.5 + 0.54 * n)
+        } else {
+          y <- seq(0.5 + n * (1 - 0.1), 0.5 + n * 0.3, length.out = m)
+          x <- seq(0.5 + 0.75 * n, 0.5 + 1.3 * n, length.out = m)
+        }
+      }
+      xend <- n:1
+      yend <- 1:n
+      if(type == "upper") {
+        if(isTRUE(diag)) {
+          xend <- xend - 1
+        }
+      } else {
+        if(isTRUE(diag)) {
+          xend <- xend + 1
+        }
       }
     }
-  }
-  x <- set_names(x, unique_from)
-  y <- set_names(y, unique_from)
-  xend <- set_names(xend, row_names)
-  yend <- set_names(yend, row_names)
+    x <- set_names(x, unique_from)
+    y <- set_names(y, unique_from)
+    xend <- set_names(xend, row_names)
+    yend <- set_names(yend, row_names)
 
-  if (!is.null(offset_x)) {
-    offset_x <- as.list(offset_x)
-    offset_x[["..x.."]] <- x
-    x <- do.call(offset, offset_x)
-    offset_x[["..x.."]] <- xend
-    xend <- do.call(offset, offset_x)
-  }
-  if (!is.null(offset_y)) {
-    offset_y <- as.list(offset_y)
-    offset_y[["..x.."]] <- y
-    y <- do.call(offset, offset_y)
-    offset_y[["..x.."]] <- yend
-    yend <- do.call(offset, offset_y)
-  }
+    if (!is.null(offset_x)) {
+      offset_x <- as.list(offset_x)
+      offset_x[["..x.."]] <- x
+      x <- do.call(offset, offset_x)
+      offset_x[["..x.."]] <- xend
+      xend <- do.call(offset, offset_x)
+    }
+    if (!is.null(offset_y)) {
+      offset_y <- as.list(offset_y)
+      offset_y[["..x.."]] <- y
+      y <- do.call(offset, offset_y)
+      offset_y[["..x.."]] <- yend
+      yend <- do.call(offset, offset_y)
+    }
 
-  edge <- tibble::tibble(.x = x[from],
-                         .y = y[from],
-                         .xend = xend[to],
-                         .yend = yend[to],
-                         .isEdge = TRUE)
-  node <- tibble::tibble(.x = x[unique_from],
-                         .y = y[unique_from],
-                         .label = unique_from,
-                         .isEdge = FALSE)
-
-  dplyr::bind_rows(dplyr::bind_cols(edge, data), node)
+    edge <- tibble::tibble(.x = x[from],
+                           .y = y[from],
+                           .xend = xend[to],
+                           .yend = yend[to],
+                           .isEdge = TRUE)
+    node <- tibble::tibble(.x = x[unique_from],
+                           .y = y[unique_from],
+                           .label = unique_from,
+                           .isEdge = FALSE)
+    dplyr::bind_rows(dplyr::bind_cols(edge, data), node)
+  } else {
+    data <- split(data, data[[facets]])
+    purrr::map2_dfr(data, names(data), function(.data, .name) {
+      df <- link_tbl(data = .data,
+                     row_names = row_names,
+                     col_names = col_names,
+                     type = type,
+                     diag = diag,
+                     from = from,
+                     to = to,
+                     drop = drop,
+                     offset_x = offset_x,
+                     offset_y = offset_y,
+                     facets = NULL)
+      df[[facets]][!df$.isEdge] <- .name
+      df
+    })
+  }
 }
 
 offset <- function(..x.., ...) {
@@ -321,3 +341,4 @@ offset <- function(..x.., ...) {
   }
   ..x..
 }
+

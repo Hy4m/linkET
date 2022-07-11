@@ -4,7 +4,15 @@
 \alias{hyplot}
 \title{Initialize hyplot}
 \usage{
-hyplot(md, mapping = NULL, drop = TRUE, use_md = NULL, facets = list(), ...)
+hyplot(
+  md,
+  mapping = NULL,
+  drop = TRUE,
+  use_md = NULL,
+  facets = list(),
+  facets_order = NULL,
+  ...
+)
 }
 \arguments{
 \item{md}{a matrix_data or md_tbl object or any can be converted to matrix_data.}
@@ -17,6 +25,8 @@ hyplot(md, mapping = NULL, drop = TRUE, use_md = NULL, facets = list(), ...)
 draw the axis labels.}
 
 \item{facets}{a parameters list of \code{facet_wrap}.}
+
+\item{facets_order}{character vector to set the order of facet panels.}
 
 \item{...}{passing to \code{\link{as_matrix_data}}.}
 }

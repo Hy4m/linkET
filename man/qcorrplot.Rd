@@ -20,6 +20,7 @@ qcorrplot(data, ...)
   fixed = TRUE,
   use_md = NULL,
   facets = list(),
+  facets_order = NULL,
   ...
 )
 
@@ -56,6 +57,7 @@ qcorrplot(data, ...)
   fixed = TRUE,
   use_md = NULL,
   facets = list(),
+  facets_order = NULL,
   ...
 )
 }
@@ -78,6 +80,8 @@ qcorrplot(data, ...)
 draw the axis labels.}
 
 \item{facets}{NULL or a parameters list of \code{facet_wrap}.}
+
+\item{facets_order}{character vector to set the order of facet panels.}
 }
 \value{
 a gg object.

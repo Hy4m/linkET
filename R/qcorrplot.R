@@ -9,6 +9,7 @@
 #' @param use_md logical. if TRUE, will use \code{ggtext::element_markdown()} to
 #' draw the axis labels.
 #' @param facets NULL or a parameters list of \code{facet_wrap}.
+#' @param facets_order character vector to set the order of facet panels.
 #' @param ... other parameters.
 #' @return a gg object.
 #' @rdname qcorrplot
@@ -38,6 +39,7 @@ qcorrplot.cor_md_tbl <- function(data,
                                  fixed = TRUE,
                                  use_md = NULL,
                                  facets = list(),
+                                 facets_order = NULL,
                                  ...) {
   if("p" %in% names(data)) {
     base_mapping <- aes_(fill = ~r, r = ~r, r0 = ~r, pvalue = ~p)
@@ -49,7 +51,8 @@ qcorrplot.cor_md_tbl <- function(data,
               mapping = aes_modify(base_mapping, mapping),
               drop = drop,
               use_md = use_md,
-              facets = facets)
+              facets = facets,
+              facets_order = facets_order)
 
   ## add panel grid
   p <- p + geom_panel_grid(colour = grid_col, size = grid_size)
@@ -123,6 +126,7 @@ qcorrplot.default <- function(data,
                               fixed = TRUE,
                               use_md = NULL,
                               facets = list(),
+                              facets_order = NULL,
                               ...) {
   data <- as_md_tbl(data, ...)
   qcorrplot(data = data,
@@ -132,5 +136,6 @@ qcorrplot.default <- function(data,
             grid_size = grid_size,
             fixed = fixed,
             use_md = use_md,
-            facets = facets)
+            facets = facets,
+            facets_order = facets_order)
 }

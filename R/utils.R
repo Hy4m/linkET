@@ -153,3 +153,12 @@ df_to_matrix <- function(x,
   matrix(vv, nrow = length(rnm), ncol = length(cnm),
          dimnames = list(rnm, cnm))
 }
+
+#' @noRd
+get_facet_vars <- function(plot) {
+  if (inherits(plot$facet, "FacetNull")) {
+    return(NULL)
+  }
+  facet <- plot$facet$params$facets
+  names(facet)
+}

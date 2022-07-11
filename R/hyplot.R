@@ -6,6 +6,7 @@
 #' @param use_md logical. if TRUE, will use \code{ggtext::element_markdown()} to
 #' draw the axis labels.
 #' @param facets a parameters list of \code{facet_wrap}.
+#' @param facets_order character vector to set the order of facet panels.
 #' @param ... passing to \code{\link{as_matrix_data}}.
 #' @return a ggplot object.
 #' @importFrom ggplot2 ggplot
@@ -26,6 +27,7 @@ hyplot <- function(md,
                    drop = TRUE,
                    use_md = NULL,
                    facets = list(),
+                   facets_order = NULL,
                    ...) {
   if (!is_matrix_data(md) && !is_grouped_matrix_data(md) && !is_md_tbl(md)) {
     if (!"name" %in% names(list(...))) {
@@ -79,6 +81,14 @@ hyplot <- function(md,
     mapping <- modifyList(base_mapping, mapping)
   }
 
+  if (isTRUE(grouped)) {
+    .group <- NULL
+    if (!is.null(facets_order)) {
+      md$.group <- factor(md$.group, levels = facets_order)
+    }
+    facets$facets <- facets$facets %||% ~ .group
+  }
+
   p <- ggplot(data = md,
               mapping = mapping)
   p <- p + scale_x_discrete(limits = col_names,
@@ -96,11 +106,11 @@ hyplot <- function(md,
   # adjust the default theme
   p <- p + theme_hy(legend.position = guide_pos, use_md = use_md)
 
+  # auto facets
   if (isTRUE(grouped)) {
-    .group <- NULL
-    facets$facets <- facets$facets %||% ~ .group
     p <- p + do.call(facet_wrap, facets)
   }
+
   class(p) <- c("hyplot", class(p))
   p
 }
