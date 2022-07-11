@@ -271,6 +271,7 @@ register_pairs_plot <- function(...,
     return(invisible(NULL))
   }
   gl <- options("linkET.pairs.plot")$linkET.pairs.plot
+  layers <- utils::modifyList(gl, utils::modifyList(layers, list(...)))
 
   if (!is.list(scale)) {
     scale <- as.list(scale)
@@ -283,7 +284,6 @@ register_pairs_plot <- function(...,
 
     if (length(scale) > 1) {
       gs <- gl$scale %||% list()
-      layers <- utils::modifyList(gl, utils::modifyList(layers, list(...)))
       scales <- utils::modifyList(gs, scale)
       layers$scale <- scales
     }
