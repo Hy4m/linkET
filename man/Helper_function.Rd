@@ -15,6 +15,7 @@
 \alias{extract_diag}
 \alias{trim_diag}
 \alias{filter_func}
+\alias{trim_duplicate}
 \title{Helper function}
 \usage{
 row_names(md)
@@ -44,6 +45,8 @@ extract_diag(md)
 trim_diag(md)
 
 filter_func(..., type = "full", diag = FALSE)
+
+trim_duplicate(md)
 }
 \arguments{
 \item{md}{a matrix_data object.}

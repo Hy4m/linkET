@@ -252,3 +252,13 @@ filter_func <- function(..., type = "full", diag = FALSE) {
     dplyr::filter(data, ...)
   }
 }
+
+#' @rdname Helper_function
+#' @export
+trim_duplicate <- function(md) {
+  if (empty(md)) return(md)
+
+  id <- paste(md$.rownames, md$.colnames, sep = "-")
+  id2 <- paste(md$.colnames, md$.rownames, sep = "-")
+  dplyr::filter(id != id2)
+}
