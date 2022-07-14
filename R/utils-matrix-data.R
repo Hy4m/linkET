@@ -255,10 +255,16 @@ filter_func <- function(..., type = "full", diag = FALSE) {
 
 #' @rdname Helper_function
 #' @export
-trim_duplicate <- function(md) {
+trim_duplicate <- function(md, diag = TRUE) {
   if (empty(md)) return(md)
 
-  id <- paste(md$.rownames, md$.colnames, sep = "-")
-  id2 <- paste(md$.colnames, md$.rownames, sep = "-")
-  dplyr::filter(id != id2)
+  if (identical(row_names(md), col_names(md)) && isTRUE(diag)) {
+    md <- trim_diag(md)
+  }
+
+  id <- purrr::map2_chr(md$.rownames, md$.colnames, function(id, id2) {
+    paste0(sort(c(id, id2)), collapse = "-")
+  })
+
+  md[!duplicated(id), ]
 }

@@ -46,7 +46,7 @@ trim_diag(md)
 
 filter_func(..., type = "full", diag = FALSE)
 
-trim_duplicate(md)
+trim_duplicate(md, diag = TRUE)
 }
 \arguments{
 \item{md}{a matrix_data object.}
