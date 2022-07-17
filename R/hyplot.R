@@ -82,7 +82,6 @@ hyplot <- function(md,
   }
 
   if (isTRUE(grouped)) {
-    .group <- NULL
     if (!is.null(facets_order)) {
       md$.group <- factor(md$.group, levels = facets_order)
     }
@@ -111,6 +110,7 @@ hyplot <- function(md,
     p <- p + do.call(facet_wrap, facets)
   }
 
+  attr(p, "facets_order") <- facets_order
   class(p) <- c("hyplot", class(p))
   p
 }

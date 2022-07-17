@@ -92,7 +92,8 @@ ggplot_add.geom_couple <- function(object, plot, object_name) {
                         drop = object$drop,
                         offset_x = object$offset_x,
                         offset_y = object$offset_y,
-                        facets = facets)
+                        facets = facets,
+                        facets_order = attr(plot, "facets_order"))
 
   .isEdge <- NULL
   edge <- dplyr::filter(link_data, .isEdge)
@@ -194,7 +195,8 @@ link_tbl <- function(data,
                      drop = TRUE,
                      offset_x = NULL,
                      offset_y = NULL,
-                     facets = NULL)
+                     facets = NULL,
+                     facets_order = NULL)
 {
   if (is.null(facets)) {
     from <- if(is.null(from)) {
@@ -298,7 +300,7 @@ link_tbl <- function(data,
     dplyr::bind_rows(dplyr::bind_cols(edge, data), node)
   } else {
     data <- split(data, data[[facets]])
-    purrr::map2_dfr(data, names(data), function(.data, .name) {
+    out <- purrr::map2_dfr(data, names(data), function(.data, .name) {
       df <- link_tbl(data = .data,
                      row_names = row_names,
                      col_names = col_names,
@@ -313,6 +315,10 @@ link_tbl <- function(data,
       df[[facets]][!df$.isEdge] <- .name
       df
     })
+    if (!is.null(facets_order)) {
+      out[[facets]] <- factor(out[[facets]], levels = facets_order)
+    }
+    out
   }
 }
 
