@@ -175,43 +175,21 @@ correlate <- function(x,
   m <- ncol(y)
   r <- cor(x, y, use = use, method = method)
 
-  p <- lower_ci <- upper_ci <- matrix(NA, ncol = m, nrow = n)
+  p <- matrix(NA, ncol = m, nrow = n, dimnames = list(rownames(r), colnames(r)))
   id <- expand.grid(1:n, 1:m)
   if (y_is_null) {
     id <- id[id$Var1 > id$Var2, , drop = FALSE]
     purrr::walk2(id$Var1, id$Var2, function(.idx, .idy) {
       tmp <- cor.test(x = x[ , .idx], y = y[ , .idy], method = method, ...)
       p[c(.idx, .idy), c(.idy, .idx)] <<- tmp$p.value
-      if (method == "pearson") {
-        if (nrow(x) > 3) {
-          lower_ci[c(.idx, .idy), c(.idy, .idx)] <<- tmp$conf.int[1]
-          upper_ci[c(.idx, .idy), c(.idy, .idx)] <<- tmp$conf.int[2]
-        } else {
-          warning("correlation test interval needs 4 observations at least.", call. = FALSE)
-        }
-      }
     })
     diag(p) <- 0
-    if (method == "pearson") {
-      diag(lower_ci) <- diag(upper_ci) <- 1
-    }
   } else {
     purrr::walk2(id$Var1, id$Var2, function(.idx, .idy) {
       tmp <- cor.test(x = x[ , .idx], y = y[ , .idy], method = method, ...)
       p[.idx, .idy] <<- tmp$p.value
-      if (method == "pearson") {
-        if (nrow(x) > 3) {
-          lower_ci[.idx, .idy] <<- tmp$conf.int[1]
-          upper_ci[.idx, .idy] <<- tmp$conf.int[2]
-        } else {
-          warning("correlation test interval needs 4 observations at least.", call. = FALSE)
-        }
-      }
     })
   }
-
-  lower_ci <- if (method == "pearson") lower_ci else NULL
-  upper_ci <- if (method == "pearson") upper_ci else NULL
   if (isTRUE(adjust)) {
     adjust_method <- match.arg(adjust_method, p.adjust.methods)
     p[] <- p.adjust(p, adjust_method)
@@ -220,10 +198,7 @@ correlate <- function(x,
   structure(
     .Data = list(
       r = r,
-      p = p,
-      lower_ci = lower_ci,
-      upper_ci = upper_ci
-    ), class = "correlate"
+      p = p), class = "correlate"
   )
 }
 

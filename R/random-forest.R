@@ -16,10 +16,10 @@
 #' @author Hou Yun
 #' @export
 random_forest <- function(spec,
-                        env,
-                        byrow = TRUE,
-                        seed = 123,
-                        ...)
+                          env,
+                          byrow = TRUE,
+                          seed = 123,
+                          ...)
 {
   if(!is.data.frame(spec))
     spec <- as.data.frame(spec)
