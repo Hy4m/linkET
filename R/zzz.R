@@ -41,6 +41,11 @@
               "character", "list", "marker")) {
     register_s3_method("linkET", "marker", g)
   }
+
+  ### register S3 method about as_correlate
+  for (g in c("matrix", "data.frame", "rcorr", "corr.test", "easycorrelation")) {
+    register_s3_method("linkET", "as_correlate", g)
+  }
 }
 
 register_s3_method <- function (pkg, generic, class, fun = NULL)
