@@ -26,7 +26,7 @@ matrix, lower triangular or upper triangular matrix.}
 
 \item{group}{NULL or a character vector.}
 
-\item{...}{passing to \code{\link{make_cluster}}.}
+\item{...}{not used.}
 }
 \value{
 a object of matrix_data

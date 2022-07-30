@@ -6,7 +6,7 @@
 #' @param diag logical, if TRUE (default) will keep the diagonal of matrix data.
 #' @param row_names,col_names the name of rows and columns.
 #' @param group NULL or a character vector.
-#' @param ... passing to \code{\link{make_cluster}}.
+#' @param ... not used.
 #' @return a object of matrix_data
 #' @rdname matrix_data
 #' @author Hou Yun
@@ -54,7 +54,7 @@ matrix_data <- function(x,
                   col_names = col_names)
     class(x) <- "grouped_matrix_data"
   }
-  make_cluster(x, ...)
+  x
 }
 
 #' @method print matrix_data
