@@ -31,6 +31,8 @@ as_md_tbl.matrix_data <- function(x, ...)
   md_tbl <- structure(.Data = bind_cols(id, value),
                       row_names = row_names(x),
                       col_names = col_names(x),
+                      row_tree = attr(x, "row_tree"),
+                      col_tree = attr(x, "col_tree"),
                       type = type,
                       diag = diag,
                       class = c("md_tbl", "tbl_df", "tbl", "data.frame"))

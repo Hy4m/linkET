@@ -25,8 +25,18 @@ as_matrix_data.matrix <- function(x,
     name <- deparse(substitute(x))
   }
 
-  x <- rlang::set_names(list(x), name)
-  matrix_data(x, group = group, ...)
+  if (!is.null(group)) {
+    row_tree <- col_tree <- NULL
+  } else {
+    row_tree <- attr(x, "row_tree")
+    col_tree <- attr(x, "col_tree")
+  }
+
+  x <- matrix_data(rlang::set_names(list(x), name),
+                   group = group, ...)
+  attr(x, "row_tree") <- row_tree
+  attr(x, "col_tree") <- col_tree
+  x
 }
 
 #' @param include one of "numeric" (default), "character" or "factor".
@@ -55,6 +65,8 @@ as_matrix_data.data.frame <- function(x,
 as_matrix_data.correlate <- function(x,
                                      extra_mat = list(),
                                      ...) {
+  row_tree <- attr(x, "row_tree")
+  col_tree <- attr(x, "col_tree")
   id <- vapply(x, is.null, logical(1))
   x <- x[!id]
   if(length(extra_mat) > 0) {
@@ -65,6 +77,8 @@ as_matrix_data.correlate <- function(x,
   }
   x <- matrix_data(x, group = NULL, ...)
   class(x) <- c("cor_matrix_data", class(x))
+  attr(x, "row_tree") <- row_tree
+  attr(x, "col_tree") <- col_tree
   x
 }
 
