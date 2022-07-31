@@ -57,7 +57,11 @@ make_list_names <- function(x, pre = "X", sep = "")
 #' @noRd
 empty <- function (df)
 {
-  is.null(df) || nrow(df) == 0 || ncol(df) == 0
+  if (inherits(df, "data.frame") || inherits(df, "matrix")) {
+    is.null(df) || nrow(df) == 0 || ncol(df) == 0
+  } else {
+    is.null(df) || length(df) == 0
+  }
 }
 
 #' @noRd
