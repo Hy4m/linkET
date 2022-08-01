@@ -23,7 +23,6 @@ Imports:
     glue, 
     grDevices,
     grid,
-    gridGeometry,
     gtable,
     igraph,
     magrittr, 
