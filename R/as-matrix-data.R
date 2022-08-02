@@ -1,3 +1,4 @@
+## TODO: add corr attributes instead of sub-class
 #' Coerce to a matrix_data
 #' @title as_matrix_data
 #' @param x any \code{R} object.
