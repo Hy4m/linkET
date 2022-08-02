@@ -36,6 +36,9 @@ as_md_tbl.matrix_data <- function(x, ...)
                       type = type,
                       diag = diag,
                       class = c("md_tbl", "tbl_df", "tbl", "data.frame"))
+  if (inherits(x, "cor_matrix_data")) {
+    class(md_tbl) <- c("cor_md_tbl", class(md_tbl))
+  }
   if(type == "upper") {
     extract_upper(md_tbl, diag = diag)
   } else if(type == "lower") {
