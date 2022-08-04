@@ -55,3 +55,15 @@ get_order.dist <- function(x, ...) {
   hc <- hclust(x)
   hc$order
 }
+
+#' @rdname get_order
+#' @export
+#' @method get_order ggtree
+get_order.ggtree <- function(x, name = NULL, ...) {
+  data <- x$data
+  order <- with(data, {
+    idx <- order(y, decreasing = TRUE)
+    label[idx][isTip[idx]]
+  })
+  get_order(order, name = name)
+}
