@@ -41,10 +41,6 @@ reorder_by.matrix <- function(x,
     by_rows <- stats::as.hclust(by_rows)
   }
 
-  if (inherits(by_rows, "hclust") || inherits(by_rows, "ggtree")) {
-    attr(x, "row_tree") <- by_rows
-  }
-
   if (inherits(by_rows, "numeric") || inherits(by_rows, "character")) {
     row_ord <- by_rows
   } else {
@@ -62,16 +58,20 @@ reorder_by.matrix <- function(x,
     by_cols <- stats::as.hclust(by_cols)
   }
 
-  if (inherits(by_cols, "hclust") || inherits(by_cols, "ggtree")) {
-    attr(x, "col_tree") <- by_cols
-  }
-
   if (inherits(by_cols, "numeric") || inherits(by_cols, "character")) {
     col_ord <- by_cols
   } else {
     col_ord <- get_order(by_cols)
   }
-  x[row_ord, col_ord, drop = FALSE]
+  x <- x[row_ord, col_ord, drop = FALSE]
+
+  if (inherits(by_rows, "hclust") || inherits(by_rows, "ggtree")) {
+    attr(x, "row_tree") <- by_rows
+  }
+  if (inherits(by_cols, "hclust") || inherits(by_cols, "ggtree")) {
+    attr(x, "col_tree") <- by_cols
+  }
+  x
 }
 
 #' @rdname reorder_by
@@ -89,6 +89,8 @@ reorder_by.data.frame <- function(x,
   as.data.frame(x)
 }
 
+#' @rdname reorder_by
+#' @export
 reorder_by.correlate <- function(x,
                                  by_rows = "hclust",
                                  by_cols = by_rows,
@@ -159,5 +161,47 @@ reorder_by.matrix_data <- function(x,
   attr(x, "col_tree") <- attr(first, "col_tree")
   attr(x, "row_names") <- rnm
   attr(x, "col_names") <- cnm
+  x
+}
+
+#' @rdname reorder_by
+#' @export
+reorder_by.md_tbl <- function(x,
+                              by_rows = NULL,
+                              by_cols = NULL,
+                              ...) {
+  if (inherits(by_rows, "dist")) {
+    by_rows <- hclust(by_rows, ...)
+  }
+  if (inherits(by_rows, "dendrogram")) {
+    by_rows <- stats::as.hclust(by_rows, ...)
+  }
+  if (inherits(by_rows, "md_tbl")) {
+    by_rows <- row_names(by_rows)
+  }
+  if (!is.null(by_rows)) {
+    if (inherits(by_rows, "hclust") || inherits(by_rows, "ggtree")) {
+      attr(x, "row_tree") <- by_rows
+    }
+    row_ord <- get_order(by_rows, name = row_names(x))
+    attr(x, "row_names") <- row_names(x)[row_ord]
+  }
+
+  if (inherits(by_cols, "dist")) {
+    by_cols <- hclust(by_cols, ...)
+  }
+  if (inherits(by_cols, "dendrogram")) {
+    by_cols <- stats::as.hclust(by_cols, ...)
+  }
+  if (inherits(by_cols, "md_tbl")) {
+    by_cols <- col_names(by_cols)
+  }
+  if (!is.null(by_cols)) {
+    if (inherits(by_cols, "hclust") || inherits(by_cols, "ggtree")) {
+      attr(x, "col_tree") <- by_cols
+    }
+    col_ord <- get_order(by_cols, name = col_names(x))
+    attr(x, "col_names") <- col_names(x)[col_ord]
+  }
   x
 }

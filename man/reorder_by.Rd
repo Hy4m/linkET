@@ -4,7 +4,9 @@
 \alias{reorder_by}
 \alias{reorder_by.matrix}
 \alias{reorder_by.data.frame}
+\alias{reorder_by.correlate}
 \alias{reorder_by.matrix_data}
+\alias{reorder_by.md_tbl}
 \title{Re-sorting Matrix Data}
 \usage{
 reorder_by(x, ...)
@@ -25,6 +27,8 @@ reorder_by(x, ...)
   ...
 )
 
+\method{reorder_by}{correlate}(x, by_rows = "hclust", by_cols = by_rows, dist_fun = NULL, ...)
+
 \method{reorder_by}{matrix_data}(
   x,
   by_rows = "hclust",
@@ -32,6 +36,8 @@ reorder_by(x, ...)
   dist_fun = dist_func(),
   ...
 )
+
+\method{reorder_by}{md_tbl}(x, by_rows = NULL, by_cols = NULL, ...)
 }
 \arguments{
 \item{x}{matrix data.}
