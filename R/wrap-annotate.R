@@ -8,6 +8,8 @@
 #' @param border,colour,color fill and border colour of the hclust bar.
 #' @author Hou Yun
 #' @rdname wrap_annotate
+#' @references Yu G (2022). aplot: Decorate a 'ggplot' with Associated Information. R package
+#' version 0.1.6, https://CRAN.R-project.org/package=aplot.
 #' @export
 wrap_annotate <- function(plot,
                           ...,

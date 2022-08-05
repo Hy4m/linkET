@@ -30,6 +30,10 @@ wrap_annotate(
 This function is a wrapper of \code{aplot}, and can be used to
 insert annotation.
 }
+\references{
+Yu G (2022). aplot: Decorate a 'ggplot' with Associated Information. R package
+version 0.1.6, https://CRAN.R-project.org/package=aplot.
+}
 \author{
 Hou Yun
 }
