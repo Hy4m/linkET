@@ -1,44 +1,27 @@
+#' @title Add Margin Annotation
+#' @description This function is a wrapper of \code{aplot}, and can be used to
+#' insert annotation.
+#' @param plot a ggplot object.
+#' @param ... annotation elements.
+#' @param width,height width/height of each annotation plot.
+#' @param k an integer scalar with the desired number of groups.
+#' @param border,colour,color fill and border colour of the hclust bar.
+#' @author Hou Yun
+#' @rdname wrap_annotate
+#' @export
 wrap_annotate <- function(plot,
                           ...,
                           width = NULL,
-                          height = NULL) {
+                          height = NULL,
+                          k = 2,
+                          colour = NULL,
+                          border = NA,
+                          color = NULL) {
   anno <- list(...)
   anno <- anno[names(anno)[names(anno) %in% c("r", "l", "t", "b")]]
 
   if (empty(anno)) {
     return(plot)
-  }
-
-  anno <- lapply(anno, function(x) {
-    if (inherits(x, "ggplot")) {
-      list(x)
-    } else {
-      x
-    }
-  })
-
-  nm <- names(anno)
-
-  for (ii in nm) {
-    ele_name <- names(anno[[ii]])
-    for (jj in seq_along(anno[[ii]])) {
-      if (identical(anno[[ii]][[jj]],  "tree")) {
-        anno[[ii]][[jj]] <- gen_tree(attr(plot$data,
-                                          if (is_row) "row_tree" else "col_tree"),
-                                     side = ii)
-      }
-      if (!is.null(ele_name)) {
-        if (ele_name[jj] != "") {
-          anno[[ii]][[jj]] <- anno[[ii]][[jj]] + ggplot2::labs(tag = ele_name[jj])
-        }
-      }
-
-      if (ii %in% c("r", "l")) {
-        anno[[ii]][[jj]] <- anno[[ii]][[jj]] + aplot::ylim2(plot)  + theme_no_axis("y")
-      } else {
-        anno[[ii]][[jj]] <- anno[[ii]][[jj]] + aplot::ylim2(plot) + theme_no_axis("x")
-      }
-    }
   }
 
   if (is.null(width)) {
@@ -68,26 +51,75 @@ wrap_annotate <- function(plot,
     height$b <- rep_len(height$b, length(anno$b))
   }
 
+  anno <- lapply(anno, function(x) {
+    if (inherits(x, "ggplot") || identical(x, "tree") || identical(x, "hc_bar")) {
+      list(x)
+    } else {
+      x
+    }
+  })
+
+  nm <- names(anno)
   for (ii in nm) {
-    if (ii == "r") {
-      for (jj in seq_along(anno[[ii]])) {
-        plot <- plot %>% aplot::insert_right(anno[[ii]][[jj]], width = width[[ii]][jj])
+    ele_name <- names(anno[[ii]])
+    tree_id <- if (ii %in% c("r", "l")) {"row_tree"} else "col_tree"
+    hc <- attr(plot$data, tree_id)
+    for (jj in seq_along(anno[[ii]])) {
+      if (identical(anno[[ii]][[jj]],  "tree")) {
+        anno[[ii]][[jj]] <- gen_tree(hc, side = ii)
+      }
+      if (identical(anno[[ii]][[jj]],  "hc_bar")) {
+        anno[[ii]][[jj]] <- gen_hc_bar(hc,
+                                       k = k,
+                                       side = ii,
+                                       colour = colour,
+                                       border = border,
+                                       color = color)
+      }
+      if (!is.null(ele_name)) {
+        if (ele_name[jj] != "") {
+          anno[[ii]][[jj]] <- anno[[ii]][[jj]] + ggplot2::labs(tag = ele_name[jj])
+        }
+      }
+
+      if (ii %in% c("r", "l")) {
+        anno[[ii]][[jj]] <- suppressMessages(
+          anno[[ii]][[jj]] + aplot::ylim2(plot)  + theme_no_axis("y")
+          )
+      } else {
+        anno[[ii]][[jj]] <- suppressMessages(
+          anno[[ii]][[jj]] + aplot::xlim2(plot) + theme_no_axis("x")
+        )
       }
     }
-    if (ii == "l") {
-      plot <- plot %>% aplot::insert_left(anno[[ii]][[jj]], width = width[[ii]][jj])
-    }
-    if (ii == "t") {
-      plot <- plot %>% aplot::insert_top(anno[[ii]][[jj]], height = height[[ii]][jj])
-    }
-    if (ii == "b") {
-      plot <- plot %>% aplot::insert_bottom(anno[[ii]][[jj]], height = height[[ii]][jj])
+  }
+
+  for (ii in nm) {
+    n <- length(anno[[ii]])
+    for (jj in seq_along(anno[[ii]])) {
+      if (ii == "r") {
+        plot <- plot %>% aplot::insert_right(anno[[ii]][[jj]],
+                                             width = width[[ii]][jj])
+      }
+      if (ii == "l") {
+        plot <- plot %>% aplot::insert_left(anno[[ii]][[n - jj + 1]],
+                                            width = width[[ii]][n - jj + 1])
+      }
+      if (ii == "t") {
+        plot <- plot %>% aplot::insert_top(anno[[ii]][[jj]],
+                                           height = height[[ii]][jj])
+      }
+      if (ii == "b") {
+        plot <- plot %>% aplot::insert_bottom(anno[[ii]][[n - jj + 1]],
+                                              height = height[[ii]][n - jj + 1])
+      }
     }
   }
 
   plot
 }
 
+#' @noRd
 gen_tree <- function(hc, side = "t") {
   if (is.null(hc)) {
     stop("Tree annotate cannot be added to unclustered data.", call. = FALSE)
@@ -121,7 +153,50 @@ gen_tree <- function(hc, side = "t") {
     ggplot2::theme_void()
 }
 
+#' @noRd
+gen_hc_bar <- function(hc,
+                       k = 2,
+                       side = "x",
+                       colour = NULL,
+                       border = NA,
+                       color = NULL) {
+  if (!inherits(hc, "hclust")) {
+    stop("Hclust bar annotate cannot be added to unclustered data.")
+  }
+  tree <- stats::cutree(hc, k)[hc$labels[hc$order]]
+  if (!is.null(color)) {
+    colour <- color
+  }
+  if (is.null(colour)) {
+    colour <- sample(grDevices::colors(TRUE), 2)
+  }
+  colour <- rep_len(colour, 2)
 
+  if (side == "x") {
+    df <- tibble::tibble(x = names(tree),
+                         y = "y",
+                         fill = colour[unname(tree)])
+    ggplot(df, aes_string(x = "x", y = "y", fill = "fill")) +
+      ggplot2::geom_tile(colour = border) +
+      ggplot2::scale_fill_identity() +
+      ggplot2::scale_x_discrete(limits = names(tree)) +
+      ggplot2::theme_void() +
+      theme_no_axis(side)
+  } else {
+    df <- tibble::tibble(x = "x",
+                         y = names(tree),
+                         fill = colour[unname(tree)])
+    ggplot(df, aes_string(x = "x", y = "y", fill = "fill")) +
+      ggplot2::geom_tile(colour = border) +
+      ggplot2::scale_fill_identity() +
+      ggplot2::scale_y_discrete(limits = names(tree)) +
+      ggplot2::theme_void() +
+      theme_no_axis(side) +
+      ggplot2::theme(plot.margin = ggplot2::margin())
+  }
+}
+
+#' @noRd
 theme_no_axis <- function(side = "x") {
   no_x <- ggplot2::theme(axis.title.x = element_blank(),
                          axis.title.x.top = element_blank(),
