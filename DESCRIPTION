@@ -16,7 +16,9 @@ BugReports: https://github.com/Hy4m/linkET/issues
 LazyData: TRUE
 Encoding: UTF-8
 Depends: R (>= 3.5.0)
-Imports: dplyr,
+Imports: 
+    digest,
+    dplyr,
     ggplot2 (>= 3.0.0),
     glue,
     grDevices,
