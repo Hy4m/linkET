@@ -10,6 +10,8 @@
 #' @param guides a string specifying how guides should be treated in the layout.
 #' @return a ggplot object.
 #' @author Hou Yun
+#' @importFrom ggplot2 geom_path
+#' @importFrom ggplot2 geom_segment
 #' @export
 qlink <- function(graph,
                   mapping = NULL,
