@@ -16,17 +16,15 @@ BugReports: https://github.com/Hy4m/linkET/issues
 LazyData: TRUE
 Encoding: UTF-8
 Depends: R (>= 3.5.0)
-Imports: 
-    digest,
-    dplyr, 
-    ggplot2 (>= 3.0.0), 
-    glue, 
+Imports: dplyr,
+    ggplot2 (>= 3.0.0),
+    glue,
     grDevices,
     grid,
     gtable,
     igraph,
-    magrittr, 
-    rlang, 
+    magrittr,
+    rlang,
     purrr, 
     tibble, 
     tidygraph,
@@ -46,6 +44,7 @@ Suggests:
     gridGraphics,
     Hmisc,
     knitr,
+    patchwork,
     picante,
     psych,
     ragg,
