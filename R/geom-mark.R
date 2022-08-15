@@ -180,22 +180,39 @@ format_number <- function (x, digits = 2, nsmall = 2)
 #' @noRd
 paste_with_na <- function(...,
                           sep = "",
-                          collapse = NULL,
-                          recycle0 = FALSE) {
+                          collapse = NULL) {
   ll <- list(...)
   if(length(ll) == 0) {
     return(character(0))
   }
   n <- max(vapply(ll, length, numeric(1)))
-  ll <- lapply(ll, function(.x) {
-    if(length(.x) < n) {
-      .x <- rep_len(.x, n)
+  ll <- lapply(ll, function(.x) {rep_len(.x, n)})
+
+  out <- character(length = n)
+  for (ii in seq_len(n)) {
+    ele <- lapply(ll, `[`, ii)
+    if (all(is.na(unlist(ele)))) {
+      out[ii] <- NA
+    } else {
+      id <- vapply(ele, is.na, logical(1))
+      ele <- ele[!id]
+      ele$sep <- sep
+      out[ii] <- do.call("paste", ele)
     }
-    .x[is.na(.x)] <- ""
-    .x
-  })
-  ll$sep <- sep
-  ll$collapse <- collapse
-  ll$recycle0 <- recycle0
-  do.call("paste", ll)
+  }
+
+  if (is.null(collapse)) {
+    out <- ifelse(is.na(out), "", out)
+  } else {
+    if (length(out) > 1) {
+      if (all(is.na(out))) {
+        out <- ""
+      } else {
+        out <- paste(out[!is.na(out)], collapse = collapse)
+      }
+    } else {
+      out <- if (is.na(out)) "" else out
+    }
+  }
+  out
 }
