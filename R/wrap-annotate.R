@@ -172,7 +172,7 @@ gen_hc_bar <- function(hc,
   if (is.null(colour)) {
     colour <- sample(grDevices::colors(TRUE), 2)
   }
-  colour <- rep_len(colour, 2)
+  colour <- rep_len(colour, k)
 
   if (side == "x") {
     df <- tibble::tibble(x = names(tree),
