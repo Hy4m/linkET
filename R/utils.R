@@ -150,7 +150,10 @@ split_by_group <- function(data, group) {
           }
           out[[ii]] <- regex_select(regex = g, byrow = TRUE)(data)
         } else {
-          out[[ii]] <- data[rownames(data) %in% g, , drop = FALSE]
+          if (nm[ii] == "") {
+            nm[ii] <- paste_with_na(g, collapse = "-")
+          }
+          out[[ii]] <- regex_select(regex = g, byrow = TRUE)(data)
         }
       }
     }

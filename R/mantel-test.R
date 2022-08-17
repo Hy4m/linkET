@@ -377,10 +377,10 @@ regex_select <- function(prefix = NULL,
       }))]
       data[id, , drop = FALSE]
     } else {
-      id <- names(data)[Reduce("|", lapply(regex, function(.regex) {
-        grepl(pattern = .regex, x = names(data), ...)
+      id <- colnames(data)[Reduce("|", lapply(regex, function(.regex) {
+        grepl(pattern = .regex, x = colnames(data), ...)
       }))]
-      data[id]
+      data[, id, drop = FALSE]
     }
   }
 }
