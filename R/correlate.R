@@ -180,13 +180,19 @@ correlate <- function(x,
   if (y_is_null) {
     id <- id[id$Var1 > id$Var2, , drop = FALSE]
     purrr::walk2(id$Var1, id$Var2, function(.idx, .idy) {
-      tmp <- cor.test(x = x[ , .idx], y = y[ , .idy], method = method, ...)
+      tmp <- suppressWarnings(cor.test(x = x[ , .idx],
+                                       y = y[ , .idy],
+                                       method = method,
+                                       ...))
       p[c(.idx, .idy), c(.idy, .idx)] <<- tmp$p.value
     })
     diag(p) <- 0
   } else {
     purrr::walk2(id$Var1, id$Var2, function(.idx, .idy) {
-      tmp <- cor.test(x = x[ , .idx], y = y[ , .idy], method = method, ...)
+      tmp <- suppressWarnings(cor.test(x = x[ , .idx],
+                                       y = y[ , .idy],
+                                       method = method,
+                                       ...))
       p[.idx, .idy] <<- tmp$p.value
     })
   }
