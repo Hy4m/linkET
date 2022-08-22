@@ -20,6 +20,8 @@ qlink <- function(graph,
                   widths = NULL,
                   heights = NULL,
                   guides = "collect") {
+
+  ## check input data, split annotation plot and params
   if (!inherits(graph, "igraph")) {
     graph <- as.igraph(graph)
   }
@@ -28,6 +30,7 @@ qlink <- function(graph,
   ll <- list(...)
   params <- ll[setdiff(names(ll), c("r", "l", "t", "b"))]
   ll <- ll[intersect(names(ll), c("r", "l", "t", "b"))]
+
   n <- length(ll)
   if (n < 1) {
     stop("Empty annotation plot.", call. = FALSE)
@@ -58,35 +61,53 @@ qlink <- function(graph,
     }
   }
 
-  if (is.null(mapping)) {
-    mapping <- ggplot2::aes()
+  mapping <- mapping %||% ggplot2::aes()
+  if ("from_id" %in% names(params)) {
+    mapping$from_id <- params$from_id
   }
-  if (all(c("from_id", "to_id") %in% names(mapping))) {
-    from_id <- rlang::eval_tidy(mapping$from_id, graph)
-    to_id <- rlang::eval_tidy(mapping$to_id, graph)
-    if (is.numeric(from_id)) {
-      from_id <- c("b", "l", "t", "r")[from_id]
-    }
-    if (is.numeric(to_id)) {
-      to_id <- c("b", "l", "t", "r")[to_id]
-    }
-    from_id <- switch_side(from_id)
-    to_id <- switch_side(to_id)
+  if ("to_id" %in% names(params)) {
+    mapping$to_id <- params$to_id
+  }
+  params <- params[setdiff(names(params), c("from_id", "to_id"))]
 
-    if (!all(from_id %in% nm)) {
-      stop("All ID of positions should be matched with annotation.",
-           call. = FALSE)
-    }
-    if (!all(to_id %in% nm)) {
-      stop("All ID of positions should be matched with annotation.",
-           call. = FALSE)
-    }
-    graph$from <- paste(from_id, graph$from, sep = ".-.")
-    graph$to <- paste(to_id, graph$to, sep = ".-.")
-    limits <- lapply(nm, function(.nm) {
-      paste(.nm, limits[[.nm]], sep = ".-.")
-    })
+  from_id <- rlang::eval_tidy(mapping$from_id, graph)
+  to_id <- rlang::eval_tidy(mapping$to_id, graph)
+  from_id <- rep_len(from_id, nrow(graph))
+  to_id <- rep_len(to_id, nrow(graph))
+
+  id <- c("b", "l", "t", "r")
+  if (is.numeric(from_id)) {
+    from_id <- ifelse(is.na(from_id), NA, id[as.integer(from_id)])
   }
+  if (is.numeric(to_id)) {
+    to_id <- ifelse(is.na(to_id), NA, id[as.integer(to_id)])
+  }
+
+  from_id <- switch_side(from_id)
+  to_id <- switch_side(to_id)
+
+  if ("group" %in% names(params)) {
+    mapping$group <- params$group
+    params <- params[setdiff(names(params), "group")]
+  }
+  if ("group" %in% names(mapping)) {
+    group <- rlang::eval_tidy(mapping$group, graph)
+    group <- rep_len(group, nrow(graph))
+  } else {
+    group <- rep_len(1L, nrow(graph))
+  }
+
+  ## calc extra nodes
+  glist <- list(split(graph, group), split(from_id, group), split(to_id, group))
+  extra <- purrr::pmap(glist, function(g, id, id2) {
+    c(g$from[is.na(id)], graph$to[is.na(id2)])
+  })
+
+  graph$from <- paste_with_na(from_id, graph$from, sep = ".-.")
+  graph$to <- paste_with_na(to_id, graph$to, sep = ".-.")
+  limits <- lapply(nm, function(.nm) {
+    paste(.nm, limits[[.nm]], sep = ".-.")
+  })
 
   if (length(ll) == 1) {
     if (nm == "r") {
@@ -346,15 +367,24 @@ gen_half_circle <- function(data, side) {
 }
 
 #' @noRd
-switch_side <- function(x) {
+switch_side <- function(x, side) {
   if (!is.character(x)) {
     x <- as.character(x)
   }
   x <- tolower(x)
-  x[x == "right"] <- "r"
-  x[x == "left"] <- "l"
-  x[x == "top"] <- "t"
-  x[x == "bottom"] <- "b"
+  for (ii in side) {
+    if (ii == "r") {
+      x[x == "right"] <- "r"
+    } else if (ii == "l") {
+      x[x == "left"] <- "l"
+    } else if (ii == "t") {
+      x[x == "top"] <- "t"
+    } else {
+      x[x == "bottom"] <- "b"
+    }
+  }
+
+  x[!x %in% side] <- NA
   x
 }
 
