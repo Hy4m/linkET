@@ -252,7 +252,7 @@ print.grouped_correlate <- function(x, all = FALSE, ...) {
   } else {
     for (i in names(x)) {
       cat("Group:", i, "\n")
-      cat("\tA", nrow(x[[1]]$r), "rows, and", ncol(x[[1]]$r), "columns correlate object.\n")
+      cat("  A", nrow(x[[1]]$r), "rows, and", ncol(x[[1]]$r), "columns correlate object.\n")
     }
   }
 }
