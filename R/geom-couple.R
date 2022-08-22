@@ -8,7 +8,7 @@
 #' @param offset_x,offset_y NULL or named-list, add a little offset to the node points.
 #' @param ... extra parameters passing to layer function.
 #' @return a ggplot layer.
-#' @note `anno_link()` has been soft deprecated, please use `geom_couple()`
+#' @note `anno_link()` has been deprecated in 0.0.4, please use `geom_couple()`
 #' instead.
 #' @importFrom ggplot2 geom_segment
 #' @importFrom ggplot2 geom_text
@@ -40,15 +40,6 @@ geom_couple <- function(data,
                          offset_y = offset_y,
                          params = list(...)),
             class = "geom_couple")
-}
-
-#' @rdname geom_couple
-#' @export
-anno_link <- function(...) {
-  ## Note: will be removed in next version
-  warning("`anno_link()` has been deprecated,\n",
-          "please use `geom_couple()` instead.", call. = FALSE)
-  geom_couple(...)
 }
 
 #' @importFrom ggplot2 aes_

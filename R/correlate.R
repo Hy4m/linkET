@@ -18,6 +18,7 @@
 #' @details The columns of 'x' will be tested for each pair when y is NULL(the default),
 #' otherwise each column in 'x' and each column in 'y' is tested for each pair.
 #' @return a list with correlation matrix, P values matrix, confidence intervals matrix.
+#' @note `fast_correlate()` and `fast_correlate2()` has been deprecated in 0.0.4 version.
 #' @importFrom stats cor cor.test p.adjust p.adjust.methods
 #' @importFrom purrr walk2
 #' @rdname correlate
@@ -206,26 +207,6 @@ correlate <- function(x,
       r = r,
       p = p), class = "correlate"
   )
-}
-
-#' @rdname correlate
-#' @export
-fast_correlate <- function(...)
-{
-  ## Note: will be removed in next version
-  warning("fast_correlate() is soft deprecated,\n",
-          "please use correlate() instead.", call. = FALSE)
-  correlate(..., engine = "WGCNA")
-}
-
-#' @rdname correlate
-#' @export
-fast_correlate2 <- function (...)
-{
-  ## Note: will be removed in next version
-  warning("fast_correlate2() is soft deprecated,\n",
-          "please use correlate() instead.", call. = FALSE)
-  correlate(..., engine = "picante")
 }
 
 #' Print correlate object.
