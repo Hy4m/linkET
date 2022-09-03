@@ -78,11 +78,11 @@ GeomCorr <- ggproto(
       return(grid::nullGrob())
     }
 
-    one_length <- length(unique(data$colour)) == 1
+    one_length <- length(unique(data$label)) == 1
     if (one_length) {
       ll <- list(Corr = data)
     } else {
-      ll <- split(data, data$colour)
+      ll <- split(data, data$label)
       if (isTRUE(contain_all)) {
         ll <- c(list(Corr = data), ll)
       }
@@ -94,7 +94,7 @@ GeomCorr <- ggproto(
 
     nm <- names(ll)
     corr <- purrr::map2_chr(ll, nm, function(.data, .nm) {
-      label <- if (.nm == "Corr") "Corr: " else paste0(.data$label[1], ": ")
+      label <- paste0(.nm, ": ")
       if (label == ": ") label <- ""
       r <- as.vector(stats::cor(x = .data$x, y = .data$y, method = method))
       p <- stats::cor.test(x = .data$x, y = .data$y, method = method)$p.value
@@ -105,7 +105,7 @@ GeomCorr <- ggproto(
       }
       text <- paste(format(r, nsmall = nsmall, digits = digits),
                     mark, sep = "")
-      col <- if (.nm == "Corr") "black" else .nm
+      col <- if (.nm == "Corr") "black" else .data$colour[1]
       paste("<span style='color:", col, "'>", paste0(label, text),
             "</span>", sep = "")
     })
