@@ -16,8 +16,8 @@ geom_corr(
   contain_all = TRUE,
   digits = 2,
   nsmall = 2,
-  nudge_x = 0,
-  nudge_y = 0,
+  nudge_x = NULL,
+  nudge_y = NULL,
   na.rm = FALSE,
   show.legend = NA,
   inherit.aes = TRUE
