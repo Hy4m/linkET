@@ -49,7 +49,7 @@ hyplot <- function(md,
   col_names <- col_names(md)
 
   if(is.null(use_md)) {
-    use_md <- suppressMessages(require("ggtext", quietly = TRUE)) &&
+    use_md <- requireNamespace("ggtext", quietly = TRUE) &&
               is_richtext(c(row_names, col_names))
   }
 
