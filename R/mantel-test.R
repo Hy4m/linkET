@@ -15,10 +15,9 @@
 #' @param spec_dist NULL (default) or \code{dist_func()}.
 #' @param env_dist NULL (default) or \code{dist_func()}.
 #' @param env_ctrl_dist NULL (default) or \code{dist_func()}.
-#' @param env_dist_method has been droped.
 #' @param seed a integer value.
-#' @param spec_dist_method has been droped.
-#' @param env_dist_method has been droped.
+## @param spec_dist_method has been droped.
+## @param env_dist_method has been droped.
 #' @param ... extra params passing to \code{mantel_fun}.
 #' @return a data.frame.
 #' @importFrom dplyr mutate
@@ -64,8 +63,8 @@ mantel_test <- function(spec,
                         env_dist = NULL,
                         env_ctrl_dist = NULL,
                         seed = 123,
-                        spec_dist_method,
-                        env_dist_method,
+                        # spec_dist_method,
+                        # env_dist_method,
                         ...)
 {
   if(!is.data.frame(spec))
@@ -91,14 +90,14 @@ mantel_test <- function(spec,
     }
   }
 
-  if(!missing(spec_dist_method)) {
-    warning("'spec_dist_method' parameter has been deprecated,\n",
-            "please use 'spec_dist' parameter instead.", call. = FALSE)
-  }
-  if(!missing(env_dist_method)) {
-    warning("'env_dist_method' parameter has been deprecated,\n",
-            "please use 'env_dist' parameter instead.", call. = FALSE)
-  }
+  # if(!missing(spec_dist_method)) {
+  #   warning("'spec_dist_method' parameter has been deprecated,\n",
+  #           "please use 'spec_dist' parameter instead.", call. = FALSE)
+  # }
+  # if(!missing(env_dist_method)) {
+  #   warning("'env_dist_method' parameter has been deprecated,\n",
+  #           "please use 'env_dist' parameter instead.", call. = FALSE)
+  # }
 
   if(!is.null(group)) {
     # ## TODO: set group by regex

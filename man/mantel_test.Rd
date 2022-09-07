@@ -17,8 +17,6 @@ mantel_test(
   env_dist = NULL,
   env_ctrl_dist = NULL,
   seed = 123,
-  spec_dist_method,
-  env_dist_method,
   ...
 )
 }
@@ -48,10 +46,6 @@ mantel_test(
 \item{env_ctrl_dist}{NULL (default) or \code{dist_func()}.}
 
 \item{seed}{a integer value.}
-
-\item{spec_dist_method}{has been droped.}
-
-\item{env_dist_method}{has been droped.}
 
 \item{...}{extra params passing to \code{mantel_fun}.}
 }
