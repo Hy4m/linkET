@@ -1,7 +1,7 @@
 #' @title Coerce to a Graph
 #' @description Functions to coerce a object to graph if possible.
 #' @param x any \code{R} object.
-#' @param use_adjacency logical, if TRUE will build graph from adjacency matrix.
+#' @param from_adjacency logical, if TRUE will build graph from adjacency matrix.
 #' @param diag logical, if TRUE will keep the diagonal of adjacency matrix data.
 #' @param simplify if TRUE, Simple graphs are graphs which do not contain loop
 #' and multiple edges.
@@ -14,38 +14,23 @@
 #' @rdname network
 as.igraph.cor_md_tbl <- function(x,
                                  ...,
-                                 use_adjacency = FALSE,
+                                 from_adjacency = FALSE,
                                  diag = FALSE,
                                  simplify = TRUE,
                                  directed = FALSE) {
   rnm <- row_names(x)
   cnm <- col_names(x)
-  params <- list(...)
-  if (is.null(params)) {
-    gparams <- list()
+  x <- dplyr::filter(x, ...)
+  if (isTRUE(simplify)) {
+    x <- trim_duplicate(x, diag = !diag)
+    nodes <- unique(c(x$.rownames, x$.colnames))
   } else {
-    gparams <- params[names(params) != ""]
-    params <- unname(params[names(params) == ""])
+    nodes <- unique(c(rnm, cnm))
   }
-  x <- do.call(dplyr::filter, c(list(.data = x), params))
 
-  if (isFALSE(use_adjacency)) {
-    if(isTRUE(simplify)) {
-      if(identical(rnm, cnm) && isFALSE(directed)) {
-        x <- extract_upper(x, diag)
-      }
-      nodes <- unique(c(x$.rownames, x$.colnames))
-    } else {
-      nodes <- unique(c(rnm, cnm))
-    }
+  if (isFALSE(from_adjacency)) {
     igraph::graph_from_data_frame(x, directed = directed, vertices = nodes)
   } else {
-    if(isTRUE(simplify)) {
-      if(identical(rnm, cnm) && isFALSE(directed)) {
-        x <- extract_upper(x, diag)
-      }
-    }
-
     if (isTRUE(directed)) {
       mode <- "directed"
     } else {
@@ -55,16 +40,42 @@ as.igraph.cor_md_tbl <- function(x,
         mode <- "undirected"
       }
     }
-
-    do.call(igraph::graph_from_adjacency_matrix,
-            c(list(adjmatrix = adjacency_matrix(x),
-                   mode = mode, diag = diag, weighted = TRUE), gparams))
+    igraph::graph_from_adjacency_matrix(adjmatrix = adjacency_matrix(x),
+                                        mode = mode,
+                                        weighted = TRUE,
+                                        diag = diag)
   }
 }
 
 #' @rdname network
-as.igraph.correlate <- function(x, ...) {
-  as.igraph(as_md_tbl(x), ...)
+as.igraph.correlate <- function(x,
+                                ...,
+                                from_adjacency = FALSE,
+                                diag = FALSE,
+                                simplify = TRUE,
+                                directed = FALSE) {
+  if (isTRUE(from_adjacency)) {
+    if (isTRUE(directed)) {
+      mode <- "directed"
+    } else {
+      if (isTRUE(simplify)) {
+        mode <- "max"
+      } else {
+        mode <- "undirected"
+      }
+    }
+    igraph::graph_from_adjacency_matrix(adjmatrix = adjacency_matrix(x, ...),
+                                        mode = mode,
+                                        weighted = TRUE,
+                                        diag = diag)
+  } else {
+    as.igraph(x = as_md_tbl(x),
+              ...,
+              from_adjacency = FALSE,
+              diag = diag,
+              simplify = simplify,
+              directed = directed)
+  }
 }
 
 #' @rdname network
@@ -74,17 +85,17 @@ as.igraph.mantel_tbl <- function(x, ...) {
 
 #' @rdname network
 as.igraph.easycorrelation <- function(x, ...) {
-  as.igraph(as_md_tbl(x), ...)
+  as.igraph(as_correlate(x), ...)
 }
 
 #' @rdname network
 as.igraph.rcorr <- function(x, ...) {
-  as.igraph.cor_md_tbl(as_md_tbl(x), ...)
+  as.igraph(as_correlate(x), ...)
 }
 
 #' @rdname network
 as.igraph.corr.test <- function(x, ...) {
-  as.igraph.cor_md_tbl(as_md_tbl(x), ...)
+  as.igraph(as_correlate(x), ...)
 }
 
 #' @rdname network
@@ -117,24 +128,44 @@ as_tbl_graph.corr.test <- function(x, ...) {
   as_tbl_graph(as.igraph(x, ...))
 }
 
-#' @noRd
+#' @title Generate adjacency matrix
+#' @description Can be used to convert a correlation object to adjacency matrix.
+#' @param x a correlation object (\code{correlate}, \code{md_tbl}, and so on).
+#' @param ... expressions that return a logical value.
+#' @return a matrix object.
+#' @author Hou Yun
+#' @rdname adjacency_matrix
+#' @export
 adjacency_matrix <- function(x, ...) {
-  UseMethod("adjacency_matrix")
-}
-
-#' @method adjacency_matrix cor_md_tbl
-adjacency_matrix.cor_md_tbl <- function(x, ...) {
-  if (isTRUE(attr(x, "grouped"))) {
-    stop("Cannot convert a grouped md_tbl to a adjacency_matrix.", call. = FALSE)
+  if (!inherits(x, "cor_md_tbl") && !inherits(x, "correlate")) {
+    clss <- class(x)[1]
+    x <- as_md_tbl(x)
+    if (!inherits(x, "cor_md_tbl")) {
+      stop("Cannot convert a", clss, "to adjacency matrix.", call. = FALSE)
+    }
   }
-  rnm <- row_names(x)
-  cnm <- col_names(x)
-  x <- dplyr::filter(x, ...)
-  df_to_matrix(x, "r", row_id = ".rownames", col_id = ".colnames",
-               row_names = rnm, col_names = cnm, missing = 0)
-}
-
-#' @method adjacency_matrix default
-adjacency_matrix.default <- function(x, ...) {
-  adjacency_matrix(as_md_tbl(x, ...))
+  if (inherits(x, "cor_md_tbl")) {
+    if (isTRUE(attr(x, "grouped"))) {
+      stop("Cannot convert a grouped md_tbl to a adjacency_matrix.", call. = FALSE)
+    }
+    rnm <- row_names(x)
+    cnm <- col_names(x)
+    x <- dplyr::filter(x, ...)
+    out <- df_to_matrix(x, "r", row_id = ".rownames", col_id = ".colnames",
+                        row_names = rnm, col_names = cnm, missing = 0)
+  } else {
+    params <- rlang::enquos(...)
+    if (length(params) >= 1) {
+      for (ii in seq_along(params)) {
+        if (ii == 1) {
+          id <- rlang::eval_tidy(params[[ii]], x)
+        } else {
+          id <- id & rlang::eval_tidy(params[[ii]], x)
+        }
+      }
+      x$r[!id] <- 0
+    }
+    out <- x$r
+  }
+  out
 }

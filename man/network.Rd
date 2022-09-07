@@ -18,13 +18,20 @@
 \method{as.igraph}{cor_md_tbl}(
   x,
   ...,
-  use_adjacency = FALSE,
+  from_adjacency = FALSE,
   diag = FALSE,
   simplify = TRUE,
   directed = FALSE
 )
 
-\method{as.igraph}{correlate}(x, ...)
+\method{as.igraph}{correlate}(
+  x,
+  ...,
+  from_adjacency = FALSE,
+  diag = FALSE,
+  simplify = TRUE,
+  directed = FALSE
+)
 
 \method{as.igraph}{mantel_tbl}(x, ...)
 
@@ -51,7 +58,7 @@
 
 \item{...}{other parameters.}
 
-\item{use_adjacency}{logical, if TRUE will build graph from adjacency matrix.}
+\item{from_adjacency}{logical, if TRUE will build graph from adjacency matrix.}
 
 \item{diag}{logical, if TRUE will keep the diagonal of adjacency matrix data.}
 
