@@ -19,6 +19,7 @@ matrix_data <- function(x,
                         group = NULL,
                         ...)
 {
+  ## TODO: this function will be soft-deprecated in next version
   stopifnot(is.list(x))
   type <- match.arg(type, c("full", "upper", "lower"))
   nm <- names(x)
