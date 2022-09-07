@@ -320,10 +320,7 @@ as_md_tbl.md_tbl <- function(x, ...) {
 #' @method as_md_tbl md_tbl
 #' @rdname as_md_tbl
 as_md_tbl.default <- function(x, ...) {
-  x <- tryCatch(as.matrix(x), error = function(e) {
-    msg <- paste("Cannot convert a", class(x)[1L], "object to md_tbl.")
-    stop(msg, call. = FALSE)
-  })
-  as_md_tbl(x, ...)
+  msg <- paste("Cannot convert a", class(x)[1L], "object to md_tbl.")
+  stop(msg, call. = FALSE)
 }
 
