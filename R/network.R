@@ -132,11 +132,12 @@ as_tbl_graph.corr.test <- function(x, ...) {
 #' @description Can be used to convert a correlation object to adjacency matrix.
 #' @param x a correlation object (\code{correlate}, \code{md_tbl}, and so on).
 #' @param ... expressions that return a logical value.
+#' @param diag if FALSE (default),  self-edges will be removed.
 #' @return a matrix object.
 #' @author Hou Yun
 #' @rdname adjacency_matrix
 #' @export
-adjacency_matrix <- function(x, ...) {
+adjacency_matrix <- function(x, ..., diag = FALSE) {
   if (!inherits(x, "cor_md_tbl") && !inherits(x, "correlate")) {
     clss <- class(x)[1]
     x <- as_md_tbl(x)
@@ -150,6 +151,9 @@ adjacency_matrix <- function(x, ...) {
     }
     rnm <- row_names(x)
     cnm <- col_names(x)
+    if (isFALSE(diag) && identical(rnm, cnm)) {
+      x <- trim_diag(x)
+    }
     x <- dplyr::filter(x, ...)
     out <- df_to_matrix(x, "r", row_id = ".rownames", col_id = ".colnames",
                         row_names = rnm, col_names = cnm, missing = 0)
@@ -166,6 +170,9 @@ adjacency_matrix <- function(x, ...) {
       x$r[!id] <- 0
     }
     out <- x$r
+    if (isFALSE(diag) && identical(rownames(out), colnames(out))) {
+      diag(out) <- 0
+    }
   }
   out
 }

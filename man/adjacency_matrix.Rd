@@ -4,12 +4,14 @@
 \alias{adjacency_matrix}
 \title{Generate adjacency matrix}
 \usage{
-adjacency_matrix(x, ...)
+adjacency_matrix(x, ..., diag = FALSE)
 }
 \arguments{
 \item{x}{a correlation object (\code{correlate}, \code{md_tbl}, and so on).}
 
 \item{...}{expressions that return a logical value.}
+
+\item{diag}{if FALSE (default),  self-edges will be removed.}
 }
 \value{
 a matrix object.
