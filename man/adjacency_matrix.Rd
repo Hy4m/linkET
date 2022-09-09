@@ -4,12 +4,15 @@
 \alias{adjacency_matrix}
 \title{Generate adjacency matrix}
 \usage{
-adjacency_matrix(x, ..., diag = FALSE)
+adjacency_matrix(x, ..., type = "full", diag = FALSE)
 }
 \arguments{
 \item{x}{a correlation object (\code{correlate}, \code{md_tbl}, and so on).}
 
 \item{...}{expressions that return a logical value.}
+
+\item{type}{one of "full", "upper" or "lower", used to extract upper or lower
+triangular part of a adjacency matrix.}
 
 \item{diag}{if FALSE (default),  self-edges will be removed.}
 }
