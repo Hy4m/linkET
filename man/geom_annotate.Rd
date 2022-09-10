@@ -2,29 +2,92 @@
 % Please edit documentation in R/geom-annotate.R
 \name{geom_annotate}
 \alias{geom_annotate}
+\alias{annotateGrob}
+\alias{annotateGrob.grob}
+\alias{annotateGrob.character}
+\alias{annotateGrob.raster}
+\alias{annotateGrob.magick-image}
+\alias{annotateGrob.ggplot}
+\alias{annotateGrob.NULL}
+\alias{annotateGrob.numeric}
 \title{Annotate Layer}
 \usage{
 geom_annotate(
-  annotate = NULL,
-  ...,
   mapping = NULL,
   data = NULL,
   stat = "identity",
   position = "rt",
   inherit.aes = TRUE,
   show.legend = FALSE,
+  ...,
+  annotate = NULL,
   width = NULL,
   height = NULL,
-  nudge_x = NULL,
-  nudge_y = NULL,
   na.rm = FALSE
 )
+
+annotateGrob(annotate, ...)
+
+\method{annotateGrob}{grob}(
+  annotate,
+  position = "rt",
+  width = NULL,
+  height = NULL,
+  nudge_x = 0,
+  nudge_y = 0,
+  default.units = "npc",
+  ...
+)
+
+\method{annotateGrob}{character}(
+  annotate,
+  position = "rt",
+  width = NULL,
+  height = NULL,
+  nudge_x = 0,
+  nudge_y = 0,
+  default.units = "npc",
+  ...
+)
+
+\method{annotateGrob}{raster}(
+  annotate,
+  position = "rt",
+  width = 0.5,
+  height = 0.5,
+  nudge_x = 0,
+  nudge_y = 0,
+  default.units = "npc",
+  ...
+)
+
+\method{annotateGrob}{`magick-image`}(
+  annotate,
+  position = "rt",
+  width = 0.5,
+  height = 0.5,
+  nudge_x = 0,
+  nudge_y = 0,
+  default.units = "npc",
+  ...
+)
+
+\method{annotateGrob}{ggplot}(
+  annotate,
+  position = "rt",
+  width = 0.5,
+  height = 0.5,
+  nudge_x = 0,
+  nudge_y = 0,
+  default.units = "npc",
+  ...
+)
+
+\method{annotateGrob}{`NULL`}(annotate, ...)
+
+\method{annotateGrob}{numeric}(annotate, digits = 2, nsmall = 2, ...)
 }
 \arguments{
-\item{annotate}{a grob object, or other object can be converted to a grob.}
-
-\item{...}{other parameters passing to convert-function.}
-
 \item{mapping}{Set of aesthetic mappings created by \code{\link[ggplot2:aes]{aes()}} or
 \code{\link[ggplot2:aes_]{aes_()}}. If specified and \code{inherit.aes = TRUE} (the
 default), it is combined with the default mapping at the top level of the
@@ -72,9 +135,23 @@ the default plot specification, e.g. \code{\link[ggplot2:borders]{borders()}}.}
 It can also be a named logical vector to finely select the aesthetics to
 display.}
 
+\item{...}{other parameters passing to convert-function.}
+
+\item{annotate}{a grob object, or other object can be converted to a grob.}
+
 \item{width, height}{width/height of annotate.}
 
+\item{na.rm}{not used.}
+
 \item{nudge_x, nudge_y}{a minor shift of position, should be a grid::unit object.}
+
+\item{default.units}{A string indicating the default units to use.}
+
+\item{digits}{integer indicating the number of decimal places (round)
+to be used, the default value is 2.}
+
+\item{nsmall}{the minimum number of digits to the right of the decimal point,
+the default value is 2.}
 }
 \value{
 a layer object.

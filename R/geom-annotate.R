@@ -18,58 +18,36 @@
 #' @param width,height width/height of annotate.
 #' @param nudge_x,nudge_y a minor shift of position, should be a grid::unit object.
 #' @return a layer object.
+#' @param na.rm not used.
+#' @param digits integer indicating the number of decimal places (round)
+#' to be used, the default value is 2.
+#' @param nsmall the minimum number of digits to the right of the decimal point,
+#'  the default value is 2.
 #' @rdname geom_annotate
 #' @export
-geom_annotate <- function(annotate = NULL,
-                          ...,
-                          mapping = NULL,
+geom_annotate <- function(mapping = NULL,
                           data = NULL,
                           stat = "identity",
                           position = "rt",
                           inherit.aes = TRUE,
                           show.legend = FALSE,
+                          ...,
+                          annotate = NULL,
                           width = NULL,
                           height = NULL,
-                          nudge_x = NULL,
-                          nudge_y = NULL,
                           na.rm = FALSE)
 {
-  if (is.null(mapping)) {
-    required_aes <- NULL
+  params <- list(...)
+  others <- params[setdiff(names(params), c("v", "h", "nudge_x", "nudge_y"))]
+  params <- params[intersect(names(params), c("v", "h", "nudge_x", "nudge_y"))]
+  if (inherits(annotate, "ggplot") || inherits(annotate, "grob") ||
+      inherits(annotate, "raster") || inherits(annotate, "magick-image")) {
+    annotate <- list(annotate)
+    width <- width %||% 0.5
+    height <- height %||% 0.5
   } else {
-    required_aes <- names(mapping)
+    annotate <- as.list(annotate)
   }
-  if (packageVersion("ggplot2") <= "3.3.5") {
-    default_aes = aes(xmin = -Inf, xmax = -Inf)
-  } else {
-    default_aes = aes()
-  }
-
-  GeomAnnotate <- ggproto(
-    "GeomAnnotate", Geom,
-    required_aes = required_aes,
-    default_aes = default_aes,
-    draw_panel = function(data,
-                          panel_params,
-                          coord,
-                          annotate = NULL,
-                          position = "rt",
-                          width = NULL,
-                          height = NULL,
-                          nudge_x = NULL,
-                          nudge_y = NULL,
-                          params = list(),
-                          na.rm = FALSE) {
-      params <- c(list(annotate = annotate,
-                       position = position,
-                       width = width,
-                       height = height,
-                       nudge_x = nudge_x,
-                       nudge_y = nudge_y), params)
-      do.call(annotateGrob, params)
-    },
-    draw_key = ggplot2::draw_key_blank
-  )
 
   layer(
     data = data,
@@ -79,25 +57,83 @@ geom_annotate <- function(annotate = NULL,
     position = "identity",
     show.legend = show.legend,
     inherit.aes = inherit.aes,
-    params = list(
-      annotate = annotate,
-      position = position,
-      width = width,
-      height = height,
-      nudge_x = nudge_x,
-      nudge_y = nudge_y,
-      params = list(...),
-      na.rm = na.rm
+    params = c(
+      list(
+        annotate = annotate,
+        position = position,
+        width = width,
+        height = height,
+        params = others,
+        na.rm = na.rm
+      ),
+      params
     )
   )
 }
 
-#' @noRd
+#' @rdname linkET-extensions
+#' @format NULL
+#' @usage NULL
+#' @export
+GeomAnnotate <- ggproto(
+  "GeomAnnotate", Geom,
+  required_aes = NULL,
+  default_aes = aes(ids = NULL, h = "r", v = "t", nudge_x = 0, nudge_y = 0),
+  draw_panel = function(data,
+                        panel_params,
+                        coord,
+                        annotate = list(),
+                        position = NULL,
+                        width = NULL,
+                        height = NULL,
+                        params = list(),
+                        na.rm = FALSE) {
+    if (empty(annotate) || empty(data)) {
+      return(grid::nullGrob())
+    }
+
+    if (!is.null(data$ids)) {
+      if (is.null(names(annotate))) {
+        stop("annotate should be a named list.", call. = FALSE)
+      }
+      annotate <- annotate[intersect(names(annotate),
+                                     unique(as.character(data$ids), TRUE))]
+      if (is_nested_annotate_list(annotate)) {
+        annotate <- Reduce("c", annotate)
+      }
+    }
+    if (empty(annotate)) {
+      return(grid::nullGrob())
+    }
+
+    data <- data[seq_len(length(annotate)), , drop = FALSE]
+    n <- nrow(data)
+
+    grobs <- lapply(seq_len(n), function(id) {
+      rows <- data[id, , drop = FALSE]
+      pp <- c(list(annotate = annotate[[id]],
+                   position = position %||% paste0(rows$h, rows$v),
+                   width = width,
+                   height = height,
+                   nudge_x = rows$nudge_x,
+                   nudge_y = rows$nudge_y), params)
+      do.call(annotateGrob, pp)
+    })
+    ggname("geom_annotate", do.call("grobTree", grobs))
+  },
+  draw_key = ggplot2::draw_key_blank
+)
+
+#' @rdname geom_annotate
+#' @param default.units A string indicating the default units to use.
+#' @export
 annotateGrob <- function(annotate, ...) {
   UseMethod("annotateGrob")
 }
 
-#' @noRd
+#' @rdname geom_annotate
+#' @method annotateGrob grob
+#' @export
 annotateGrob.grob <- function(annotate,
                               position = "rt",
                               width = NULL,
@@ -150,7 +186,9 @@ annotateGrob.grob <- function(annotate,
               cl = "annotateGrob")
 }
 
-#' @noRd
+#' @rdname geom_annotate
+#' @method annotateGrob character
+#' @export
 annotateGrob.character <- function(annotate,
                                    position = "rt",
                                    width = NULL,
@@ -174,7 +212,9 @@ annotateGrob.character <- function(annotate,
                default.units = default.units)
 }
 
-#' @noRd
+#' @rdname geom_annotate
+#' @method annotateGrob raster
+#' @export
 annotateGrob.raster <- function(annotate,
                                 position = "rt",
                                 width = 0.5,
@@ -197,7 +237,9 @@ annotateGrob.raster <- function(annotate,
                default.units = default.units)
 }
 
-#' @noRd
+#' @rdname geom_annotate
+#' @method annotateGrob magick-image
+#' @export
 `annotateGrob.magick-image` <- function(annotate,
                                         position = "rt",
                                         width = 0.5,
@@ -217,7 +259,9 @@ annotateGrob.raster <- function(annotate,
                ...)
 }
 
-#' @noRd
+#' @rdname geom_annotate
+#' @method annotateGrob ggplot
+#' @export
 annotateGrob.ggplot <- function(annotate,
                                 position = "rt",
                                 width = 0.5,
@@ -237,20 +281,26 @@ annotateGrob.ggplot <- function(annotate,
                ...)
 }
 
-#' @noRd
+#' @rdname geom_annotate
+#' @method annotateGrob NULL
+#' @export
 annotateGrob.NULL <- function(annotate, ...) {
   annotate <- grid::nullGrob()
-  annotateGrob(annotate = annotate,
-               position = position,
-               width = width,
-               height = height,
-               nudge_x = nudge_x,
-               nudge_y = nudge_y,
-               default.units = default.units,
-               ...)
+  annotateGrob(annotate = annotate, ...)
 }
 
-#' @noRd
+#' @rdname geom_annotate
+#' @method annotateGrob numeric
+#' @export
+annotateGrob.numeric <- function(annotate,
+                                 digits = 2,
+                                 nsmall = 2,
+                                 ...) {
+  annotate <- format(annotate, digits = digits, nsmall = nsmall)
+  annotateGrob(annotate = annotate, ...)
+}
+
+#' @export
 makeContent.annotateGrob <- function(x) {
   annotate <- x$annotate
   xx <- x$x
@@ -299,4 +349,14 @@ makeContent.annotateGrob <- function(x) {
   annotate <- grid::editGrob(annotate, vp = vp)
 
   grid::setChildren(x, do.call(grid::gList, list(annotate)))
+}
+
+#' @noRd
+is_nested_annotate_list <- function(annotate) {
+  id <- vapply(annotate, function(x) {
+    is.list(x) && !inherits(x, "ggplot") && !inherits(x, "grob") &&
+      !inherits(x, "raster") && !inherits(x, "magick-image") &&
+      !inherits(x, "NULL")
+  }, logical(1))
+  if (any(id)) TRUE else FALSE
 }
