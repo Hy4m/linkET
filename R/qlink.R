@@ -23,7 +23,11 @@ qlink <- function(graph,
 
   ## check input data, split annotation plot and params
   if (!inherits(graph, "igraph")) {
-    graph <- as.igraph(graph)
+    graph <- tryCatch(igraph::as.igraph(graph),
+                      error = function(e) tidygraph::as_tbl_graph(graph))
+    if (inherits(graph, "tbl_graph")) {
+      graph <- igraph::as.igraph(graph)
+    }
   }
   graph <- igraph::as_data_frame(graph)
 
@@ -61,6 +65,10 @@ qlink <- function(graph,
     }
   }
 
+  for (ii in names(limits)) {
+    limits[[ii]] <- paste(ii, limits[[ii]], sep = ".-.")
+  }
+
   mapping <- mapping %||% ggplot2::aes()
   if ("from_id" %in% names(params)) {
     mapping$from_id <- params$from_id
@@ -70,66 +78,47 @@ qlink <- function(graph,
   }
   params <- params[setdiff(names(params), c("from_id", "to_id"))]
 
-  from_id <- rlang::eval_tidy(mapping$from_id, graph)
-  to_id <- rlang::eval_tidy(mapping$to_id, graph)
+  from_id <- rlang::eval_tidy(mapping$from_id, graph) %||% NA
+  to_id <- rlang::eval_tidy(mapping$to_id, graph) %||% NA
   from_id <- rep_len(from_id, nrow(graph))
   to_id <- rep_len(to_id, nrow(graph))
 
-  id <- c("b", "l", "t", "r")
+  side <- c("b", "l", "t", "r")
   if (is.numeric(from_id)) {
-    from_id <- ifelse(is.na(from_id), NA, id[as.integer(from_id)])
+    from_id <- ifelse(is.na(from_id), NA, side[as.integer(from_id)])
   }
   if (is.numeric(to_id)) {
-    to_id <- ifelse(is.na(to_id), NA, id[as.integer(to_id)])
+    to_id <- ifelse(is.na(to_id), NA, side[as.integer(to_id)])
   }
 
-  from_id <- switch_side(from_id)
-  to_id <- switch_side(to_id)
-
-  if ("group" %in% names(params)) {
-    mapping$group <- params$group
-    params <- params[setdiff(names(params), "group")]
-  }
-  if ("group" %in% names(mapping)) {
-    group <- rlang::eval_tidy(mapping$group, graph)
-    group <- rep_len(group, nrow(graph))
-  } else {
-    group <- rep_len(1L, nrow(graph))
-  }
-
-  ## calc extra nodes
-  glist <- list(split(graph, group), split(from_id, group), split(to_id, group))
-  extra <- purrr::pmap(glist, function(g, id, id2) {
-    c(g$from[is.na(id)], graph$to[is.na(id2)])
-  })
+  from_id <- switch_side(from_id, side)
+  to_id <- switch_side(to_id, side)
 
   graph$from <- paste_with_na(from_id, graph$from, sep = ".-.")
   graph$to <- paste_with_na(to_id, graph$to, sep = ".-.")
-  limits <- lapply(nm, function(.nm) {
-    paste(.nm, limits[[.nm]], sep = ".-.")
-  })
 
   if (length(ll) == 1) {
     if (nm == "r") {
       xx <- rep(0, length(limits$r))
       yy <- seq_along(limits$r)
-      pos_x <- rlang::set_names(xx, limits$r)
-      pos_y <- rlang::set_names(yy, limits$r)
+      pos_x <- get_xy_pos(xx, limits$r)
+      pos_y <- get_xy_pos(yy, limits$r)
     } else if (nm == "l") {
       xx <- rep(1, length(limits$l))
       yy <- seq_along(limits$l)
-      pos_x <- rlang::set_names(xx, limits$l)
-      pos_y <- rlang::set_names(yy, limits$l)
+      pos_x <- get_xy_pos(xx, limits$l)
+      pos_y <- get_xy_pos(yy, limits$l)
     } else if (nm == "t") {
       xx <- seq_along(limits$t)
       yy <- rep(1, length(limits$t))
-      pos_x <- rlang::set_names(xx, limits$t)
-      pos_y <- rlang::set_names(yy, limits$t)
+      pos_x <- get_xy_pos(xx, limits$t)
+      pos_y <- get_xy_pos(yy, limits$t)
+
     } else {
       xx <- seq_along(limits$b)
       yy <- rep(0, length(limits$b))
-      pos_x <- rlang::set_names(xx, limits$b)
-      pos_y <- rlang::set_names(yy, limits$b)
+      pos_x <- get_xy_pos(xx, limits$b)
+      pos_y <- get_xy_pos(yy, limits$b)
     }
     graph$.y <- pos_y[graph$from]
     graph$.yend <- pos_y[graph$to]
@@ -154,42 +143,42 @@ qlink <- function(graph,
       xx <- c(rep(0, length(limits$l)), rep(1, length(limits$r)))
       yy <- c(seq_along(limits$l),
               scales::rescale(seq_along(limits$r), rngs$r, rngs$l))
-      pos_x <- rlang::set_names(xx, c(limits$l, limits$r))
-      pos_y <- rlang::set_names(yy, c(limits$l, limits$r))
+      pos_x <- get_xy_pos(xx, c(limits$l, limits$r))
+      pos_y <- get_xy_pos(yy, c(limits$l, limits$r))
     } else if (identical(sort(nm), c("l", "t"))) {
       xx <- c(seq_along(limits$t), rep_len(length(limits$t), length(limits$l)))
       yy <- c(rep_len(length(limits$l), length(limits$t)), seq_along(limits$l))
-      pos_x <- rlang::set_names(xx, c(limits$t, limits$l))
-      pos_y <- rlang::set_names(yy, c(limits$t, limits$l))
+      pos_x <- get_xy_pos(xx, c(limits$t, limits$l))
+      pos_y <- get_xy_pos(yy, c(limits$t, limits$l))
     } else if (identical(sort(nm), c("b", "l"))) {
       xx <- c(seq_along(limits$b), rep_len(length(limits$b), length(limits$l)))
       yy <- c(rep_len(length(limits$l), length(limits$b)), seq_along(limits$l))
-      pos_x <- rlang::set_names(xx, c(limits$b, limits$l))
-      pos_y <- rlang::set_names(yy, c(limits$b, limits$l))
+      pos_x <- get_xy_pos(xx, c(limits$b, limits$l))
+      pos_y <- get_xy_pos(yy, c(limits$b, limits$l))
     } else if (identical(sort(nm), c("b", "t"))) {
       xx <- c(seq_along(limits$b),
               scales::rescale(seq_along(limits$t), rngs$t, limits$b))
       yy <- c(rep(0, length(limits$b)), rep(1, length(limits$t)))
-      pos_x <- rlang::set_names(xx, c(limits$b, limits$t))
-      pos_y <- rlang::set_names(yy, c(limits$b, limits$t))
+      pos_x <- get_xy_pos(xx, c(limits$b, limits$t))
+      pos_y <- get_xy_pos(yy, c(limits$b, limits$t))
     } else if (identical(sort(nm), c("b", "r"))) {
       xx <- c(seq_along(limits$b), rep_len(length(limits$b), length(limits$r)))
       yy <- c(rep_len(length(limits$r), length(limits$b)), seq_along(limits$r))
-      pos_x <- rlang::set_names(xx, c(limits$b, limits$r))
-      pos_y <- rlang::set_names(yy, c(limits$b, limits$r))
+      pos_x <- get_xy_pos(xx, c(limits$b, limits$r))
+      pos_y <- get_xy_pos(yy, c(limits$b, limits$r))
     } else if (identical(sort(nm), c("r", "t"))) {
       xx <- c(seq_along(limits$t), rep_len(length(limits$t), length(limits$r)))
       yy <- c(rep_len(length(limits$r), length(limits$t)), seq_along(limits$r))
-      pos_x <- rlang::set_names(xx, c(limits$t, limits$r))
-      pos_y <- rlang::set_names(yy, c(limits$t, limits$r))
+      pos_x <- get_xy_pos(xx, c(limits$t, limits$r))
+      pos_y <- get_xy_pos(yy, c(limits$t, limits$r))
     } else if (identical(sort(nm), c("l", "r", "t"))) {
       xx <- c(seq_along(limits$t), rep_len(1, length(limits$r)),
               rep_len(length(limits$t), length(rngs$t)))
       yy <- c(rep(length(limits$t), length(limits$t)),
               scales::rescale(seq_along(limits$r), rngs$r, rngs$l),
               seq_along(limits$l))
-      pos_x <- rlang::set_names(xx, c(limits$t, limits$r, limits$l))
-      pos_y <- rlang::set_names(yy, c(limits$t, limits$r, limits$l))
+      pos_x <- get_xy_pos(xx, c(limits$t, limits$r, limits$l))
+      pos_y <- get_xy_pos(yy, c(limits$t, limits$r, limits$l))
     } else if (identical(sort(nm), c("b", "l", "t"))) {
       xx <- c(seq_along(limits$b),
               seq_along(limits$l),
@@ -197,8 +186,8 @@ qlink <- function(graph,
       yy <- c(rep(rngs$l[1], length(limits$b)),
               seq_along(limits$l),
               rep(rngs$l[2], length(limits$t)))
-      pos_x <- rlang::set_names(xx, c(limits$b, limits$l, limits$t))
-      pos_y <- rlang::set_names(yy, c(limits$b, limits$l, limits$t))
+      pos_x <- get_xy_pos(xx, c(limits$b, limits$l, limits$t))
+      pos_y <- get_xy_pos(yy, c(limits$b, limits$l, limits$t))
     } else if (identical(sort(nm), c("b", "r", "t"))) {
       xx <- c(seq_along(limits$b),
               seq_along(limits$r),
@@ -206,8 +195,8 @@ qlink <- function(graph,
       yy <- c(rep(rngs$r[1], length(limits$b)),
               seq_along(limits$r),
               rep(rngs$r[2], length(limits$t)))
-      pos_x <- rlang::set_names(xx, c(limits$b, limits$r, limits$t))
-      pos_y <- rlang::set_names(yy, c(limits$b, limits$r, limits$t))
+      pos_x <- get_xy_pos(xx, c(limits$b, limits$r, limits$t))
+      pos_y <- get_xy_pos(yy, c(limits$b, limits$r, limits$t))
     } else if (identical(sort(nm), c("b", "l", "r"))) {
       xx <- c(seq_along(limits$b),
               rep(rngs$b[1], length(limits$l)),
@@ -215,8 +204,8 @@ qlink <- function(graph,
       yy <- c(rep(rngs$l[1], length(limits$b)),
               seq_along(limits$l),
               scales::rescale(limits$r, rngs$r, rngs$l))
-      pos_x <- rlang::set_names(xx, c(limits$b, limits$l, limits$r))
-      pos_y <- rlang::set_names(yy, c(limits$b, limits$l, limits$r))
+      pos_x <- get_xy_pos(xx, c(limits$b, limits$l, limits$r))
+      pos_y <- get_xy_pos(yy, c(limits$b, limits$l, limits$r))
     } else {
       xx <- c(seq_along(limits$b),
               scales::rescale(seq_along(limits$t), rngs$t, rngs$b),
@@ -226,8 +215,8 @@ qlink <- function(graph,
               rep(rngs$l[2], length(limits$t)),
               seq_along(limits$l),
               scales::rescale(seq_along(limits$r), rngs$r, rngs$l))
-      pos_x <- rlang::set_names(xx, c(limits$b, limits$t, limits$l, limits$r))
-      pos_y <- rlang::set_names(yy, c(limits$b, limits$t, limits$l, limits$r))
+      pos_x <- get_xy_pos(xx, c(limits$b, limits$t, limits$l, limits$r))
+      pos_y <- get_xy_pos(yy, c(limits$b, limits$t, limits$l, limits$r))
     }
     graph$.y <- pos_y[graph$from]
     graph$.yend <- pos_y[graph$to]
@@ -388,3 +377,8 @@ switch_side <- function(x, side) {
   x
 }
 
+#' @noRd
+get_xy_pos <- function(x, nm) {
+  short <- gsub("^[rltb]\\.\\-\\.", "", nm)
+  rlang::set_names(c(x, x), c(nm, short))
+}
