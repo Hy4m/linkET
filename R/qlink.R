@@ -125,19 +125,26 @@ qlink <- function(graph,
     graph$.x <- pos_x[graph$from]
     graph$.xend <- pos_x[graph$to]
 
-    graph <- gen_half_circle(graph, side = nm)
-    mapping <- aes_modify(mapping, aes_string(x = ".x", y = ".y", group = ".group"))
-    p <- ggplot(graph, mapping) + do.call("geom_path", params)
-
-    if (nm %in% c("r", "l")) {
-      p <- p + ggplot2::scale_y_continuous(limits = rngs[[nm]],
-                                           expand = c(0, 0))
+    .x <- .y <- .xend <- .yend <- NULL
+    graph <- dplyr::filter(graph, !is.na(.x), !is.na(.y), !is.na(.xend), !is.na(.yend))
+    if (empty(graph)) {
+      p <- ggplot() + ggplot2::theme_void()
     } else {
-      p <- p + ggplot2::scale_x_continuous(limits = rngs[[nm]],
-                                           expand = c(0, 0))
-    }
-    p <- p + ggplot2::theme_void()
+      graph <- gen_half_circle(graph, side = nm)
+      mapping <- aes_modify(mapping, aes_string(x = ".x",
+                                                y = ".y",
+                                                group = ".group"))
+      p <- ggplot(graph, mapping) + do.call("geom_path", params)
 
+      if (nm %in% c("r", "l")) {
+        p <- p + ggplot2::scale_y_continuous(limits = rngs[[nm]],
+                                             expand = c(0, 0))
+      } else {
+        p <- p + ggplot2::scale_x_continuous(limits = rngs[[nm]],
+                                             expand = c(0, 0))
+      }
+      p <- p + ggplot2::theme_void()
+    }
   } else {
     if (identical(sort(nm), c("l", "r"))) {
       xx <- c(rep(0, length(limits$l)), rep(1, length(limits$r)))
@@ -146,13 +153,13 @@ qlink <- function(graph,
       pos_x <- get_xy_pos(xx, c(limits$l, limits$r))
       pos_y <- get_xy_pos(yy, c(limits$l, limits$r))
     } else if (identical(sort(nm), c("l", "t"))) {
-      xx <- c(seq_along(limits$t), rep_len(1, length(limits$l)))
-      yy <- c(rep_len(length(limits$l), length(limits$t)), seq_along(limits$l))
+      xx <- c(seq_along(limits$t), rep_len(rngs$t[1], length(limits$l)))
+      yy <- c(rep_len(rngs$l[2], length(limits$t)), seq_along(limits$l))
       pos_x <- get_xy_pos(xx, c(limits$t, limits$l))
       pos_y <- get_xy_pos(yy, c(limits$t, limits$l))
     } else if (identical(sort(nm), c("b", "l"))) {
-      xx <- c(seq_along(limits$b), rep_len(1, length(limits$l)))
-      yy <- c(rep_len(1, length(limits$b)), seq_along(limits$l))
+      xx <- c(seq_along(limits$b), rep_len(rngs$b[1], length(limits$l)))
+      yy <- c(rep_len(rngs$l[1], length(limits$b)), seq_along(limits$l))
       pos_x <- get_xy_pos(xx, c(limits$b, limits$l))
       pos_y <- get_xy_pos(yy, c(limits$b, limits$l))
     } else if (identical(sort(nm), c("b", "t"))) {
@@ -162,35 +169,35 @@ qlink <- function(graph,
       pos_x <- get_xy_pos(xx, c(limits$b, limits$t))
       pos_y <- get_xy_pos(yy, c(limits$b, limits$t))
     } else if (identical(sort(nm), c("b", "r"))) {
-      xx <- c(seq_along(limits$b), rep_len(1, length(limits$r)))
-      yy <- c(rep_len(length(limits$r), length(limits$b)), seq_along(limits$r))
+      xx <- c(seq_along(limits$b), rep_len(rngs$b[2], length(limits$r)))
+      yy <- c(rep_len(rngs$r[1], length(limits$b)), seq_along(limits$r))
       pos_x <- get_xy_pos(xx, c(limits$b, limits$r))
       pos_y <- get_xy_pos(yy, c(limits$b, limits$r))
     } else if (identical(sort(nm), c("r", "t"))) {
-      xx <- c(seq_along(limits$t), rep_len(length(limits$t), length(limits$r)))
-      yy <- c(rep_len(length(limits$r), length(limits$t)), seq_along(limits$r))
+      xx <- c(seq_along(limits$t), rep_len(rngs$t[2], length(limits$r)))
+      yy <- c(rep_len(rngs$r[2], length(limits$t)), seq_along(limits$r))
       pos_x <- get_xy_pos(xx, c(limits$t, limits$r))
       pos_y <- get_xy_pos(yy, c(limits$t, limits$r))
     } else if (identical(sort(nm), c("l", "r", "t"))) {
-      xx <- c(seq_along(limits$t), rep_len(1, length(limits$r)),
-              rep_len(length(limits$t), length(rngs$t)))
-      yy <- c(rep(length(limits$t), length(limits$t)),
-              scales::rescale(seq_along(limits$r), rngs$r, rngs$l),
+      xx <- c(seq_along(limits$t), rep_len(rngs$t[2], length(limits$r)),
+              rep_len(rngs$t[1], length(limits$l)))
+      yy <- c(rep(rngs$r[2], length(limits$t)),
+              scales::rescale(seq_along(limits$r), rngs$l, rngs$r),
               seq_along(limits$l))
       pos_x <- get_xy_pos(xx, c(limits$t, limits$r, limits$l))
       pos_y <- get_xy_pos(yy, c(limits$t, limits$r, limits$l))
     } else if (identical(sort(nm), c("b", "l", "t"))) {
       xx <- c(seq_along(limits$b),
-              rep_len(1, length(limits$l)),
+              rep_len(rngs$t[1], length(limits$l)),
               scales::rescale(seq_along(limits$t), rngs$t, rngs$b))
-      yy <- c(rep(1, length(limits$b)),
+      yy <- c(rep(rngs$l[2], length(limits$b)),
               seq_along(limits$l),
-              rep(length(limits$l), length(limits$t)))
+              rep(rngs$t[1], length(limits$t)))
       pos_x <- get_xy_pos(xx, c(limits$b, limits$l, limits$t))
       pos_y <- get_xy_pos(yy, c(limits$b, limits$l, limits$t))
     } else if (identical(sort(nm), c("b", "r", "t"))) {
       xx <- c(seq_along(limits$b),
-              seq_along(limits$r),
+              rep_len(rngs$t[2], length(limits$r)),
               scales::rescale(seq_along(limits$t), rngs$t, rngs$b))
       yy <- c(rep(rngs$r[1], length(limits$b)),
               seq_along(limits$r),
@@ -203,18 +210,18 @@ qlink <- function(graph,
               rep(rngs$b[2], length(limits$r)))
       yy <- c(rep(rngs$l[1], length(limits$b)),
               seq_along(limits$l),
-              scales::rescale(limits$r, rngs$r, rngs$l))
+              scales::rescale(seq_along(limits$r), rngs$l, rngs$r))
       pos_x <- get_xy_pos(xx, c(limits$b, limits$l, limits$r))
       pos_y <- get_xy_pos(yy, c(limits$b, limits$l, limits$r))
     } else {
       xx <- c(seq_along(limits$b),
-              scales::rescale(seq_along(limits$t), rngs$t, rngs$b),
+              scales::rescale(seq_along(limits$t), rngs$b, rngs$t),
               rep(rngs$b[1], length(limits$l)),
               rep(rngs$b[2], length(limits$r)))
       yy <- c(rep(rngs$l[1], length(limits$b)),
               rep(rngs$l[2], length(limits$t)),
               seq_along(limits$l),
-              scales::rescale(seq_along(limits$r), rngs$r, rngs$l))
+              scales::rescale(seq_along(limits$r), rngs$l, rngs$r))
       pos_x <- get_xy_pos(xx, c(limits$b, limits$t, limits$l, limits$r))
       pos_y <- get_xy_pos(yy, c(limits$b, limits$t, limits$l, limits$r))
     }
@@ -222,14 +229,21 @@ qlink <- function(graph,
     graph$.yend <- pos_y[graph$to]
     graph$.x <- pos_x[graph$from]
     graph$.xend <- pos_x[graph$to]
-    mapping <- aes_modify(mapping, aes_string(x = ".x", y = ".y",
-                                              xend = ".xend", yend = ".yend"))
-    p <- ggplot(graph, mapping) + do.call("geom_segment", params)
-    p <- p + ggplot2::scale_x_continuous(limits = rngs[["b"]] %||% rngs[["t"]],
-                                         expand = c(0, 0))
-    p <- p + ggplot2::scale_y_continuous(limits = rngs[["l"]] %||% rngs[["r"]],
-                                         expand = c(0, 0))
-    p <- p + ggplot2::theme_void()
+
+    .x <- .y <- .xend <- .yend <- NULL
+    graph <- dplyr::filter(graph, !is.na(.x), !is.na(.y), !is.na(.xend), !is.na(.yend))
+    if (empty(graph)) {
+      p <- ggplot() + ggplot2::theme_void()
+    } else {
+      mapping <- aes_modify(mapping, aes_string(x = ".x", y = ".y",
+                                                xend = ".xend", yend = ".yend"))
+      p <- ggplot(graph, mapping) + do.call("geom_segment", params)
+      p <- p + ggplot2::scale_x_continuous(limits = rngs[["b"]] %||% rngs[["t"]],
+                                           expand = c(0, 0))
+      p <- p + ggplot2::scale_y_continuous(limits = rngs[["l"]] %||% rngs[["r"]],
+                                           expand = c(0, 0))
+      p <- p + ggplot2::theme_void()
+    }
   }
 
   structure(.Data = p,
@@ -315,15 +329,15 @@ gen_half_circle <- function(data, side) {
       cy <- 0.5 * (row$.y + row$.yend)
       if (row$.yend > row$.y) {
         if (side == "l") {
-          tt <- seq(-pi/2, pi/2, length.out = 100)
+          tt <- seq(-pi/2, pi/2, length.out = 200)
         } else {
-          tt <- seq(pi * 1.5, pi/2, length.out = 100)
+          tt <- seq(pi * 1.5, pi/2, length.out = 200)
         }
       } else {
         if (side == "l") {
-          tt <- seq(pi/2, -pi/2, length.out = 100)
+          tt <- seq(pi/2, -pi/2, length.out = 200)
         } else {
-          tt <- seq(pi/2, pi * 1.5, length.out = 100)
+          tt <- seq(pi/2, pi * 1.5, length.out = 200)
         }
       }
       pos <- tibble::tibble(.x = r * cos(tt) + cx,
