@@ -2,6 +2,7 @@
 % Please edit documentation in R/qlink.R
 \name{qlink}
 \alias{qlink}
+\alias{extract_nodes}
 \title{Draw link-curves}
 \usage{
 qlink(
@@ -13,6 +14,8 @@ qlink(
   heights = NULL,
   guides = "collect"
 )
+
+extract_nodes()
 }
 \arguments{
 \item{graph}{a igraph, tbl_graph, or other can be converted to igraph object.}

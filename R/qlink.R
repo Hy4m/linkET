@@ -29,9 +29,16 @@ qlink <- function(graph,
       graph <- igraph::as.igraph(graph)
     }
   }
+  nodes <- igraph::as_data_frame(graph, "vertices")
   graph <- igraph::as_data_frame(graph)
 
+  nodes$name <- long_to_short(nodes$name)
+  graph$from <- long_to_short(graph$from)
+  graph$to <- long_to_short(graph$to)
+
   ll <- list(...)
+  ll <- rlang::set_names(ll, long_to_short(names(ll)))
+
   params <- ll[setdiff(names(ll), c("r", "l", "t", "b"))]
   ll <- ll[intersect(names(ll), c("r", "l", "t", "b"))]
 
@@ -69,34 +76,7 @@ qlink <- function(graph,
     limits[[ii]] <- paste(ii, limits[[ii]], sep = ".-.")
   }
 
-  mapping <- mapping %||% ggplot2::aes()
-  if ("from_id" %in% names(params)) {
-    mapping$from_id <- params$from_id
-  }
-  if ("to_id" %in% names(params)) {
-    mapping$to_id <- params$to_id
-  }
-  params <- params[setdiff(names(params), c("from_id", "to_id"))]
-
-  from_id <- rlang::eval_tidy(mapping$from_id, graph) %||% NA
-  to_id <- rlang::eval_tidy(mapping$to_id, graph) %||% NA
-  from_id <- rep_len(from_id, nrow(graph))
-  to_id <- rep_len(to_id, nrow(graph))
-
-  side <- c("b", "l", "t", "r")
-  if (is.numeric(from_id)) {
-    from_id <- ifelse(is.na(from_id), NA, side[as.integer(from_id)])
-  }
-  if (is.numeric(to_id)) {
-    to_id <- ifelse(is.na(to_id), NA, side[as.integer(to_id)])
-  }
-
-  from_id <- switch_side(from_id, side)
-  to_id <- switch_side(to_id, side)
-
-  graph$from <- paste_with_na(from_id, graph$from, sep = ".-.")
-  graph$to <- paste_with_na(to_id, graph$to, sep = ".-.")
-
+  data <- function(data) data[data$.isEdges, , drop = FALSE]
   if (length(ll) == 1) {
     if (nm == "r") {
       xx <- rep(0, length(limits$r))
@@ -124,17 +104,26 @@ qlink <- function(graph,
     graph$.yend <- pos_y[graph$to]
     graph$.x <- pos_x[graph$from]
     graph$.xend <- pos_x[graph$to]
-
+    graph$.isEdges <- TRUE
     .x <- .y <- .xend <- .yend <- NULL
     graph <- dplyr::filter(graph, !is.na(.x), !is.na(.y), !is.na(.xend), !is.na(.yend))
-    if (empty(graph)) {
-      p <- ggplot() + ggplot2::theme_void()
+
+    nodes$.x <- pos_x[nodes$name]
+    nodes$.y <- pos_y[nodes$name]
+    nodes$.isEdges <- FALSE
+
+    graph <- dplyr::bind_rows(graph, nodes)
+
+    if (empty(graph[graph$.isEdges, , drop = FALSE])) {
+      mapping <- aes_modify(mapping, aes_string(x = ".x", y = ".y",
+                                                xend = ".xend", yend = ".yend"))
+      p <- ggplot(graph, mapping) + ggplot2::theme_void()
     } else {
       graph <- gen_half_circle(graph, side = nm)
       mapping <- aes_modify(mapping, aes_string(x = ".x",
                                                 y = ".y",
                                                 group = ".group"))
-      p <- ggplot(graph, mapping) + do.call("geom_path", params)
+      p <- ggplot(graph, mapping) + do.call("geom_path", c(params, list(data = data)))
 
       if (nm %in% c("r", "l")) {
         p <- p + ggplot2::scale_y_continuous(limits = rngs[[nm]],
@@ -229,21 +218,26 @@ qlink <- function(graph,
     graph$.yend <- pos_y[graph$to]
     graph$.x <- pos_x[graph$from]
     graph$.xend <- pos_x[graph$to]
-
+    graph$.isEdges <- TRUE
     .x <- .y <- .xend <- .yend <- NULL
     graph <- dplyr::filter(graph, !is.na(.x), !is.na(.y), !is.na(.xend), !is.na(.yend))
-    if (empty(graph)) {
-      p <- ggplot() + ggplot2::theme_void()
-    } else {
-      mapping <- aes_modify(mapping, aes_string(x = ".x", y = ".y",
-                                                xend = ".xend", yend = ".yend"))
 
-      p <- ggplot(graph, mapping) + do.call("geom_segment", params)
+    nodes$.x <- pos_x[nodes$name]
+    nodes$.y <- pos_y[nodes$name]
+    nodes$.isEdges <- FALSE
+    graph <- dplyr::bind_rows(graph, nodes)
+
+    mapping <- aes_modify(mapping, aes_string(x = ".x", y = ".y",
+                                              xend = ".xend", yend = ".yend"))
+
+    p <- ggplot(graph, mapping) + ggplot2::theme_void()
+    if (!empty(graph)) {
+
+      p <- p + do.call("geom_segment", c(params, list(data = data)))
       p <- p + ggplot2::scale_x_continuous(limits = rngs[["b"]] %||% rngs[["t"]],
                                            expand = c(0, 0))
       p <- p + ggplot2::scale_y_continuous(limits = rngs[["l"]] %||% rngs[["r"]],
                                            expand = c(0, 0))
-      p <- p + ggplot2::theme_void()
     }
   }
 
@@ -320,9 +314,11 @@ print.qlink <- function(x, ...) {
 
 #' @noRd
 gen_half_circle <- function(data, side) {
-  nm <- setdiff(names(data), c(".x", ".y", ".xend", ".yend"))
-  purrr::map_dfr(seq_len(nrow(data)), function(id) {
-    row <- data[id, , drop = FALSE]
+  edges <- data[data$.isEdges, , drop = FALSE]
+  nodes <- data[!data$.isEdges, , drop = FALSE]
+  nm <- setdiff(names(edges), c(".x", ".y", ".xend", ".yend"))
+  edges <- purrr::map_dfr(seq_len(nrow(edges)), function(id) {
+    row <- edges[id, , drop = FALSE]
 
     if (side %in% c("l", "r")) {
       r <- 0.5 * abs(row$.yend - row$.y)
@@ -368,32 +364,54 @@ gen_half_circle <- function(data, side) {
       dplyr::bind_cols(pos, row[rep_len(1, 200), nm, drop = FALSE])
     }
   })
+  dplyr::bind_rows(edges, nodes)
 }
 
 #' @noRd
-switch_side <- function(x, side) {
+long_to_short <- function(x) {
+  if (is.null(x)) {
+    return(x)
+  }
+
   if (!is.character(x)) {
     x <- as.character(x)
   }
-  x <- tolower(x)
-  for (ii in side) {
-    if (ii == "r") {
-      x[x == "right"] <- "r"
-    } else if (ii == "l") {
-      x[x == "left"] <- "l"
-    } else if (ii == "t") {
-      x[x == "top"] <- "t"
-    } else {
-      x[x == "bottom"] <- "b"
-    }
+
+  contain_side <- grepl(".-.", x, fixed = TRUE)
+  if (!any(contain_side)) {
+    return(x)
   }
 
-  x[!x %in% side] <- NA
+  temp <- unlist(strsplit(x[contain_side], ".-.", fixed = TRUE))
+  side <- tolower(temp[rep(c(TRUE, FALSE), sum(contain_side))])
+  name <- temp[rep(c(FALSE, TRUE), sum(contain_side))]
+
+  side[side == "right"] <- "r"
+  side[side == "left"] <- "l"
+  side[side == "top"] <- "t"
+  side[side == "bottom"] <- "b"
+  side[!side %in% c("r", "l", "b", "t")] <- NA
+
+  x[contain_side] <- paste_with_na(side, name, sep = ".-.")
   x
 }
 
 #' @noRd
 get_xy_pos <- function(x, nm) {
   short <- gsub("^[rltb]\\.\\-\\.", "", nm)
-  rlang::set_names(c(x, x), c(nm, short))
+  if (identical(short, nm)) {
+    rlang::set_names(x, nm)
+  } else {
+    rlang::set_names(c(x, x), c(nm, short))
+  }
+}
+
+#' @rdname qlink
+#' @export
+extract_nodes <- function() {
+  function(data) {
+    data <- data[!data$.isEdges, , drop = FALSE]
+    data$name <- gsub("^[rltb]\\.\\-\\.", "", data$name)
+    data
+  }
 }
