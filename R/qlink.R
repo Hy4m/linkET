@@ -149,7 +149,7 @@ qlink <- function(graph,
     if (identical(sort(nm), c("l", "r"))) {
       xx <- c(rep(0, length(limits$l)), rep(1, length(limits$r)))
       yy <- c(seq_along(limits$l),
-              scales::rescale(seq_along(limits$r), rngs$r, rngs$l))
+              scales::rescale(seq_along(limits$r), rngs$l, rngs$r))
       pos_x <- get_xy_pos(xx, c(limits$l, limits$r))
       pos_y <- get_xy_pos(yy, c(limits$l, limits$r))
     } else if (identical(sort(nm), c("l", "t"))) {
@@ -164,7 +164,7 @@ qlink <- function(graph,
       pos_y <- get_xy_pos(yy, c(limits$b, limits$l))
     } else if (identical(sort(nm), c("b", "t"))) {
       xx <- c(seq_along(limits$b),
-              scales::rescale(seq_along(limits$t), rngs$t, rngs$b))
+              scales::rescale(seq_along(limits$t), rngs$b, rngs$t))
       yy <- c(rep(0, length(limits$b)), rep(1, length(limits$t)))
       pos_x <- get_xy_pos(xx, c(limits$b, limits$t))
       pos_y <- get_xy_pos(yy, c(limits$b, limits$t))
@@ -181,24 +181,24 @@ qlink <- function(graph,
     } else if (identical(sort(nm), c("l", "r", "t"))) {
       xx <- c(seq_along(limits$t), rep_len(rngs$t[2], length(limits$r)),
               rep_len(rngs$t[1], length(limits$l)))
-      yy <- c(rep(rngs$r[2], length(limits$t)),
+      yy <- c(rep(rngs$l[2], length(limits$t)),
               scales::rescale(seq_along(limits$r), rngs$l, rngs$r),
               seq_along(limits$l))
       pos_x <- get_xy_pos(xx, c(limits$t, limits$r, limits$l))
       pos_y <- get_xy_pos(yy, c(limits$t, limits$r, limits$l))
     } else if (identical(sort(nm), c("b", "l", "t"))) {
       xx <- c(seq_along(limits$b),
-              rep_len(rngs$t[1], length(limits$l)),
-              scales::rescale(seq_along(limits$t), rngs$t, rngs$b))
-      yy <- c(rep(rngs$l[2], length(limits$b)),
+              rep_len(rngs$b[1], length(limits$l)),
+              scales::rescale(seq_along(limits$t), rngs$b, rngs$t))
+      yy <- c(rep(rngs$l[1], length(limits$b)),
               seq_along(limits$l),
-              rep(rngs$t[1], length(limits$t)))
+              rep(rngs$l[2], length(limits$t)))
       pos_x <- get_xy_pos(xx, c(limits$b, limits$l, limits$t))
       pos_y <- get_xy_pos(yy, c(limits$b, limits$l, limits$t))
     } else if (identical(sort(nm), c("b", "r", "t"))) {
       xx <- c(seq_along(limits$b),
-              rep_len(rngs$t[2], length(limits$r)),
-              scales::rescale(seq_along(limits$t), rngs$t, rngs$b))
+              rep_len(rngs$b[2], length(limits$r)),
+              scales::rescale(seq_along(limits$t), rngs$b, rngs$t))
       yy <- c(rep(rngs$r[1], length(limits$b)),
               seq_along(limits$r),
               rep(rngs$r[2], length(limits$t)))
@@ -237,6 +237,7 @@ qlink <- function(graph,
     } else {
       mapping <- aes_modify(mapping, aes_string(x = ".x", y = ".y",
                                                 xend = ".xend", yend = ".yend"))
+
       p <- ggplot(graph, mapping) + do.call("geom_segment", params)
       p <- p + ggplot2::scale_x_continuous(limits = rngs[["b"]] %||% rngs[["t"]],
                                            expand = c(0, 0))
@@ -343,28 +344,28 @@ gen_half_circle <- function(data, side) {
       pos <- tibble::tibble(.x = r * cos(tt) + cx,
                             .y = r * sin(tt) + cy,
                             .group = id)
-      dplyr::bind_cols(pos, row[rep_len(1, 100), nm, drop = FALSE])
+      dplyr::bind_cols(pos, row[rep_len(1, 200), nm, drop = FALSE])
     } else {
       r <- 0.5 * abs(row$.xend - row$.x)
       cx <- 0.5 * (row$.x + row$.xend)
       cy <- 0.5 * (row$.y + row$.yend)
       if (row$.xend > row$.x) {
         if (side == "b") {
-          tt <- seq(pi, 0, length.out = 100)
+          tt <- seq(pi, 0, length.out = 200)
         } else {
-          tt <- seq(-pi, 0, length.out = 100)
+          tt <- seq(-pi, 0, length.out = 200)
         }
       } else {
         if (side == "b") {
-          tt <- seq(0, pi, length.out = 100)
+          tt <- seq(0, pi, length.out = 200)
         } else {
-          tt <- seq(0, -pi, length.out = 100)
+          tt <- seq(0, -pi, length.out = 200)
         }
       }
       pos <- tibble(.x = r * cos(tt) + cx,
                     .y = r * sin(tt) + cy,
                     .group = id)
-      dplyr::bind_cols(pos, row[rep_len(1, 100), nm, drop = FALSE])
+      dplyr::bind_cols(pos, row[rep_len(1, 200), nm, drop = FALSE])
     }
   })
 }
