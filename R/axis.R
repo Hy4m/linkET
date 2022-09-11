@@ -1,9 +1,13 @@
-#' @title Secondary and Nested Axis
+#' @title Axis helper function
 #' @description functions to add secondary and nested axis.
-#' @param ... other parameters passing to \code{ggh4x::guide_axis_manual()} or
-#' \code{ggh4x::guide_axis_nested()}.
+#' @param ... other parameters passing to:
+#' \itemize{
+#'      \item{\code{secondary_axis*()}: ggh4x::guide_axis_manual().}
+#'      \item{\code{guide_axis_filter()}: parameters for filtering.}
+#'      }
 #' @param position where this guide should be drawn: one of top, bottom, left, or right.
 #' @param position_aes one of "x" or "y".
+#' @inheritParams ggplot2::guide_axis
 #' @return a guide object.
 #' @rdname axis
 #' @importFrom ggplot2 guides
@@ -284,6 +288,66 @@ guide_gengrob.guide_child <- function(guide, theme) {
   }
   gTree(children = gList(gt), width = gtable_width(gt), height = gtable_height(gt),
         cl = "absoluteGrob")
+}
+
+#' @rdname axis
+#' @export
+guide_axis_filter <- function(...,
+                              title = waiver(),
+                              check.overlap = FALSE,
+                              angle = NULL,
+                              n.dodge = 1,
+                              order = 0,
+                              position = waiver()) {
+
+  structure(
+    list(params = rlang::enquos(...),
+         title = title,
+         check.overlap = check.overlap,
+         angle = angle,
+         n.dodge = n.dodge,
+         order = order,
+         position = position,
+         available_aes = c("x", "y"),
+         name = "axis"),
+    class = c("guide", "guide_filter", "axis")
+  )
+}
+
+#' @method guide_train guide_filter
+#' @importFrom ggplot2 guide_train
+#' @export
+guide_train.guide_filter <- function(guide, scale, aesthetic = NULL) {
+  NextMethod()
+}
+
+#' @method guide_transform guide_filter
+#' @importFrom ggplot2 guide_transform
+#' @export
+guide_transform.guide_filter <- function(guide, coord, panel_params) {
+
+  guide$key <- filter2(guide$key, guide$params)
+  NextMethod()
+}
+
+#' @method guide_gengrob guide_filter
+#' @importFrom ggplot2 guide_gengrob
+#' @export
+guide_gengrob.guide_filter <- function(guide, theme) {
+  NextMethod()
+}
+
+#' @noRd
+filter2 <- function(data, params) {
+  if (length(params) < 1) {
+    return(data)
+  }
+
+  id <- TRUE
+  for (ii in params) {
+    id <- id & rlang::eval_tidy(ii, data)
+  }
+  data[id, , drop = FALSE]
 }
 
 #' @importFrom grid grobHeight

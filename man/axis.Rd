@@ -4,21 +4,54 @@
 \alias{secondary_x_axis}
 \alias{secondary_y_axis}
 \alias{set_secondary_axis}
-\title{Secondary and Nested Axis}
+\alias{guide_axis_filter}
+\title{Axis helper function}
 \usage{
 secondary_x_axis(...)
 
 secondary_y_axis(...)
 
 set_secondary_axis(..., position = waiver(), position_aes = "x")
+
+guide_axis_filter(
+  ...,
+  title = waiver(),
+  check.overlap = FALSE,
+  angle = NULL,
+  n.dodge = 1,
+  order = 0,
+  position = waiver()
+)
 }
 \arguments{
-\item{...}{other parameters passing to \code{ggh4x::guide_axis_manual()} or
-\code{ggh4x::guide_axis_nested()}.}
+\item{...}{other parameters passing to:
+\itemize{
+     \item{\code{secondary_axis*()}: ggh4x::guide_axis_manual().}
+     \item{\code{guide_axis_filter()}: parameters for filtering.}
+     }}
 
 \item{position}{where this guide should be drawn: one of top, bottom, left, or right.}
 
 \item{position_aes}{one of "x" or "y".}
+
+\item{title}{A character string or expression indicating a title of guide.
+If \code{NULL}, the title is not shown. By default
+(\code{\link[ggplot2:waiver]{waiver()}}), the name of the scale object or the name
+specified in \code{\link[ggplot2:labs]{labs()}} is used for the title.}
+
+\item{check.overlap}{silently remove overlapping labels,
+(recursively) prioritizing the first, last, and middle labels.}
+
+\item{angle}{Compared to setting the angle in \code{\link[ggplot2:theme]{theme()}} / \code{\link[ggplot2:element]{element_text()}},
+this also uses some heuristics to automatically pick the \code{hjust} and \code{vjust} that
+you probably want.}
+
+\item{n.dodge}{The number of rows (for vertical axes) or columns (for
+horizontal axes) that should be used to render the labels. This is
+useful for displaying labels that would otherwise overlap.}
+
+\item{order}{Used to determine the order of the guides (left-to-right,
+top-to-bottom), if more than one  guide must be drawn at the same location.}
 }
 \value{
 a guide object.
