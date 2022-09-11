@@ -146,23 +146,23 @@ qlink <- function(graph,
       pos_x <- get_xy_pos(xx, c(limits$l, limits$r))
       pos_y <- get_xy_pos(yy, c(limits$l, limits$r))
     } else if (identical(sort(nm), c("l", "t"))) {
-      xx <- c(seq_along(limits$t), rep_len(length(limits$t), length(limits$l)))
+      xx <- c(seq_along(limits$t), rep_len(1, length(limits$l)))
       yy <- c(rep_len(length(limits$l), length(limits$t)), seq_along(limits$l))
       pos_x <- get_xy_pos(xx, c(limits$t, limits$l))
       pos_y <- get_xy_pos(yy, c(limits$t, limits$l))
     } else if (identical(sort(nm), c("b", "l"))) {
-      xx <- c(seq_along(limits$b), rep_len(length(limits$b), length(limits$l)))
-      yy <- c(rep_len(length(limits$l), length(limits$b)), seq_along(limits$l))
+      xx <- c(seq_along(limits$b), rep_len(1, length(limits$l)))
+      yy <- c(rep_len(1, length(limits$b)), seq_along(limits$l))
       pos_x <- get_xy_pos(xx, c(limits$b, limits$l))
       pos_y <- get_xy_pos(yy, c(limits$b, limits$l))
     } else if (identical(sort(nm), c("b", "t"))) {
       xx <- c(seq_along(limits$b),
-              scales::rescale(seq_along(limits$t), rngs$t, limits$b))
+              scales::rescale(seq_along(limits$t), rngs$t, rngs$b))
       yy <- c(rep(0, length(limits$b)), rep(1, length(limits$t)))
       pos_x <- get_xy_pos(xx, c(limits$b, limits$t))
       pos_y <- get_xy_pos(yy, c(limits$b, limits$t))
     } else if (identical(sort(nm), c("b", "r"))) {
-      xx <- c(seq_along(limits$b), rep_len(length(limits$b), length(limits$r)))
+      xx <- c(seq_along(limits$b), rep_len(1, length(limits$r)))
       yy <- c(rep_len(length(limits$r), length(limits$b)), seq_along(limits$r))
       pos_x <- get_xy_pos(xx, c(limits$b, limits$r))
       pos_y <- get_xy_pos(yy, c(limits$b, limits$r))
@@ -181,11 +181,11 @@ qlink <- function(graph,
       pos_y <- get_xy_pos(yy, c(limits$t, limits$r, limits$l))
     } else if (identical(sort(nm), c("b", "l", "t"))) {
       xx <- c(seq_along(limits$b),
-              seq_along(limits$l),
+              rep_len(1, length(limits$l)),
               scales::rescale(seq_along(limits$t), rngs$t, rngs$b))
-      yy <- c(rep(rngs$l[1], length(limits$b)),
+      yy <- c(rep(1, length(limits$b)),
               seq_along(limits$l),
-              rep(rngs$l[2], length(limits$t)))
+              rep(length(limits$l), length(limits$t)))
       pos_x <- get_xy_pos(xx, c(limits$b, limits$l, limits$t))
       pos_y <- get_xy_pos(yy, c(limits$b, limits$l, limits$t))
     } else if (identical(sort(nm), c("b", "r", "t"))) {
