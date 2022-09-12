@@ -316,9 +316,9 @@ gen_half_circle <- function(data, ranges) {
       rngs <- ranges$b %||% ranges$t
       if (!is.null(rngs)) {
         if (side == "l") {
-          pos$.x <- scales::rescale(pos$.x, c(rngs[1], 1/3*diff(rngs)))
+          pos$.x <- scales::rescale(pos$.x, c(rngs[1], rngs[1] + 1/3*diff(rngs)))
         } else {
-          pos$.x <- scales::rescale(pos$.x, c(2/3*diff(rngs), rngs[2]))
+          pos$.x <- scales::rescale(pos$.x, c(rngs[1] + 2/3*diff(rngs), rngs[2]))
         }
       } else {
         if (length(all_side) > 1) {
@@ -354,9 +354,9 @@ gen_half_circle <- function(data, ranges) {
       rngs <- ranges$l %||% ranges$r
       if (!is.null(rngs)) {
         if (side == "b") {
-          pos$.y <- scales::rescale(pos$.y, c(rngs[1], 1/3*diff(rngs)))
+          pos$.y <- scales::rescale(pos$.y, c(rngs[1], rngs[1] + 1/3*diff(rngs)))
         } else {
-          pos$.y <- scales::rescale(pos$.y, c(2/3*diff(rngs), rngs[2]))
+          pos$.y <- scales::rescale(pos$.y, c(rngs[1] + 2/3*diff(rngs), rngs[2]))
         }
       } else {
         if (length(all_side) > 1) {
@@ -413,12 +413,36 @@ inner_link_side <- function(data, limits) {
     data$.inner <- names(limits)
   } else {
     nm <- names(limits)
+    n <- length(nm)
     data$.inner <- purrr::map2_chr(data$from, data$to, function(from, to) {
-       inner<- NA_character_
+       inner_from <- inner_to <- NA_character_
       for (ii in seq_along(nm)) {
-        temp <- all(c(from, to) %in% limits[[ii]])
-        if (isTRUE(temp)) {
-          inner <- nm[ii]
+        if (grepl(".-.", from, fixed = TRUE)) {
+          if (from %in% limits[[ii]]) {
+            inner_from <- nm[ii]
+          }
+        } else {
+          lim <- gsub("^[rltb]\\.\\-\\.", "", limits[[ii]])
+          if (from %in% lim) {
+            inner_from <- nm[ii]
+          }
+        }
+
+        if (grepl(".-.", to, fixed = TRUE)) {
+          if (to %in% limits[[ii]]) {
+            inner_to <- nm[ii]
+          }
+        } else {
+          lim <- gsub("^[rltb]\\.\\-\\.", "", limits[[ii]])
+          if (to %in% lim) {
+            inner_to <- nm[ii]
+          }
+        }
+
+        if (anyNA(c(inner_from, inner_to)) || !identical(inner_from, inner_to)) {
+          inner <- NA_character_
+        } else {
+          inner <- inner_from
         }
       }
        inner
