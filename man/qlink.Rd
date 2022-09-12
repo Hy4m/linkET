@@ -12,7 +12,9 @@ qlink(
   geom = "auto",
   widths = NULL,
   heights = NULL,
-  guides = "collect"
+  guides = "collect",
+  nsteps = 100,
+  hratio = 0.33
 )
 
 extract_nodes()
@@ -31,6 +33,10 @@ extract_nodes()
 \item{heights}{height of margin plot.}
 
 \item{guides}{a string specifying how guides should be treated in the layout.}
+
+\item{nsteps}{integer, the value determines the smoothness of the curve.}
+
+\item{hratio}{range 0 to 1, height ratio of half-circle link.}
 }
 \value{
 a ggplot object.

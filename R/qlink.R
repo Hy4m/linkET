@@ -8,6 +8,8 @@
 #' @param widths width of margin plot.
 #' @param heights height of margin plot.
 #' @param guides a string specifying how guides should be treated in the layout.
+#' @param nsteps integer, the value determines the smoothness of the curve.
+#' @param hratio range 0 to 1, height ratio of half-circle link.
 #' @return a ggplot object.
 #' @author Hou Yun
 #' @importFrom ggplot2 geom_path
@@ -19,7 +21,9 @@ qlink <- function(graph,
                   geom = "auto",
                   widths = NULL,
                   heights = NULL,
-                  guides = "collect") {
+                  guides = "collect",
+                  nsteps = 100,
+                  hratio = 0.33) {
 
   ## check input data, split annotation plot and params
   if (!inherits(graph, "igraph")) {
@@ -200,7 +204,11 @@ qlink <- function(graph,
                                               xend = ".xend", yend = ".yend"))
     p <- ggplot(graph, mapping) + ggplot2::theme_void()
   } else {
-    graph <- gen_half_circle(graph, ranges = rngs)
+    graph <- gen_half_circle(graph,
+                             ranges = rngs,
+                             limits = limits,
+                             nsteps = nsteps,
+                             hratio = hratio)
     mapping <- aes_modify(mapping, aes_string(x = ".x",
                                               y = ".y",
                                               group = ".group"))
@@ -285,89 +293,64 @@ print.qlink <- function(x, ...) {
 }
 
 #' @noRd
-gen_half_circle <- function(data, ranges) {
+gen_half_circle <- function(data, ranges, limits,
+                            nsteps = 100, hratio = 0.33) {
   edges <- data[data$.isEdges, , drop = FALSE]
   nodes <- data[!data$.isEdges, , drop = FALSE]
-  all_side <- names(ranges)
-  nm <- setdiff(names(edges), c(".x", ".y", ".xend", ".yend"))
+  nm <- setdiff(names(edges), c(".x", ".y", ".xend", ".yend", ".inner"))
   edges <- purrr::map2_dfr(seq_len(nrow(edges)), edges$.inner, function(id, side) {
     row <- edges[id, , drop = FALSE]
 
     if (side %in% c("l", "r")) {
-      r <- 0.5 * abs(row$.yend - row$.y)
+      rngs <- ranges$b %||% ranges$t %||% c(0, 1)
+      ry <- 0.5 * abs(row$.yend - row$.y)
       cx <- 0.5 * (row$.x + row$.xend)
       cy <- 0.5 * (row$.y + row$.yend)
+      ratio <- ry / (length(limits[[side]]) - 1) * 2
+      rx <- hratio*ratio*diff(rngs)
+
       if (row$.yend > row$.y) {
         if (side == "l") {
-          tt <- seq(-pi/2, pi/2, length.out = 100)
+          tt <- seq(-pi/2, pi/2, length.out = nsteps)
         } else {
-          tt <- seq(pi * 1.5, pi/2, length.out = 100)
+          tt <- seq(pi * 1.5, pi/2, length.out = nsteps)
         }
       } else {
         if (side == "l") {
-          tt <- seq(pi/2, -pi/2, length.out = 100)
+          tt <- seq(pi/2, -pi/2, length.out = nsteps)
         } else {
-          tt <- seq(pi/2, pi * 1.5, length.out = 100)
+          tt <- seq(pi/2, pi * 1.5, length.out = nsteps)
         }
       }
-      pos <- tibble::tibble(.x = r * cos(tt) + cx,
-                            .y = r * sin(tt) + cy,
+      pos <- tibble::tibble(.x = rx * cos(tt) + cx,
+                            .y = ry * sin(tt) + cy,
                             .group = id)
-      rngs <- ranges$b %||% ranges$t
-      if (!is.null(rngs)) {
-        if (side == "l") {
-          pos$.x <- scales::rescale(pos$.x, c(rngs[1], rngs[1] + 1/3*diff(rngs)))
-        } else {
-          pos$.x <- scales::rescale(pos$.x, c(rngs[1] + 2/3*diff(rngs), rngs[2]))
-        }
-      } else {
-        if (length(all_side) > 1) {
-          if (side == "l") {
-            pos$.x <- scales::rescale(pos$.x, c(0, 1/3))
-          } else {
-            pos$.x <- scales::rescale(pos$.x, c(2/3, 1))
-          }
-        }
-      }
-      dplyr::bind_cols(pos, row[rep_len(1, 100), nm, drop = FALSE])
+      dplyr::bind_cols(pos, row[rep_len(1, nsteps), nm, drop = FALSE])
     } else if (side %in% c("b", "t")) {
-      r <- 0.5 * abs(row$.xend - row$.x)
+      rngs <- ranges$l %||% ranges$r %||% c(0, 1)
+      rx <- 0.5 * abs(row$.xend - row$.x)
       cx <- 0.5 * (row$.x + row$.xend)
       cy <- 0.5 * (row$.y + row$.yend)
+      ratio <- rx / (length(limits[[side]]) - 1) * 2
+      ry <- hratio*ratio*diff(rngs)
+
       if (row$.xend > row$.x) {
         if (side == "b") {
-          tt <- seq(pi, 0, length.out = 100)
+          tt <- seq(pi, 0, length.out = nsteps)
         } else {
-          tt <- seq(-pi, 0, length.out = 100)
+          tt <- seq(-pi, 0, length.out = nsteps)
         }
       } else {
         if (side == "b") {
-          tt <- seq(0, pi, length.out = 100)
+          tt <- seq(0, pi, length.out = nsteps)
         } else {
-          tt <- seq(0, -pi, length.out = 100)
+          tt <- seq(0, -pi, length.out = nsteps)
         }
       }
-      pos <- tibble(.x = r * cos(tt) + cx,
-                    .y = r * sin(tt) + cy,
+      pos <- tibble(.x = rx * cos(tt) + cx,
+                    .y = ry * sin(tt) + cy,
                     .group = id)
-
-      rngs <- ranges$l %||% ranges$r
-      if (!is.null(rngs)) {
-        if (side == "b") {
-          pos$.y <- scales::rescale(pos$.y, c(rngs[1], rngs[1] + 1/3*diff(rngs)))
-        } else {
-          pos$.y <- scales::rescale(pos$.y, c(rngs[1] + 2/3*diff(rngs), rngs[2]))
-        }
-      } else {
-        if (length(all_side) > 1) {
-          if (side == "b") {
-            pos$.y <- scales::rescale(pos$.y, c(0, 1/3))
-          } else {
-            pos$.y <- scales::rescale(pos$.y, c(2/3, 1))
-          }
-        }
-      }
-      dplyr::bind_cols(pos, row[rep_len(1, 100), nm, drop = FALSE])
+      dplyr::bind_cols(pos, row[rep_len(1, nsteps), nm, drop = FALSE])
     } else {
       pos <- tibble(.x = c(row$.x, row$.xend),
                     .y = c(row$.y, row$.yend),
@@ -375,7 +358,7 @@ gen_half_circle <- function(data, ranges) {
       dplyr::bind_cols(pos, row[rep_len(1, 2), nm, drop = FALSE])
     }
   })
-  dplyr::bind_rows(edges, nodes)
+  dplyr::bind_rows(edges, nodes[setdiff(names(nodes), c(".xend", ".yend", ".inner"))])
 }
 
 #' @noRd
