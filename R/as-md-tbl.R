@@ -207,9 +207,7 @@ as_md_tbl.easycorrelation <- function(x,
 #' @method as_md_tbl correlate
 #' @rdname as_md_tbl
 as_md_tbl.correlate <- function(x, ...) {
-  x <- as_md_tbl(as_matrix_data(x, ...))
-  class(x) <- c("cor_md_tbl", class(x))
-  x
+  as_md_tbl(as_matrix_data(x, ...))
 }
 
 #' @method as_md_tbl grouped_correlate
