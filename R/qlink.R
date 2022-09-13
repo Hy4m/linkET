@@ -41,7 +41,6 @@ qlink <- function(graph,
   graph$to <- long_to_short(graph$to)
 
   ll <- list(...)
-  ll <- rlang::set_names(ll, long_to_short(names(ll)))
   params <- ll[setdiff(names(ll), c("r", "l", "t", "b"))]
   ll <- ll[intersect(names(ll), c("r", "l", "t", "b"))]
 
@@ -242,7 +241,7 @@ as_patchwork <- function(plot, ...) {
   class(plot) <- setdiff(class(plot), "qlink")
   nm <- names(anno)
   if ("l" %in% nm) {
-    width_l <- rev(widths$l) %||% 1
+    width_l <- widths$l %||% 1
     width_l <- rep_len(width_l, length(anno$l))
   } else {
     width_l <- NULL
@@ -256,7 +255,7 @@ as_patchwork <- function(plot, ...) {
   }
 
   if ("t" %in% nm) {
-    height_t <- rev(heights$t) %||% 1
+    height_t <- heights$t %||% 1
     height_t <- rep_len(height_t, length(anno$t))
   } else {
     height_t <- NULL
@@ -277,8 +276,8 @@ as_patchwork <- function(plot, ...) {
   plotlist <- rep_len(list(patchwork::plot_spacer()), n * m)
   id_row <- seq(n * length(anno$t) + 1, n * (length(anno$t) + 1))
   id_col <- seq(length(anno$l) + 1, n * m, by = n)
-  plotlist[id_row] <- c(rev(anno$l), list(plot), anno$r)
-  plotlist[id_col] <- c(rev(anno$t), list(plot), anno$b)
+  plotlist[id_row] <- c(anno$l, list(plot), anno$r)
+  plotlist[id_col] <- c(anno$t, list(plot), anno$b)
 
   plotlist <- lapply(plotlist, function(p) {
     p + ggplot2::theme(plot.margin = ggplot2::margin())
