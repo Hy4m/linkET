@@ -268,3 +268,36 @@ trim_duplicate <- function(md, diag = TRUE) {
 
   md[!duplicated(id), ]
 }
+
+#' @param keep logical, the output matrix remains symmetric if
+#' the input matrix is symmetric.
+#' @rdname Helper_function
+#' @export
+simplify <- function(md, keep = TRUE) {
+  stopifnot(is_md_tbl(md))
+  if (empty(md)) {
+    stop("Empty data input.", call. = FALSE)
+  }
+
+  rnm <- attr(md, "row_names")
+  cnm <- attr(md, "col_names")
+  if (!identical(rnm, cnm)) {
+    keep <- FALSE
+  }
+
+  if (isTRUE(keep)) {
+    row_and_cols <- unique(c(md$.rownames, md$.conames))
+    attr(md, "row_names") <- rnm[rnm %in% row_and_cols]
+    attr(md, "col_names") <- cnm[cnm %in% row_and_cols]
+  } else {
+    rows <- unique(md$.rownames)
+    cols <- unique(md$.colnames)
+    attr(md, "row_names") <- rows
+    attr(md, "col_names") <- cols
+    if (!identical(rows, cols)) {
+      attr(md, "type") <- "full"
+      attr(md, "diag") <- TRUE
+    }
+  }
+  md
+}

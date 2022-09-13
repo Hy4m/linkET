@@ -16,6 +16,7 @@
 \alias{trim_diag}
 \alias{filter_func}
 \alias{trim_duplicate}
+\alias{simplify}
 \title{Helper function}
 \usage{
 row_names(md)
@@ -47,6 +48,8 @@ trim_diag(md)
 filter_func(..., type = "full", diag = FALSE)
 
 trim_duplicate(md, diag = TRUE)
+
+simplify(md, keep = TRUE)
 }
 \arguments{
 \item{md}{a matrix_data object.}
@@ -58,6 +61,9 @@ trim_duplicate(md, diag = TRUE)
 \item{...}{other parameters.}
 
 \item{type}{character, "full" (default), "upper", "lower" or "diag".}
+
+\item{keep}{logical, the output matrix remains symmetric if
+the input matrix is symmetric.}
 }
 \description{
 Helper function for matrix_data object
