@@ -1,3 +1,4 @@
+## TODO: can draw link-curve from continuous axis?
 #' @title Draw link-curves
 #' @description This function can be used to draw a special network, which nodes
 #' should be matched width margin plot.
@@ -18,7 +19,7 @@
 qlink <- function(graph,
                   mapping = NULL,
                   ...,
-                  geom = "auto",
+                  geom = "path",
                   widths = NULL,
                   heights = NULL,
                   guides = "collect",
@@ -209,11 +210,14 @@ qlink <- function(graph,
                              limits = limits,
                              nsteps = nsteps,
                              hratio = hratio)
+    if (!grepl("geom_", geom, fixed = TRUE)) {
+      geom <- paste0("geom_", geom)
+    }
     mapping <- aes_modify(mapping, aes_string(x = ".x",
                                               y = ".y",
                                               group = ".group"))
     data <- function(data) data[data$.isEdges, , drop = FALSE]
-    p <- ggplot(graph, mapping) + do.call("geom_path", c(params, list(data = data)))
+    p <- ggplot(graph, mapping) + do.call(geom, c(params, list(data = data)))
     p <- p + ggplot2::scale_x_continuous(limits = rngs$b %||% rngs$t,
                                          expand = c(0, 0))
     p <- p + ggplot2::scale_y_continuous(limits = rngs$l %||% rngs$r,

@@ -9,7 +9,7 @@ qlink(
   graph,
   mapping = NULL,
   ...,
-  geom = "auto",
+  geom = "path",
   widths = NULL,
   heights = NULL,
   guides = "collect",
