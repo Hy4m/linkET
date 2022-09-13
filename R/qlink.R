@@ -324,7 +324,8 @@ gen_half_circle <- function(data, ranges, limits,
       }
       pos <- tibble::tibble(.x = rx * cos(tt) + cx,
                             .y = ry * sin(tt) + cy,
-                            .group = id)
+                            .group = id,
+                            .index = seq_len(nsteps))
       dplyr::bind_cols(pos, row[rep_len(1, nsteps), nm, drop = FALSE])
     } else if (side %in% c("b", "t")) {
       rngs <- ranges$l %||% ranges$r %||% c(0, 1)
@@ -349,12 +350,14 @@ gen_half_circle <- function(data, ranges, limits,
       }
       pos <- tibble(.x = rx * cos(tt) + cx,
                     .y = ry * sin(tt) + cy,
-                    .group = id)
+                    .group = id,
+                    .index = seq_len(nsteps))
       dplyr::bind_cols(pos, row[rep_len(1, nsteps), nm, drop = FALSE])
     } else {
       pos <- tibble(.x = c(row$.x, row$.xend),
                     .y = c(row$.y, row$.yend),
-                    .group = id)
+                    .group = id,
+                    .index = seq_len(2))
       dplyr::bind_cols(pos, row[rep_len(1, 2), nm, drop = FALSE])
     }
   })
