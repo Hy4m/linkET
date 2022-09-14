@@ -301,3 +301,21 @@ simplify <- function(md, keep = TRUE) {
   }
   md
 }
+
+#' @export
+as.data.frame.md_tbl <- function(x, ...) {
+  if (empty(x)) {
+    return(as.data.frame(list()))
+  }
+  x <- x[names(x)]
+  class(x) <- "data.frame"
+  x
+}
+
+#' @importFrom tibble as_tibble
+#' @export
+as_tibble.md_tbl <- function(x, ...) {
+  x <- as.data.frame(x)
+  class(x) <- c("tbl_df", "tbl", "data.frame")
+  x
+}
