@@ -197,11 +197,15 @@ annotateGrob.character <- function(annotate,
                                    nudge_y = 0,
                                    default.units = "npc",
                                    ...) {
-  annotate <- paste_with_na(annotate, collapse = "\n")
-  annotate <- grid::textGrob(annotate,
-                             x = 0.5,
-                             y = 0.5,
-                             ...)
+  print(list(...))
+  if (is_richtext(annotate)) {
+    annotate <- paste_with_na(annotate, collapse = "<br>")
+    annotate <- gridtext::textbox_grob(annotate, ...)
+  } else {
+    annotate <- paste_with_na(annotate, collapse = "\n")
+    annotate <- grid::textGrob(annotate, ...)
+  }
+
   annotateGrob(annotate = annotate,
                position = position,
                width = width,
