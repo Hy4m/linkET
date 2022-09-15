@@ -201,7 +201,6 @@ annotateGrob.character <- function(annotate,
   annotate <- grid::textGrob(annotate,
                              x = 0.5,
                              y = 0.5,
-                             just = "center",
                              ...)
   annotateGrob(annotate = annotate,
                position = position,
