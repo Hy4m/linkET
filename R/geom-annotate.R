@@ -40,8 +40,8 @@ geom_annotate <- function(mapping = NULL,
   params <- list(...)
   others <- params[setdiff(names(params), c("v", "h", "nudge_x", "nudge_y"))]
   params <- params[intersect(names(params), c("v", "h", "nudge_x", "nudge_y"))]
-  if (inherits(annotate, "ggplot") || inherits(annotate, "grob") ||
-      inherits(annotate, "raster") || inherits(annotate, "magick-image")) {
+  if (inherits(annotate, "ggplot") || inherits(annotate, "raster") ||
+      inherits(annotate, "magick-image")) {
     annotate <- list(annotate)
     width <- width %||% 0.5
     height <- height %||% 0.5
@@ -197,10 +197,10 @@ annotateGrob.character <- function(annotate,
                                    nudge_y = 0,
                                    default.units = "npc",
                                    ...) {
-  print(list(...))
   if (is_richtext(annotate)) {
+    textbox_grob <- get_function("gridtext", "textbox_grob")
     annotate <- paste_with_na(annotate, collapse = "<br>")
-    annotate <- gridtext::textbox_grob(annotate, ...)
+    annotate <- textbox_grob(annotate, ...)
   } else {
     annotate <- paste_with_na(annotate, collapse = "\n")
     annotate <- grid::textGrob(annotate, ...)
