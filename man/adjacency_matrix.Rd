@@ -4,12 +4,15 @@
 \alias{adjacency_matrix}
 \title{Generate adjacency matrix}
 \usage{
-adjacency_matrix(x, ..., type = "full", diag = FALSE)
+adjacency_matrix(x, ..., weighted = TRUE, type = "full", diag = FALSE)
 }
 \arguments{
 \item{x}{a correlation object (\code{correlate}, \code{md_tbl}, and so on).}
 
-\item{...}{expressions that return a logical value.}
+\item{...}{expressions used to subset data.}
+
+\item{weighted}{if TRUE (default) will return filtered correlation
+coefficient matrix, and if (FALSE) will return adjacency matrix.}
 
 \item{type}{one of "full", "upper" or "lower", used to extract upper or lower
 triangular part of a adjacency matrix.}

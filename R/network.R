@@ -131,7 +131,9 @@ as_tbl_graph.corr.test <- function(x, ...) {
 #' @title Generate adjacency matrix
 #' @description Can be used to convert a correlation object to adjacency matrix.
 #' @param x a correlation object (\code{correlate}, \code{md_tbl}, and so on).
-#' @param ... expressions that return a logical value.
+#' @param ... expressions used to subset data.
+#' @param weighted if TRUE (default) will return filtered correlation
+#' coefficient matrix, and if (FALSE) will return adjacency matrix.
 #' @param type one of "full", "upper" or "lower", used to extract upper or lower
 #' triangular part of a adjacency matrix.
 #' @param diag if FALSE (default),  self-edges will be removed.
@@ -141,6 +143,7 @@ as_tbl_graph.corr.test <- function(x, ...) {
 #' @export
 adjacency_matrix <- function(x,
                              ...,
+                             weighted = TRUE,
                              type = "full",
                              diag = FALSE) {
   type <- match.arg(type, c("full", "upper", "lower"))
@@ -191,7 +194,13 @@ adjacency_matrix <- function(x,
       out[do.call(.f, list(x = out))] <- NA
     }
   }
-  out[!is.na(out)] <- 1
-  out[is.na(out)] <- 0
+
+  if (isTRUE(weighted)) {
+    out[is.na(out)] <- 0
+  } else {
+    out[!is.na(out)] <- 1
+    out[is.na(out)] <- 0
+  }
+
   out
 }
