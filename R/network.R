@@ -165,7 +165,7 @@ adjacency_matrix <- function(x,
     }
     x <- dplyr::filter(x, ...)
     out <- df_to_matrix(x, "r", row_id = ".rownames", col_id = ".colnames",
-                        row_names = rnm, col_names = cnm, missing = 0)
+                        row_names = rnm, col_names = cnm, missing = NA)
   } else {
     out <- x$r
     params <- rlang::enquos(...)
@@ -177,19 +177,21 @@ adjacency_matrix <- function(x,
           id <- id & rlang::eval_tidy(params[[ii]], x)
         }
       }
-      out[!id] <- 0
+      out[!id] <- NA
     }
 
     if (isFALSE(diag) && identical(rownames(out), colnames(out))) {
-      diag(out) <- 0
+      diag(out) <- NA
     }
     if (!identical(type, "full") && identical(rownames(out), colnames(out))) {
       .f <- switch (type,
         "upper" = "lower.tri",
         "lower" = "upper.tri"
       )
-      out[do.call(.f, list(x = out))] <- 0
+      out[do.call(.f, list(x = out))] <- NA
     }
   }
+  out[!is.na(out)] <- 1
+  out[is.na(out)] <- 0
   out
 }
