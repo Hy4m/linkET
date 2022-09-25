@@ -4,7 +4,7 @@
 \alias{adjacency_matrix}
 \title{Generate adjacency matrix}
 \usage{
-adjacency_matrix(x, ..., type = "full", diag = FALSE)
+adjacency_matrix(x, ..., type = "full", diag = FALSE, missing = 0)
 }
 \arguments{
 \item{x}{a correlation object (\code{correlate}, \code{md_tbl}, and so on).}
@@ -15,6 +15,8 @@ adjacency_matrix(x, ..., type = "full", diag = FALSE)
 triangular part of a adjacency matrix.}
 
 \item{diag}{if FALSE (default),  self-edges will be removed.}
+
+\item{missing}{numeric, used to fill in missing values.}
 }
 \value{
 a matrix object.

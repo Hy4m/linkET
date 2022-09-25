@@ -135,6 +135,7 @@ as_tbl_graph.corr.test <- function(x, ...) {
 #' @param type one of "full", "upper" or "lower", used to extract upper or lower
 #' triangular part of a adjacency matrix.
 #' @param diag if FALSE (default),  self-edges will be removed.
+#' @param missing numeric, used to fill in missing values.
 #' @return a matrix object.
 #' @author Hou Yun
 #' @rdname adjacency_matrix
@@ -142,7 +143,8 @@ as_tbl_graph.corr.test <- function(x, ...) {
 adjacency_matrix <- function(x,
                              ...,
                              type = "full",
-                             diag = FALSE) {
+                             diag = FALSE,
+                             missing = 0) {
   type <- match.arg(type, c("full", "upper", "lower"))
   if (!inherits(x, "cor_md_tbl") && !inherits(x, "correlate")) {
     clss <- class(x)[1]
@@ -165,7 +167,7 @@ adjacency_matrix <- function(x,
     }
     x <- dplyr::filter(x, ...)
     out <- df_to_matrix(x, "r", row_id = ".rownames", col_id = ".colnames",
-                        row_names = rnm, col_names = cnm, missing = 0)
+                        row_names = rnm, col_names = cnm, missing = missing)
   } else {
     out <- x$r
     params <- rlang::enquos(...)
@@ -177,18 +179,18 @@ adjacency_matrix <- function(x,
           id <- id & rlang::eval_tidy(params[[ii]], x)
         }
       }
-      out[!id] <- 0
+      out[!id] <- missing
     }
 
     if (isFALSE(diag) && identical(rownames(out), colnames(out))) {
-      diag(out) <- 0
+      diag(out) <- missing
     }
     if (!identical(type, "full") && identical(rownames(out), colnames(out))) {
       .f <- switch (type,
         "upper" = "lower.tri",
         "lower" = "upper.tri"
       )
-      out[do.call(.f, list(x = out))] <- 0
+      out[do.call(.f, list(x = out))] <- missing
     }
   }
   out
