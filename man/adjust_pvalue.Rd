@@ -4,17 +4,12 @@
 \alias{adjust_pvalue}
 \title{Adjust p values}
 \usage{
-adjust_pvalue(x, .FUN = "p.adjust", method = "holm", proc = "Holm", ...)
+adjust_pvalue(x, method = "holm", ...)
 }
 \arguments{
 \item{x}{a correlate or md_tbl object.}
 
-\item{.FUN}{adjust function, such as \code{stats::p.adjust()},
-\code{multtest::mt.rawp2adjp()}.}
-
-\item{method}{adjust method when .FUN is "p.adjust".}
-
-\item{proc}{adjust method when .FUN is "mt.rawp2adjp".}
+\item{method}{adjust method.}
 
 \item{...}{other parameters passing on to adjust function.}
 }

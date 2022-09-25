@@ -1,20 +1,13 @@
 #' @title Adjust p values
 #' @description Adjust correlation p values based on user-specified method.
 #' @param x a correlate or md_tbl object.
-#' @param .FUN adjust function, such as \code{stats::p.adjust()},
-#' \code{multtest::mt.rawp2adjp()}.
-#' @param method adjust method when .FUN is "p.adjust".
-#' @param proc adjust method when .FUN is "mt.rawp2adjp".
+#' @param method adjust method.
 #' @param ... other parameters passing on to adjust function.
 #' @return a object same as x.
 #' @author Hou Yun
 #' @rdname adjust_pvalue
 #' @export
-adjust_pvalue <- function(x,
-                          .FUN = "p.adjust",
-                          method = "holm",
-                          proc = "Holm",
-                          ...) {
+adjust_pvalue <- function(x, method = "holm", ...) {
   if (!inherits(x, "cor_md_tbl") && !inherits(x, "correlate")) {
     stop("Can only adjust p-value for 'md_tbl' and 'correlate' object.",
          call. = FALSE)
@@ -23,10 +16,14 @@ adjust_pvalue <- function(x,
     return(x)
   }
 
-  .FUN <- match.arg(.FUN, c("p.adjust", "mt.rawp2adjp"))
+  method <- match.arg(method, c("Bonferroni", "Holm", "Hochberg", "SidakSS",
+                                "SidakSD", "BH", "BY", "ABH", "TSBH", "holm",
+                                "hochberg", "hommel", "bonferroni", "fdr", "none"))
+  if (method == "none") {
+    return(x)
+  }
 
-  if (.FUN == "p.adjust") {
-    .FUN <- get_function("stats", "p.adjust")
+  if (method %in% stats::p.adjust.methods) {
     if (inherits(x, "cor_md_tbl")) {
       adj_p <- stats::p.adjust(x$p, method = method, n = nrows(x) * ncols(x))
     } else {
@@ -34,14 +31,12 @@ adjust_pvalue <- function(x,
     }
   } else {
     .FUN <- get_function("multtest", "mt.rawp2adjp")
-    proc <- match.arg(proc, c("Bonferroni", "Holm", "Hochberg", "SidakSS",
-                              "SidakSD", "BH", "BY", "ABH", "TSBH"))
     if (inherits(x, "cor_md_tbl")) {
       if (length(x$p) != nrows(x) * ncols(x)) {
         warning("Please adjust p-value before filter.", call. = FALSE)
       }
     }
-    adj_p <- .FUN(rawp = x$p, proc = proc, ...)$adjp[, 2]
+    adj_p <- .FUN(rawp = x$p, proc = method, ...)$adjp[, 2]
   }
 
   if (inherits(x, "cor_md_tbl")) {
