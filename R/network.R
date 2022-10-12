@@ -137,7 +137,6 @@ as_tbl_graph.corr.test <- function(x, ...) {
 #' @param type one of "full", "upper" or "lower", used to extract upper or lower
 #' triangular part of a adjacency matrix.
 #' @param diag if FALSE (default),  self-edges will be removed.
-#' @param missing numeric, used to fill in missing values.
 #' @return a matrix object.
 #' @author Hou Yun
 #' @rdname adjacency_matrix

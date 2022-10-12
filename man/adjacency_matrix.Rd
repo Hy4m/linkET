@@ -18,8 +18,6 @@ coefficient matrix, and if (FALSE) will return adjacency matrix.}
 triangular part of a adjacency matrix.}
 
 \item{diag}{if FALSE (default),  self-edges will be removed.}
-
-\item{missing}{numeric, used to fill in missing values.}
 }
 \value{
 a matrix object.
