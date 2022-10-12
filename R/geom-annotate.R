@@ -186,6 +186,7 @@ annotateGrob.grob <- function(annotate,
               cl = "annotateGrob")
 }
 
+#' @param parse if TRUE (default) will convert text to richtext.
 #' @rdname geom_annotate
 #' @method annotateGrob character
 #' @export
@@ -196,14 +197,24 @@ annotateGrob.character <- function(annotate,
                                    nudge_x = 0,
                                    nudge_y = 0,
                                    default.units = "npc",
+                                   parse = FALSE,
                                    ...) {
+  params <- list(...)
+  if (isTRUE(parse)) {
+    annotate <- latex_richtext(annotate,
+                               sup = params$sup %||% "^",
+                               sub = params$sub %||% "_",
+                               br = params$br %||% "\n")
+  }
+  params <- params[setdiff(names(params), c("sup", "sub", "br"))]
+
   if (is_richtext(annotate)) {
     textbox_grob <- get_function("gridtext", "textbox_grob")
-    annotate <- paste_with_na(annotate, collapse = "<br>")
-    annotate <- textbox_grob(annotate, ...)
+    params$text <- paste_with_na(annotate, collapse = "<br>")
+    annotate <- do.call(textbox_grob, params)
   } else {
-    annotate <- paste_with_na(annotate, collapse = "\n")
-    annotate <- grid::textGrob(annotate, ...)
+    params$label <- paste_with_na(annotate, collapse = "\n")
+    annotate <- do.call(grid::textGrob, params)
   }
 
   annotateGrob(annotate = annotate,

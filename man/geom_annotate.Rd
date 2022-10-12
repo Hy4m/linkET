@@ -47,6 +47,7 @@ annotateGrob(annotate, ...)
   nudge_x = 0,
   nudge_y = 0,
   default.units = "npc",
+  parse = FALSE,
   ...
 )
 
@@ -146,6 +147,8 @@ display.}
 \item{nudge_x, nudge_y}{a minor shift of position, should be a grid::unit object.}
 
 \item{default.units}{A string indicating the default units to use.}
+
+\item{parse}{if TRUE (default) will convert text to richtext.}
 
 \item{digits}{integer indicating the number of decimal places (round)
 to be used, the default value is 2.}
