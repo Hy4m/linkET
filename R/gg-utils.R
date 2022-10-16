@@ -19,7 +19,6 @@ label_formula <- function (parse = TRUE) {
     n <- length(x)
     nm <- names(x)
     .FUN <- parse
-    print(parse)
     if (!is.function(.FUN)) {
       if (any(grepl("\n", x, fixed = TRUE))) {
         .FUN <- parse_func(output = "richtext")
