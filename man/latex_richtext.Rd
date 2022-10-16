@@ -2,9 +2,9 @@
 % Please edit documentation in R/geom-magic-text.R
 \name{latex_richtext}
 \alias{latex_richtext}
-\title{Converts a LaTeX String to a Rich Text}
+\title{Converts a LaTeX String to Richtext}
 \usage{
-latex_richtext(x, sup = "^", sub = "_", br = "\\n")
+latex_richtext(x, sup = "^", sub = "_", br = "\\n", env = parent.frame())
 }
 \arguments{
 \item{x}{a character vector.}
@@ -14,9 +14,11 @@ latex_richtext(x, sup = "^", sub = "_", br = "\\n")
 \item{sub}{one-length character, indicates that characters after this is subscript.}
 
 \item{br}{string,  separator of lines.}
+
+\item{env}{environment to evaluate each expression in.}
 }
 \description{
-Helper function to convert a LaTeX string to a rich text.
+Helper function to convert a LaTeX string to richtext.
 }
 \examples{
 name <- c("A_2", "B^3", "C_2", "D^{123 + x}")

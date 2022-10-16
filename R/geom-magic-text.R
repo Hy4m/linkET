@@ -7,11 +7,9 @@
 #' as a string.
 #' @param position position adjustment, either as a string, or the result of a
 #' call to a position adjustment function.
-#' @param parse logical. IF TRUE (default), the labels will be parsed into richtext.
-#' @param sup one-length character, indicates that characters after this is superscript.
-#' @param sub one-length character, indicates that characters after this is subscript.
-#' @param br string,  separator of lines.
-#' @param ... others passing to \code{ggtext::geom_richtext()}.
+#' @param geom one of text, label or richtext.
+#' @param parse logical. IF TRUE (default), the labels will be parsed into expression.
+#' @param ... others passing to \code{ggplot2::geom_<geom>()}.
 #' @return a gg layer object.
 #' @rdname geom_magic_text
 #' @author Hou Yun
@@ -20,22 +18,17 @@ geom_magic_text <- function(mapping = NULL,
                             data = NULL,
                             stat = "identity",
                             position = "identity",
+                            geom = "text",
                             parse = TRUE,
-                            sup = "^",
-                            sub = "_",
-                            br = "\n",
                             ...) {
-  if(!suppressMessages(requireNamespace("ggtext"))) {
-    stop("ggtext package has not been installed", call. = FALSE)
-  }
+  geom <- gsub("geom_", "", geom, fixed = TRUE)
+  geom <- match.arg(geom, c("text", "label", "richtext", "text_repel", "label_repel"))
   structure(list(mapping = mapping,
                  data = data,
                  stat = stat,
                  position = position,
+                 geom = geom,
                  parse = parse,
-                 sup = sup,
-                 sub = sub,
-                 br = br,
                  ...), class = "magic_text")
 }
 
@@ -47,44 +40,49 @@ ggplot_add.magic_text <- function(object, plot, object_name) {
     object$mapping <- aes_modify(plot$mapping, object$mapping)
   }
 
-  object$data <- object$data %||% plot$data
+  object$data <- tibble::as_tibble(object$data %||% plot$data)
   label <- aes_vars(object$mapping, "label")
   if(is.null(label) && is.null(object$label)) {
     stop("geom_magic_text requires the label aesthetics.", call. = FALSE)
   }
 
-  if(isTRUE(object$parse)) {
+  parse_fun <- object$parse
+  if(isTRUE(parse_fun) || is.function(parse_fun)) {
+    if (!is.function(parse_fun)) {
+      parse_fun <- parse_func()
+    }
     if(!is.null(object$label)) {
-     object$label <- latex_richtext(object$label,
-                                    sup = object$sup,
-                                    sub = object$sub,
-                                    br = object$br)
+      object$label <- parse_fun(object$label)
     } else {
-      object$data[[label]] <- latex_richtext(object$data[[label]],
-                                             sup = object$sup,
-                                             sub = object$sub,
-                                             br = object$br)
+      object$data[[label]] <- parse_fun(object$data[[label]])
     }
   }
 
-  object <- object[setdiff(names(object), c("sub", "sup", "br", "parse"))]
-  if(is.null(object$fill %||% object$mapping$fill)) {
-    object$fill <- NA
+  geom <- switch (object$geom,
+    "text" = ggplot2::geom_text,
+    "label" = ggplot2::geom_label,
+    "richtext" = get_function("ggtext", "geom_richtext"),
+    "label_repel" = get_function("ggrepel", "geom_label_repel"),
+    "text_repel" = get_function("ggrepel", "geom_text_repel")
+  )
+
+  if (object$geom == "richtext") {
+    object <- object[setdiff(names(object), c("geom", "parse"))]
+  } else {
+    object <- object[setdiff(names(object), "geom")]
   }
-  if(is.null(object$label.colour %||% object$mapping$label.colour)) {
-    object$label.colour <- NA
-  }
-  geom_richtext <- get_function("ggtext", "geom_richtext")
-  object <- do.call(geom_richtext, object)
+
+  object <- do.call(geom, object)
   ggplot_add(object, plot, object_name)
 }
 
-#' @title Converts a LaTeX String to a Rich Text
-#' @description Helper function to convert a LaTeX string to a rich text.
+#' @title Converts a LaTeX String to Richtext
+#' @description Helper function to convert a LaTeX string to richtext.
 #' @param x a character vector.
 #' @param sup one-length character, indicates that characters after this is superscript.
 #' @param sub one-length character, indicates that characters after this is subscript.
 #' @param br string,  separator of lines.
+#' @param env environment to evaluate each expression in.
 #' @rdname latex_richtext
 #' @author Hou Yun
 #' @export
@@ -95,12 +93,16 @@ ggplot_add.magic_text <- function(object, plot, object_name) {
 latex_richtext <- function(x,
                            sup = "^",
                            sub = "_",
-                           br = "\n") {
+                           br = "\n",
+                           env = parent.frame()) {
   if(!is.character(x)) {
     x <- as.character(x)
   }
+  x <- vapply(x, function(.x) {
+    glue::glue(.x, .envir = env, .open = ".val{", .close = "}")
+  }, character(1), USE.NAMES = FALSE)
 
-  x <- sub(br, "<br>", x, fixed = "TRUE")
+  x <- gsub(br, "<br>", x, fixed = "TRUE")
   x <- vapply(x, function(.x) {
     if(is.na(.x)) {
       return(.x)
@@ -165,4 +167,103 @@ end_bracket <- function(id, ll) {
   s[s > id][1L]
 }
 
+#' @title Converts a LaTeX String to Expression
+#' @description Helper function to convert a LaTeX string to expression.
+#' @param x a character vector.
+#' @param sup one-length character, indicates that characters after this is superscript.
+#' @param sub one-length character, indicates that characters after this is subscript.
+#' @param user_defined user-defined command, see \code{?latex2exp::TeX} for details.
+#' @param env environment to evaluate each expression in.
+#' @param mode 'inline' means inline formula mode in latex, and 'display' means
+#' displayed formula mode in latex.
+#' @param output the type of returned object, should be expression or character.
+#' @param ... other parameters passing to \code{latex2exp::TeX()}.
+#' @rdname latex_expression
+#' @author Hou Yun
+#' @export
+#' @examples
+#' name <- c("A_2", "B^3", "C_2", "D^{123 + x}")
+#' name <- latex_expression(name)
+latex_expression <- function(x,
+                             sup = NULL,
+                             sub = NULL,
+                             user_defined = list(),
+                             env = parent.frame(),
+                             mode = "inline",
+                             output = "character",
+                             ...) {
+  if (!is.character(x)) {
+    x <- as.character(x)
+  }
+  if (length(x) < 1) {
+    return(x)
+  }
 
+  is_na <- is.na(x)
+  x <- ifelse(is_na, "", x)
+  mode <- match.arg(mode, c("inline", "display"))
+  output <- match.arg(output, c("expression", "character"))
+  if (mode == "inline") {
+    x <- paste0("$", x, "$")
+  } else {
+    x <- paste0("$$", x, "$$")
+  }
+
+  x <- vapply(x, function(.x) {
+    glue::glue(.x, .envir = env, .open = ".val{", .close = "}")
+  }, character(1), USE.NAMES = FALSE)
+
+  if (!is.null(sup)) {
+    x <- vapply(x, function(.x) {
+      gsub("^", "SUPPUS", .x, fixed = TRUE)
+    }, character(1), USE.NAMES = FALSE)
+    x <- vapply(x, function(.x) {
+      gsub(sup, "^", .x, fixed = TRUE)
+    }, character(1), USE.NAMES = FALSE)
+  }
+
+  if (!is.null(sub)) {
+    x <- vapply(x, function(.x) {
+      gsub("_", "SUBBUS", .x, fixed = TRUE)
+    }, character(1), USE.NAMES = FALSE)
+    x <- vapply(x, function(.x) {
+      gsub(sub, "_", .x, fixed = TRUE)
+    }, character(1), USE.NAMES = FALSE)
+  }
+
+  TeX <- get_function("latex2exp", "TeX")
+  x <- TeX(x, user_defined = user_defined, output = "character", ...)
+  x <- gsub("SUPPUS", "^", x, fixed = TRUE)
+  x <- gsub("SUBBUS", "_", x, fixed = TRUE)
+
+  if (output == "expression") {
+    out <- vector("expression", length(x))
+    for (ii in seq_along(x)) {
+      expr <- parse(text = x[ii])
+      out[[ii]] <- if (length(expr) == 0) NA else expr[[1]]
+    }
+  } else {
+    out <- unname(x)
+    out <- ifelse(is_na, NA_character_, out)
+  }
+  out
+}
+
+#' @rdname latex_expression
+#' @export
+parse_func <- function(..., output = "character") {
+  output <- match.arg(output, c("character", "richtext"))
+  if (output == "richtext") {
+    function(x) {
+      latex_richtext(x = x, ...)
+    }
+  } else {
+    function(x) {
+      if (any(grepl("\n", x, fixed = TRUE))) {
+        warning("R expression not supports multiline formula,\n",
+                "please use richtext instead.", call. = FALSE)
+      }
+      latex_expression(x = x, ..., output = output)
+    }
+  }
+}

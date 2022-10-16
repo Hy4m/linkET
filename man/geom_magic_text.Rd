@@ -9,10 +9,8 @@ geom_magic_text(
   data = NULL,
   stat = "identity",
   position = "identity",
+  geom = "text",
   parse = TRUE,
-  sup = "^",
-  sub = "_",
-  br = "\\n",
   ...
 )
 }
@@ -27,15 +25,11 @@ as a string.}
 \item{position}{position adjustment, either as a string, or the result of a
 call to a position adjustment function.}
 
-\item{parse}{logical. IF TRUE (default), the labels will be parsed into richtext.}
+\item{geom}{one of text, label or richtext.}
 
-\item{sup}{one-length character, indicates that characters after this is superscript.}
+\item{parse}{logical. IF TRUE (default), the labels will be parsed into expression.}
 
-\item{sub}{one-length character, indicates that characters after this is subscript.}
-
-\item{br}{string,  separator of lines.}
-
-\item{...}{others passing to \code{ggtext::geom_richtext()}.}
+\item{...}{others passing to \code{ggplot2::geom_<geom>()}.}
 }
 \value{
 a gg layer object.
