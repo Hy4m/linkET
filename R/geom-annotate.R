@@ -15,6 +15,7 @@
 #'      \item{\code{"ct"}: center-top.}
 #'      \item{\code{"cb"}: center-bottom.}
 #'   }
+#' @param hjust,vjust a numeric vector specifying horizontal/vertical justification.
 #' @param width,height width/height of annotate.
 #' @param nudge_x,nudge_y a minor shift of position, should be a grid::unit object.
 #' @return a layer object.
@@ -37,6 +38,7 @@ geom_annotate <- function(mapping = NULL,
                           height = NULL,
                           na.rm = FALSE)
 {
+
   params <- list(...)
   others <- params[setdiff(names(params), c("v", "h", "nudge_x", "nudge_y"))]
   params <- params[intersect(names(params), c("v", "h", "nudge_x", "nudge_y"))]
@@ -163,6 +165,7 @@ annotateGrob.grob <- function(annotate,
     y <- just_y <- switch(y_pos, "t" = 1, "b" = 0, "c" = 0.5)
   }
 
+
   if (!grid::is.unit(x)) {
     x <- grid::unit(x, "npc")
   }
@@ -192,6 +195,8 @@ annotateGrob.grob <- function(annotate,
 #' @export
 annotateGrob.character <- function(annotate,
                                    position = "rt",
+                                   hjust = 0.5,
+                                   vjust = 0.5,
                                    width = NULL,
                                    height = NULL,
                                    nudge_x = 0,
@@ -229,11 +234,31 @@ annotateGrob.character <- function(annotate,
     }
   }
 
+  hjust <- get_hjust(hjust)
+  vjust <- 0.5
+  if (identical(hjust, 1)) {
+    xx <- 1
+  } else if (identical(hjust, 0)) {
+    xx <- 0
+  } else {
+    xx <- 0.5
+  }
+
   if (is_richtext(annotate)) {
     richtext_grob <- get_function("gridtext", "richtext_grob")
-    annotate <- richtext_grob(text = annotate, ...)
+    annotate <- richtext_grob(text = annotate,
+                              x = xx,
+                              y = 0.5,
+                              hjust = hjust,
+                              vjust = 0.5,
+                              ...)
   } else {
-    annotate <- grid::textGrob(label = annotate, ...)
+    annotate <- grid::textGrob(label = annotate,
+                               x = xx,
+                               y = 0.5,
+                               hjust = hjust,
+                               vjust = 0.5,
+                               ...)
   }
 
   annotateGrob(annotate = annotate,
@@ -336,6 +361,7 @@ annotateGrob.numeric <- function(annotate,
 #' @export
 makeContent.annotateGrob <- function(x) {
   annotate <- x$annotate
+  is_label <- inherits(annotate, "text") || inherits(annotate, "richtext_grob")
   xx <- x$x
   yy <- x$y
   nudge_x <- x$nudge_x
@@ -378,6 +404,7 @@ makeContent.annotateGrob <- function(x) {
                        width = width,
                        height = height,
                        just = x$just,
+                       clip = "off",
                        default.units = default.units)
   annotate <- grid::editGrob(annotate, vp = vp)
 
@@ -392,4 +419,37 @@ is_nested_annotate_list <- function(annotate) {
       !inherits(x, "NULL")
   }, logical(1))
   if (any(id)) TRUE else FALSE
+}
+
+#' @noRd
+get_hjust <- function(hjust) {
+  if (is.character(hjust)) {
+    hjust <- tolower(hjust)
+    hjust <- match.arg(hjust, c("left", "right", "center", "l", "r", "c"))
+    hjust <- switch (hjust,
+                     "left" = 0,
+                     "right" = 1,
+                     "center" = 0.5,
+                     "l" = 0,
+                     "r" = 1,
+                     "c" = 0.5
+    )
+  } else {
+    if (is.null(hjust) || !is.numeric(hjust)) {
+      hjust <- 0.5
+    }
+    if (length(hjust) < 1) {
+      hjust <- 0.5
+    } else {
+      hjust <- hjust[1]
+    }
+    if (hjust > 0.5) {
+      hjust <- 1
+    } else if (hjust < 0.5) {
+      hjust <- 0
+    } else {
+      hjust <- 0.5
+    }
+  }
+  hjust
 }

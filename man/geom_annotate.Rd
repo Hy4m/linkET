@@ -42,6 +42,8 @@ annotateGrob(annotate, ...)
 \method{annotateGrob}{character}(
   annotate,
   position = "rt",
+  hjust = 0.5,
+  vjust = 0.5,
   width = NULL,
   height = NULL,
   nudge_x = 0,
@@ -147,6 +149,8 @@ display.}
 \item{nudge_x, nudge_y}{a minor shift of position, should be a grid::unit object.}
 
 \item{default.units}{A string indicating the default units to use.}
+
+\item{hjust, vjust}{a numeric vector specifying horizontal/vertical justification.}
 
 \item{parse}{if TRUE (default) will convert text to richtext.}
 
