@@ -166,3 +166,6 @@ a layer object.
 \description{
 A wrapper funtion to add some annotate elements on ggplot.
 }
+\author{
+Hou Yun
+}

@@ -25,6 +25,7 @@
 #' @param nsmall the minimum number of digits to the right of the decimal point,
 #'  the default value is 2.
 #' @rdname geom_annotate
+#' @author Hou Yun
 #' @export
 geom_annotate <- function(mapping = NULL,
                           data = NULL,
