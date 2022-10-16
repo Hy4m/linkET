@@ -248,7 +248,7 @@ latex_expression <- function(x,
 #' @rdname latex_expression
 #' @export
 parse_func <- function(..., output = "character") {
-  output <- match.arg(output, c("character", "richtext"))
+  output <- match.arg(output, c("character", "richtext", "expression"))
   if (output == "richtext") {
     function(x) {
       latex_richtext(x = x, ...)
