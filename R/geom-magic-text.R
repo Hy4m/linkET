@@ -237,11 +237,7 @@ latex_expression <- function(x,
   x <- gsub("SUBBUS", "_", x, fixed = TRUE)
 
   if (output == "expression") {
-    out <- vector("expression", length(x))
-    for (ii in seq_along(x)) {
-      expr <- parse(text = x[ii])
-      out[[ii]] <- if (length(expr) == 0) NA else expr[[1]]
-    }
+    out <- parse_safe(x)
   } else {
     out <- unname(x)
     out <- ifelse(is_na, NA_character_, out)
@@ -266,4 +262,30 @@ parse_func <- function(..., output = "character") {
       latex_expression(x = x, ..., output = output)
     }
   }
+}
+
+#' @noRd
+parse_safe <- function(x) {
+  out <- vector("expression", length(x))
+  for (ii in seq_along(x)) {
+    expr <- parse(text = x[ii])
+    out[[ii]] <- if (length(expr) == 0) NA else expr[[1]]
+  }
+  out
+}
+
+#' @noRd
+is_richtext <- function(x, pattern = NULL) {
+  if (!is.character(x)) {
+    return(FALSE)
+  }
+
+  if(is.null(pattern)) {
+    pattern <- c("<sub>", "<sup>", "<br>", "<span")
+  }
+  if(length(pattern) > 1) {
+    pattern <- paste(pattern, collapse = "|")
+  }
+  x <- gsub("\\s+", "", x)
+  any(grepl(pattern, x))
 }
