@@ -109,18 +109,6 @@ rename <- function(data, ...) {
 }
 
 #' @noRd
-is_richtext <- function(x, pattern = NULL) {
-  if(is.null(pattern)) {
-    pattern <- c("<sub>", "<sup>", "<br>", "<span")
-  }
-  if(length(pattern) > 1) {
-    pattern <- paste(pattern, collapse = "|")
-  }
-  x <- gsub("\\s+", "", x)
-  any(grepl(pattern, x))
-}
-
-#' @noRd
 r_version <- function() {
   strsplit(R.version.string, " ")[[1]][3]
 }
