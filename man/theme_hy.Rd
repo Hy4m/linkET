@@ -4,13 +4,10 @@
 \alias{theme_hy}
 \title{hyplot theme}
 \usage{
-theme_hy(..., use_md = FALSE)
+theme_hy(...)
 }
 \arguments{
 \item{...}{extra params passing to \code{\link[ggplot2]{theme}}.}
-
-\item{use_md}{logical. if TRUE, will use \code{ggtext::element_markdown()} to
-draw the axis labels.}
 }
 \value{
 The theme.
