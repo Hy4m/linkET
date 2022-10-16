@@ -213,12 +213,15 @@ annotateGrob.character <- function(annotate,
   }
   if (is.function(parse_fun)) {
     annotate <- parse_fun(annotate)
+    if ( is.character(annotate) && !is_richtext(annotate)) {
+      annotate <- parse_safe(annotate)
+    }
   }
-
   if (is_richtext(annotate) && length(annotate) > 1) {
     annotate <- paste_with_na(annotate, collapse = "<br>")
   }
-  if (length(annotate) > 1) {
+
+  if (length(annotate) > 1 && !is.expression(annotate)) {
     warning("R expression not supports multiline formula,\n",
             "please use richtext instead.", call. = FALSE)
     if (is.character(annotate)) {
