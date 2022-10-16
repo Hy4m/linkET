@@ -199,22 +199,38 @@ annotateGrob.character <- function(annotate,
                                    default.units = "npc",
                                    parse = FALSE,
                                    ...) {
-  params <- list(...)
-  if (isTRUE(parse)) {
-    annotate <- latex_richtext(annotate,
-                               sup = params$sup %||% "^",
-                               sub = params$sub %||% "_",
-                               br = params$br %||% "\n")
+  if (length(annotate) < 1) {
+    return(grid::nullGrob())
   }
-  params <- params[setdiff(names(params), c("sup", "sub", "br"))]
+
+  parse_fun <- parse
+  if (isTRUE(parse_fun)) {
+    if (length(annotate) > 1 || any(grepl("\n", annotate, fixed = TRUE))) {
+      parse_fun <- parse_func(output = "richtext")
+    } else {
+      parse_fun <- parse_func()
+    }
+  }
+  if (is.function(parse_fun)) {
+    annotate <- parse_fun(annotate)
+  }
+
+  if (is_richtext(annotate) && length(annotate) > 1) {
+    annotate <- paste_with_na(annotate, collapse = "<br>")
+  }
+  if (length(annotate) > 1) {
+    warning("R expression not supports multiline formula,\n",
+            "please use richtext instead.", call. = FALSE)
+    if (is.character(annotate)) {
+      annotate <- paste_with_na(annotate, collapse = "\n")
+    }
+  }
 
   if (is_richtext(annotate)) {
-    textbox_grob <- get_function("gridtext", "textbox_grob")
-    params$text <- paste_with_na(annotate, collapse = "<br>")
-    annotate <- do.call(textbox_grob, params)
+    richtext_grob <- get_function("gridtext", "richtext_grob")
+    annotate <- richtext_grob(text = annotate, ...)
   } else {
-    params$label <- paste_with_na(annotate, collapse = "\n")
-    annotate <- do.call(grid::textGrob, params)
+    annotate <- grid::textGrob(label = annotate, ...)
   }
 
   annotateGrob(annotate = annotate,
