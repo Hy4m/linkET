@@ -62,9 +62,6 @@ as_md_tbl.grouped_matrix_data <- function(x, ...)
   row_names <- unique(unlist(lapply(x, attr, "row_names")))
   col_names <- unique(unlist(lapply(x, attr, "col_names")))
 
-  is_corr <- all(vapply(x, function(.x) "cor_matrix_data" %in% class(.x),
-                        logical(1)))
-
   if (length(unique(type)) != 1L) {
     type <- "full"
   } else {
@@ -82,11 +79,7 @@ as_md_tbl.grouped_matrix_data <- function(x, ...)
       mutate(.group = .nm)
   })
 
-  if (is_corr) {
-    clss <- c("grouped_md_tbl", "cor_md_tbl", class(x[[1]]))
-  } else {
-    clss <- c("grouped_md_tbl", class(x[[1]]))
-  }
+  clss <- c("grouped_md_tbl", class(x[[1]]))
 
   structure(do.call(dplyr::bind_rows, x),
             type = type,
@@ -213,9 +206,7 @@ as_md_tbl.correlate <- function(x, ...) {
 #' @method as_md_tbl grouped_correlate
 #' @rdname as_md_tbl
 as_md_tbl.grouped_correlate <- function(x, ...) {
-  x <- as_md_tbl(as_matrix_data(x, ...))
-  class(x) <- c("cor_md_tbl", class(x))
-  x
+  as_md_tbl(as_matrix_data(x, ...))
 }
 
 #' @method as_md_tbl rcorr
