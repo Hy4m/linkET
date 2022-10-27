@@ -98,6 +98,9 @@ latex_richtext <- function(x,
   if(!is.character(x)) {
     x <- as.character(x)
   }
+  ## more safely glue: glue always trim double {{ or }} to single
+  x <- gsub("{{", "{{{{", x, fixed = TRUE)
+  x <- gsub("}}", "}}}}", x, fixed = TRUE)
   x <- vapply(x, function(.x) {
     glue::glue(.x, .envir = env, .open = ".val{", .close = "}")
   }, character(1), USE.NAMES = FALSE)
@@ -195,23 +198,32 @@ latex_expression <- function(x,
   if (!is.character(x)) {
     x <- as.character(x)
   }
+  mode <- match.arg(mode, c("inline", "display"))
+  output <- match.arg(output, c("expression", "character"))
+
   if (length(x) < 1) {
-    return(x)
+    if (output == "character") {
+      return(character(0))
+    } else {
+      return(expression())
+    }
   }
 
   is_na <- is.na(x)
   x <- ifelse(is_na, "", x)
-  mode <- match.arg(mode, c("inline", "display"))
-  output <- match.arg(output, c("expression", "character"))
   if (mode == "inline") {
     x <- paste0("$", x, "$")
   } else {
     x <- paste0("$$", x, "$$")
   }
 
+  ## more safely glue: glue always trim double {{ or }} to single
+  x <- gsub("{{", "{{{{", x, fixed = TRUE)
+  x <- gsub("}}", "}}}}", x, fixed = TRUE)
   x <- vapply(x, function(.x) {
     glue::glue(.x, .envir = env, .open = ".val{", .close = "}")
   }, character(1), USE.NAMES = FALSE)
+
 
   if (!is.null(sup)) {
     x <- vapply(x, function(.x) {
