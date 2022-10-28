@@ -99,7 +99,6 @@ latex_richtext <- function(x,
     x <- as.character(x)
   }
   ## more safely glue: glue always trim double {{ or }} to single
-  x <- gsub("{{", "{{{{", x, fixed = TRUE)
   x <- gsub("}}", "}}}}", x, fixed = TRUE)
   x <- vapply(x, function(.x) {
     glue::glue(.x, .envir = env, .open = ".val{", .close = "}")
@@ -218,7 +217,6 @@ latex_expression <- function(x,
   }
 
   ## more safely glue: glue always trim double {{ or }} to single
-  x <- gsub("{{", "{{{{", x, fixed = TRUE)
   x <- gsub("}}", "}}}}", x, fixed = TRUE)
   x <- vapply(x, function(.x) {
     glue::glue(.x, .envir = env, .open = ".val{", .close = "}")
