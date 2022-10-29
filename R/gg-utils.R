@@ -38,3 +38,79 @@ label_formula <- function (parse = TRUE) {
     x
   }
 }
+
+#' @importFrom ggplot2 element_grob
+#' @export
+element_grob.element_magic_text <- function(element, label = "", ...) {
+  if (is.null(label)) {
+    return(ggplot2::zeroGrob())
+  }
+
+  parse_fun <- element$parse
+  if (isTRUE(parse_fun)) {
+    parse_fun <- parse_func(output = "expression")
+  }
+  if (is.function(parse_fun) && !is.expression(label)) {
+    label <- parse_fun(label)
+    if (!is_richtext(label)) {
+      label <- parse(text = label)
+    }
+  }
+  element <- element[setdiff(names(element), "parse")]
+  if (is_richtext(label)) {
+    class(element) <- c("element_markdown", "element_text", "element")
+  } else {
+    class(element) <- c("element_text", "element")
+  }
+  ggplot2::element_grob(element = element, label = label, ...)
+}
+
+#' @title Theme element that enables magic text
+#' @description theme element that can parse text to expression or richtext.
+#' @inheritParams ggplot2::element_text
+#' @param parse logical or a parse function. IF TRUE (default), the labels will
+#' be parsed into expression.
+#' @return a element_magic_text object.
+#' @rdname element_magic_text
+#' @author Hou Yun
+#' @export
+element_magic_text <- function(parse = TRUE,
+                               family = NULL,
+                               face = NULL,
+                               size = NULL,
+                               colour = NULL,
+                               hjust = NULL,
+                               vjust = NULL,
+                               angle = NULL,
+                               lineheight = NULL,
+                               margin = NULL,
+                               color = NULL,
+                               debug = FALSE,
+                               inherit.blank = FALSE) {
+  if (!is.null(color)) {
+    colour <- color
+  }
+
+  n <- max(length(family), length(face), length(colour), length(size),
+           length(hjust), length(vjust), length(angle), length(lineheight))
+  if (n > 1) {
+    warning("Vectorized input to `element_text()` is not officially supported.\n",
+    "Results may be unexpected or may change in future versions of ggplot2.",
+    call. = FALSE)
+  }
+
+  structure(list(parse = parse,
+                 family = family,
+                 face = face,
+                 colour = colour,
+                 size = size,
+                 hjust = hjust,
+                 vjust = vjust,
+                 angle = angle,
+                 lineheight = lineheight,
+                 margin = margin,
+                 debug = debug,
+                 inherit.blank = inherit.blank),
+            class = c("element_magic_text", "element_text", "element"))
+
+}
