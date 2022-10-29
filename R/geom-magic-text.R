@@ -213,10 +213,6 @@ latex_expression <- function(x,
 
   is_na <- is.na(x)
   x <- ifelse(is_na, "", x)
-  if (mode == "formula") {
-    x <- paste0("$", x, "$")
-    x <- gsub(" ", space, x, fixed = TRUE)
-  }
 
   ## more safely glue: glue always trim double {{ or }} to single
   x <- gsub("}}", "}}}}", x, fixed = TRUE)
@@ -224,6 +220,10 @@ latex_expression <- function(x,
     glue::glue(.x, .envir = env, .open = ".val{", .close = "}")
   }, character(1), USE.NAMES = FALSE)
 
+  if (mode == "formula") {
+    x <- paste0("$", x, "$")
+    x <- gsub(" ", space, x, fixed = TRUE)
+  }
 
   if (!is.null(sup)) {
     x <- vapply(x, function(.x) {
