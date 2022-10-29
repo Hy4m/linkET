@@ -17,12 +17,12 @@ geom_annotate(
   data = NULL,
   stat = "identity",
   position = "rt",
-  inherit.aes = TRUE,
   show.legend = FALSE,
   ...,
   annotate = NULL,
   width = NULL,
   height = NULL,
+  recycle = FALSE,
   na.rm = FALSE
 )
 
@@ -127,11 +127,6 @@ layer, as a string.}
    \item{\code{"cb"}: center-bottom.}
 }}
 
-\item{inherit.aes}{If \code{FALSE}, overrides the default aesthetics,
-rather than combining with them. This is most useful for helper functions
-that define both data and aesthetics and shouldn't inherit behaviour from
-the default plot specification, e.g. \code{\link[ggplot2:borders]{borders()}}.}
-
 \item{show.legend}{logical. Should this layer be included in the legends?
 \code{NA}, the default, includes if any aesthetics are mapped.
 \code{FALSE} never includes, and \code{TRUE} always includes.
@@ -143,6 +138,9 @@ display.}
 \item{annotate}{a grob object, or other object can be converted to a grob.}
 
 \item{width, height}{width/height of annotate.}
+
+\item{recycle}{if TRUE indicating annotate will repeated to the same length
+as rows of data.}
 
 \item{na.rm}{not used.}
 

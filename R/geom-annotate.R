@@ -17,13 +17,15 @@
 #'   }
 #' @param hjust,vjust a numeric vector specifying horizontal/vertical justification.
 #' @param width,height width/height of annotate.
+#' @param recycle if TRUE indicating annotate will repeated to the same length
+#' as rows of data.
 #' @param nudge_x,nudge_y a minor shift of position, should be a grid::unit object.
-#' @return a layer object.
 #' @param na.rm not used.
 #' @param digits integer indicating the number of decimal places (round)
 #' to be used, the default value is 2.
 #' @param nsmall the minimum number of digits to the right of the decimal point,
 #'  the default value is 2.
+#' @return a layer object.
 #' @rdname geom_annotate
 #' @author Hou Yun
 #' @export
@@ -31,12 +33,12 @@ geom_annotate <- function(mapping = NULL,
                           data = NULL,
                           stat = "identity",
                           position = "rt",
-                          inherit.aes = TRUE,
                           show.legend = FALSE,
                           ...,
                           annotate = NULL,
                           width = NULL,
                           height = NULL,
+                          recycle = FALSE,
                           na.rm = FALSE)
 {
 
@@ -59,13 +61,14 @@ geom_annotate <- function(mapping = NULL,
     geom = GeomAnnotate,
     position = "identity",
     show.legend = show.legend,
-    inherit.aes = inherit.aes,
+    inherit.aes = FALSE,
     params = c(
       list(
         annotate = annotate,
         position = position,
         width = width,
         height = height,
+        recycle = recycle,
         params = others,
         na.rm = na.rm
       ),
@@ -81,7 +84,27 @@ geom_annotate <- function(mapping = NULL,
 GeomAnnotate <- ggproto(
   "GeomAnnotate", Geom,
   required_aes = NULL,
-  default_aes = aes(ids = NULL, h = "r", v = "t", nudge_x = 0, nudge_y = 0),
+  default_aes = aes(h = "r", v = "t", nudge_x = 0, nudge_y = 0),
+  setup_data = function(data, params) {
+    if (empty(data)) {
+      return(data)
+    }
+    annotate <- params$annotate
+    recycle <- params$recycle
+    data <- tibble::as_tibble(data)
+    if (isTRUE(recycle)) {
+      if (length(annotate) > nrow(data)) {
+        annotate <- rep_len(annotate, length(annotate))
+      } else {
+        data <- data[rep_len(seq_len(nrow(data)), length(annotate)), ]
+      }
+      data$annotate <- annotate
+    } else {
+      data <- data[seq_len(length(annotate)), ]
+      data$annotate <- annotate
+    }
+    data
+  },
   draw_panel = function(data,
                         panel_params,
                         coord,
@@ -89,32 +112,15 @@ GeomAnnotate <- ggproto(
                         position = NULL,
                         width = NULL,
                         height = NULL,
+                        recycle = FALSE,
                         params = list(),
                         na.rm = FALSE) {
-    if (empty(annotate) || empty(data)) {
+    if (empty(data)) {
       return(grid::nullGrob())
     }
 
-    if (!is.null(data$ids)) {
-      if (is.null(names(annotate))) {
-        stop("annotate should be a named list.", call. = FALSE)
-      }
-      annotate <- annotate[intersect(names(annotate),
-                                     unique(as.character(data$ids), TRUE))]
-      if (is_nested_annotate_list(annotate)) {
-        annotate <- Reduce("c", annotate)
-      }
-    }
-    if (empty(annotate)) {
-      return(grid::nullGrob())
-    }
-
-    data <- data[seq_len(length(annotate)), , drop = FALSE]
-    n <- nrow(data)
-
-    grobs <- lapply(seq_len(n), function(id) {
-      rows <- data[id, , drop = FALSE]
-      pp <- c(list(annotate = annotate[[id]],
+    grobs <- lapply(split(data, seq_len(nrow(data))), function(rows) {
+      pp <- c(list(annotate = rows$annotate[[1]],
                    position = position %||% paste0(rows$h, rows$v),
                    width = width,
                    height = height,
