@@ -175,10 +175,11 @@ end_bracket <- function(id, ll) {
 #' @param x a character vector.
 #' @param sup one-length character, indicates that characters after this is superscript.
 #' @param sub one-length character, indicates that characters after this is subscript.
+#' @param space if `mode = "formula"`, will replace space in x with it.
 #' @param user_defined user-defined command, see \code{?latex2exp::TeX} for details.
 #' @param env environment to evaluate each expression in.
-#' @param mode 'inline' means inline formula mode in latex, and 'display' means
-#' displayed formula mode in latex.
+#' @param mode 'inline' means string is normal text with some formula,
+#' and 'formula' means all string is formula.
 #' @param output the type of returned object, should be expression or character.
 #' @param ... other parameters passing to \code{latex2exp::TeX()}.
 #' @rdname latex_expression
@@ -190,15 +191,16 @@ end_bracket <- function(id, ll) {
 latex_expression <- function(x,
                              sup = NULL,
                              sub = NULL,
+                             space = "\\ ",
                              user_defined = list(),
                              env = parent.frame(),
-                             mode = "inline",
+                             mode = "formula",
                              output = "character",
                              ...) {
   if (!is.character(x)) {
     x <- as.character(x)
   }
-  mode <- match.arg(mode, c("inline", "display"))
+  mode <- match.arg(mode, c("inline", "formula"))
   output <- match.arg(output, c("expression", "character"))
 
   if (length(x) < 1) {
@@ -211,10 +213,9 @@ latex_expression <- function(x,
 
   is_na <- is.na(x)
   x <- ifelse(is_na, "", x)
-  if (mode == "inline") {
+  if (mode == "formula") {
     x <- paste0("$", x, "$")
-  } else {
-    x <- paste0("$$", x, "$$")
+    x <- gsub(" ", space, x, fixed = TRUE)
   }
 
   ## more safely glue: glue always trim double {{ or }} to single

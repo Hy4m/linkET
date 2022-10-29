@@ -9,9 +9,10 @@ latex_expression(
   x,
   sup = NULL,
   sub = NULL,
+  space = "\\\\ ",
   user_defined = list(),
   env = parent.frame(),
-  mode = "inline",
+  mode = "formula",
   output = "character",
   ...
 )
@@ -25,12 +26,14 @@ parse_func(..., output = "character")
 
 \item{sub}{one-length character, indicates that characters after this is subscript.}
 
+\item{space}{if `mode = "formula"`, will replace space in x with it.}
+
 \item{user_defined}{user-defined command, see \code{?latex2exp::TeX} for details.}
 
 \item{env}{environment to evaluate each expression in.}
 
-\item{mode}{'inline' means inline formula mode in latex, and 'display' means
-displayed formula mode in latex.}
+\item{mode}{'inline' means string is normal text with some formula,
+and 'formula' means all string is formula.}
 
 \item{output}{the type of returned object, should be expression or character.}
 
