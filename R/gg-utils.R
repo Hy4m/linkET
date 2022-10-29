@@ -41,7 +41,7 @@ label_formula <- function (parse = TRUE) {
 
 #' @importFrom ggplot2 element_grob
 #' @export
-element_grob.element_magic_text <- function(element, label = "", ...) {
+element_grob.element_formula <- function(element, label = "", ...) {
   if (is.null(label)) {
     return(ggplot2::zeroGrob())
   }
@@ -65,7 +65,7 @@ element_grob.element_magic_text <- function(element, label = "", ...) {
   ggplot2::element_grob(element = element, label = label, ...)
 }
 
-#' @title Theme element that enables magic text
+#' @title Theme element that enables formula
 #' @description theme element that can parse text to expression or richtext.
 #' @inheritParams ggplot2::element_text
 #' @param parse logical or a parse function. IF TRUE (default), the labels will
@@ -74,19 +74,19 @@ element_grob.element_magic_text <- function(element, label = "", ...) {
 #' @rdname element_magic_text
 #' @author Hou Yun
 #' @export
-element_magic_text <- function(parse = TRUE,
-                               family = NULL,
-                               face = NULL,
-                               size = NULL,
-                               colour = NULL,
-                               hjust = NULL,
-                               vjust = NULL,
-                               angle = NULL,
-                               lineheight = NULL,
-                               margin = NULL,
-                               color = NULL,
-                               debug = FALSE,
-                               inherit.blank = FALSE) {
+element_formula <- function(parse = TRUE,
+                            family = NULL,
+                            face = NULL,
+                            size = NULL,
+                            colour = NULL,
+                            hjust = NULL,
+                            vjust = NULL,
+                            angle = NULL,
+                            lineheight = NULL,
+                            margin = NULL,
+                            color = NULL,
+                            debug = FALSE,
+                            inherit.blank = FALSE) {
   if (!is.null(color)) {
     colour <- color
   }
@@ -111,6 +111,6 @@ element_magic_text <- function(parse = TRUE,
                  margin = margin,
                  debug = debug,
                  inherit.blank = inherit.blank),
-            class = c("element_magic_text", "element_text", "element"))
+            class = c("element_formula", "element_text", "element"))
 
 }
