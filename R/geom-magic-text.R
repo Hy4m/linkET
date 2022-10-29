@@ -8,7 +8,8 @@
 #' @param position position adjustment, either as a string, or the result of a
 #' call to a position adjustment function.
 #' @param geom one of text, label or richtext.
-#' @param parse logical. IF TRUE (default), the labels will be parsed into expression.
+#' @param parse logical or a parse function. IF TRUE (default), the labels will
+#' be parsed into expression.
 #' @param ... others passing to \code{ggplot2::geom_<geom>()}.
 #' @return a gg layer object.
 #' @rdname geom_magic_text

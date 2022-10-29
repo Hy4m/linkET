@@ -27,7 +27,8 @@ call to a position adjustment function.}
 
 \item{geom}{one of text, label or richtext.}
 
-\item{parse}{logical. IF TRUE (default), the labels will be parsed into expression.}
+\item{parse}{logical or a parse function. IF TRUE (default), the labels will
+be parsed into expression.}
 
 \item{...}{others passing to \code{ggplot2::geom_<geom>()}.}
 }
