@@ -123,6 +123,7 @@ Geomshaping <- ggproto(
                     linetype = 1, alpha = NA, width = 1, height = 1, n = 5, r = 0,
                     angle = 0, hjust = 0.5, vjust = 0.5, ratio = 0.618),
   required_aes = c("x", "y"),
+  optional_aes = c("n", "r", "ration"),
 
   draw_panel = function(self, data, panel_params, coord, shaping = NULL,
                         width_unit = NULL, height_unit = NULL, rasterize = FALSE,
@@ -162,9 +163,9 @@ Geomshaping <- ggproto(
                         height = data$height,
                         width_unit = width_unit %||% "native",
                         height_unit = height_unit %||% "native",
-                        r = data$r,
-                        n = data$n,
-                        ratio = data$ratio)
+                        r = data$r %||% 0,
+                        n = data$n %||% 5,
+                        ratio = data$ratio %||% 0.618)
     }
 
     markerGrob(marker = shaping,
