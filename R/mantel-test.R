@@ -192,26 +192,6 @@ mantel_test <- function(spec,
     env_ctrl <- check_env_ctrl(env, env_ctrl, env_select)
   }
 
-  if(is.null(spec_dist)) {
-    if(all(vapply(spec, is.numeric, logical(1)))) {
-      message("`mantel_test()` using 'bray' dist method for 'spec'.")
-      spec_dist <- dist_func(.FUN = "vegdist", method = "bray")
-    } else {
-      message("`mantel_test()` using 'gower' dist method for 'spec'.")
-      spec_dist <- dist_func(.FUN = "gowdis")
-    }
-  }
-
-  if(is.null(env_dist)) {
-    if(all(vapply(env, is.numeric, logical(1)))) {
-      message("`mantel_test()` using 'euclidean' dist method for 'env'.")
-      env_dist <- dist_func(.FUN = "vegdist", method = "euclidean")
-    } else {
-      message("`mantel_test()` using 'gower' dist method for 'env'.")
-      env_dist <- dist_func(.FUN = "gowdis")
-    }
-  }
-
   spec_select <- make_list_names(spec_select, "spec")
   env_select <- make_list_names(env_select, "env")
   spec_name <- rep(names(spec_select), each = length(env_select))
@@ -232,6 +212,42 @@ mantel_test <- function(spec,
     } else {
       subset(env, select = .x, drop = FALSE)
     }})
+
+  if(is.null(spec_dist)) {
+    all_spec_is_numeric <- all(vapply(spec, function(x) {
+      all(vapply(x, is.numeric, logical(1)))
+    }, logical(1)))
+    if(all_spec_is_numeric) {
+      ## detect rowsum is zero?
+      rowsum_is_zero <- vapply(spec, function(x) {
+        any(rowSums(x) == 0)
+      }, logical(1))
+      if (any(rowsum_is_zero)) {
+        message("`mantel_test()` using 'euclidean' dist method for 'spec'.")
+        spec_dist <- dist_func(.FUN = "vegdist", method = "euclidean")
+      } else {
+        message("`mantel_test()` using 'bray' dist method for 'spec'.")
+        spec_dist <- dist_func(.FUN = "vegdist", method = "bray")
+      }
+    } else {
+      message("`mantel_test()` using 'gower' dist method for 'spec'.")
+      spec_dist <- dist_func(.FUN = "gowdis")
+    }
+  }
+
+  if(is.null(env_dist)) {
+    all_env_is_numeric <- all(vapply(env, function(x) {
+      all(vapply(x, is.numeric, logical(1)))
+    }, logical(1)))
+
+    if(all_env_is_numeric) {
+      message("`mantel_test()` using 'euclidean' dist method for 'env'.")
+      env_dist <- dist_func(.FUN = "vegdist", method = "euclidean")
+    } else {
+      message("`mantel_test()` using 'gower' dist method for 'env'.")
+      env_dist <- dist_func(.FUN = "gowdis")
+    }
+  }
 
   rp <- purrr::pmap(list(spec_name, env_name, seeds), function(.x, .y, .seed) {
     .spec <- spec[[.x]]
