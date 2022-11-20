@@ -2,7 +2,6 @@
 % Please edit documentation in R/geom-doughnut.R
 \name{geom_doughnut}
 \alias{geom_doughnut}
-\alias{geom_node_doughnut}
 \title{Doughnut Layer}
 \usage{
 geom_doughnut(
@@ -16,14 +15,6 @@ geom_doughnut(
   na.rm = FALSE,
   show.legend = NA,
   inherit.aes = TRUE
-)
-
-geom_node_doughnut(
-  mapping = NULL,
-  data = NULL,
-  position = "identity",
-  show.legend = NA,
-  ...
 )
 }
 \arguments{

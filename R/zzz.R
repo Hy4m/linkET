@@ -11,11 +11,11 @@
   register_pairs_plot(reset = TRUE)
 
   ### register S3 method about network
-  for(g in c("cor_md_tbl", "correlate", "mantel_tbl",
-             "easycorrelation", "rcorr", "corr.test")) {
-    register_s3_method("igraph", "as.igraph", g)
-    register_s3_method("tidygraph", "as_tbl_graph", g)
-  }
+  # for(g in c("cor_md_tbl", "correlate", "mantel_tbl",
+  #            "easycorrelation", "rcorr", "corr.test")) {
+  #   register_s3_method("igraph", "as.igraph", g)
+  #   register_s3_method("tidygraph", "as_tbl_graph", g)
+  # }
 
   ### register S3 method about qcorrplot
   for (g in c("cor_md_tbl", "matrix", "data.frame", "default")) {

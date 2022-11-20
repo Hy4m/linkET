@@ -58,30 +58,6 @@ geom_doughnut <- function(mapping = NULL,
             )
 }
 
-#' @rdname geom_doughnut
-#' @export
-geom_node_doughnut <- function(mapping = NULL,
-                               data = NULL,
-                               position = "identity",
-                               show.legend = NA,
-                               ...) {
-  StatFilter <- get_function("ggraph", "StatFilter")
-  aes_intersect <- utils::getFromNamespace("aes_intersect", "ggraph")
-  mapping <- aes_intersect(mapping, aes_(x = ~x, y = ~y, ids = ~name))
-
-  layer(data = data,
-        mapping = mapping,
-        stat = StatFilter,
-        geom = "doughnut",
-        position = position,
-        show.legend = show.legend,
-        inherit.aes = FALSE,
-        params = list(
-          na.rm = FALSE,
-          ...)
-        )
-}
-
 #' @method ggplot_add doughnut
 #' @export
 ggplot_add.doughnut <- function(object, plot, object_name) {
