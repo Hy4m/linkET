@@ -19,7 +19,7 @@ knitr::opts_chunk$set(
 <!-- badges: end -->
 
 The goal of `linkET` is to visualize simply and directly a matrix heatmap based
-on 'ggplot2'.
+on 'ggplot2'. **Note: all functions of network have been merged in netET package.**
 
 ## Installation
 
@@ -133,14 +133,6 @@ qcorrplot(correlate(varechem), type = "lower", diag = FALSE) +
 
 ```{r}
 qpairs(iris) + geom_pairs()
-```
-
-## network
-
-```{r}
-correlate(mtcars) %>% 
-  as.igraph() %>% 
-  plot(layout = layout_with_circular)
 ```
 
 ## Citation

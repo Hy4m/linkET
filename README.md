@@ -7,7 +7,8 @@
 <!-- badges: end -->
 
 The goal of `linkET` is to visualize simply and directly a matrix
-heatmap based on ‘ggplot2’.
+heatmap based on ‘ggplot2’. **Note: all functions of network have been
+merged in netET package.**
 
 ## Installation
 
@@ -84,27 +85,27 @@ as_md_tbl(mtcars)
 correlate(mtcars) %>% 
   as_matrix_data()
 #> A matrix data object:
-#> Number:  4 
-#> Names:  r, p, lower_ci, upper_ci 
+#> Number:  2 
+#> Names:  r, p 
 #> Dimensions:  11 rows, 11 columns
 #> Row names:  mpg, cyl, disp, hp, drat, wt, qsec, vs, am, gear, carb 
 #> Column names:  mpg, cyl, disp, hp, drat, wt, qsec, vs, am, gear, carb
 
 correlate(mtcars) %>% 
   as_md_tbl()
-#> # A tibble: 121 × 6
-#>    .rownames .colnames      r        p lower_ci upper_ci
-#>  * <chr>     <chr>      <dbl>    <dbl>    <dbl>    <dbl>
-#>  1 mpg       mpg        1     0          1         1    
-#>  2 cyl       mpg       -0.852 6.11e-10  -0.926    -0.716
-#>  3 disp      mpg       -0.848 9.38e-10  -0.923    -0.708
-#>  4 hp        mpg       -0.776 1.79e- 7  -0.885    -0.586
-#>  5 drat      mpg        0.681 1.78e- 5   0.436     0.832
-#>  6 wt        mpg       -0.868 1.29e-10  -0.934    -0.744
-#>  7 qsec      mpg        0.419 1.71e- 2   0.0820    0.670
-#>  8 vs        mpg        0.664 3.42e- 5   0.410     0.822
-#>  9 am        mpg        0.600 2.85e- 4   0.318     0.784
-#> 10 gear      mpg        0.480 5.40e- 3   0.158     0.710
+#> # A tibble: 121 × 4
+#>    .rownames .colnames      r        p
+#>  * <chr>     <chr>      <dbl>    <dbl>
+#>  1 mpg       mpg        1     0       
+#>  2 cyl       mpg       -0.852 6.11e-10
+#>  3 disp      mpg       -0.848 9.38e-10
+#>  4 hp        mpg       -0.776 1.79e- 7
+#>  5 drat      mpg        0.681 1.78e- 5
+#>  6 wt        mpg       -0.868 1.29e-10
+#>  7 qsec      mpg        0.419 1.71e- 2
+#>  8 vs        mpg        0.664 3.42e- 5
+#>  9 am        mpg        0.600 2.85e- 4
+#> 10 gear      mpg        0.480 5.40e- 3
 #> # … with 111 more rows
 ```
 
@@ -140,7 +141,7 @@ correlate(mtcars) %>%
 library(vegan)
 #> 载入需要的程辑包：permute
 #> 载入需要的程辑包：lattice
-#> This is vegan 2.5-7
+#> This is vegan 2.6-4
 data("varespec")
 data("varechem")
 correlate(varespec[1:30], varechem) %>% 
@@ -226,19 +227,11 @@ qcorrplot(correlate(varechem), type = "lower", diag = FALSE) +
 
 ``` r
 qpairs(iris) + geom_pairs()
+#> Warning: 'use_md' has been deprecated,
+#> please set 'parse' parameter instead.
 ```
 
 <img src="man/figures/README-unnamed-chunk-2-1.png" width="100%" />
-
-## network
-
-``` r
-correlate(mtcars) %>% 
-  as.igraph() %>% 
-  plot(layout = layout_with_circular)
-```
-
-<img src="man/figures/README-unnamed-chunk-3-1.png" width="100%" />
 
 ## Citation
 
