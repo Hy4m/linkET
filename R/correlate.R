@@ -71,8 +71,6 @@ correlate <- function(x,
                         y = y,
                         method = method,
                         use = use,
-                        adjust = adjust,
-                        adjust_method = adjust_method,
                         ...)
     } else if (engine == "WGCNA") {
       corAndPvalue <- get_function("WGCNA", "corAndPvalue")
@@ -81,19 +79,11 @@ correlate <- function(x,
                            method = method,
                            use = use,
                            ...)
-      if(isTRUE(adjust)) {
-        adjust_method <- match.arg(adjust_method, p.adjust.methods)
-        corr$p <- p.adjust(corr$p, adjust_method)
-      }
       out <- structure(.Data = list(r = corr$cor, p = corr$p),
                        class = "correlate")
     } else if (engine == "picante") {
       cor.table <- get_function("picante", "cor.table")
       corr <- cor.table(x = x, cor.method = method, ...)
-      if(isTRUE(adjust)) {
-        adjust_method <- match.arg(adjust_method, p.adjust.methods)
-        corr$p <- p.adjust(corr$p, adjust_method)
-      }
       out <- structure(.Data = list(r = corr$r, p = corr$P),
                        class = "correlate")
     } else if (engine == "Hmisc") {
@@ -102,10 +92,6 @@ correlate <- function(x,
                                 y = if (!is.null(y)) as.matrix(y) else NULL,
                                 type = method,
                                 ...))
-      if (isTRUE(adjust)) {
-        adjust_method <- match.arg(adjust_method, p.adjust.methods)
-        out$p <- p.adjust(out$p, adjust_method)
-      }
     } else if (engine == "psych") {
       corr.test <- get_function("psych", "corr.test")
       x <- as.data.frame(x)
@@ -127,10 +113,13 @@ correlate <- function(x,
                                       p_adjust = p_adjust,
                                       ...))
     }
+    if ((!engine %in% c("psych", "correlation")) && isTRUE(adjust)) {
+      warning("It's unwise to adjust p-value in the `correlate()` function,\n",
+              "you can use `correlate() |> adjust_pvalue()` instead.",
+              call. = FALSE)
+      out <- adjust_pvalue(out, method = adjust_method)
+    }
   } else {
-    # if (length(group) != nrow(x)) {
-    #   stop("group should have same length as rows of x.", call. = FALSE)
-    # }
     x <- tryCatch(as.data.frame(x), error = function(e) as.data.frame(as.matrix(x)))
     x <- split_by_group(x, group)
     if (!is.null(y)) {
@@ -162,8 +151,6 @@ correlate <- function(x,
                        y = NULL,
                        method = "pearson",
                        use = "everything",
-                       adjust = FALSE,
-                       adjust_method = "holm",
                        ...)
 {
   y_is_null <- is.null(y)
@@ -197,10 +184,10 @@ correlate <- function(x,
       p[.idx, .idy] <<- tmp$p.value
     })
   }
-  if (isTRUE(adjust)) {
-    adjust_method <- match.arg(adjust_method, p.adjust.methods)
-    p[] <- p.adjust(p, adjust_method)
-  }
+  # if (isTRUE(adjust)) {
+  #   adjust_method <- match.arg(adjust_method, p.adjust.methods)
+  #   p[] <- p.adjust(p, adjust_method)
+  # }
 
   structure(
     .Data = list(
