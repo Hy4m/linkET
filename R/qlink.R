@@ -80,7 +80,7 @@ qlink <- function(graph,
   }
   if (anyDuplicated(unlist(limits))) {
     stop("Contain duplicate id,\n",
-         "maybe not set from and to id?", call. = FALSE)
+         "maybe not set `from` and `to` id?", call. = FALSE)
   }
 
   graph <- inner_link_side(graph, limits = limits)
