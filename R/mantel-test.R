@@ -16,8 +16,8 @@
 #' @param env_dist NULL (default) or \code{dist_func()}.
 #' @param env_ctrl_dist NULL (default) or \code{dist_func()}.
 #' @param seed a integer value.
-## @param spec_dist_method has been droped.
-## @param env_dist_method has been droped.
+## @param spec_all_dist_method has been droped.
+## @param env_all_dist_method has been droped.
 #' @param ... extra params passing to \code{mantel_fun}.
 #' @return a data.frame.
 #' @importFrom dplyr mutate
@@ -63,8 +63,8 @@ mantel_test <- function(spec,
                         env_dist = NULL,
                         env_ctrl_dist = NULL,
                         seed = 123,
-                        # spec_dist_method,
-                        # env_dist_method,
+                        # spec_all_dist_method,
+                        # env_all_dist_method,
                         ...)
 {
   if(!is.data.frame(spec))
@@ -90,12 +90,12 @@ mantel_test <- function(spec,
     }
   }
 
-  # if(!missing(spec_dist_method)) {
-  #   warning("'spec_dist_method' parameter has been deprecated,\n",
+  # if(!missing(spec_all_dist_method)) {
+  #   warning("'spec_all_dist_method' parameter has been deprecated,\n",
   #           "please use 'spec_dist' parameter instead.", call. = FALSE)
   # }
-  # if(!missing(env_dist_method)) {
-  #   warning("'env_dist_method' parameter has been deprecated,\n",
+  # if(!missing(env_all_dist_method)) {
+  #   warning("'env_all_dist_method' parameter has been deprecated,\n",
   #           "please use 'env_dist' parameter instead.", call. = FALSE)
   # }
 
@@ -213,39 +213,65 @@ mantel_test <- function(spec,
       subset(env, select = .x, drop = FALSE)
     }})
 
-  if(is.null(spec_dist)) {
-    all_spec_is_numeric <- all(vapply(spec, function(x) {
-      all(vapply(x, is.numeric, logical(1)))
-    }, logical(1)))
-    if(all_spec_is_numeric) {
-      ## detect rowsum is zero?
-      rowsum_is_zero <- vapply(spec, function(x) {
-        any(rowSums(x) == 0)
-      }, logical(1))
-      if (any(rowsum_is_zero)) {
-        message("`mantel_test()` using 'euclidean' dist method for 'spec'.")
-        spec_dist <- dist_func(.FUN = "vegdist", method = "euclidean")
+  if (!is.function(spec_dist)) {
+    if(is.null(spec_dist)) {
+
+      all_spec_is_numeric <- all(vapply(spec, function(x) {
+        all(vapply(x, is.numeric, logical(1)))
+      }, logical(1)))
+
+      if(all_spec_is_numeric) {
+        ## detect rowsum is zero?
+        rowsum_is_zero <- vapply(spec, function(x) {
+          any(rowSums(x) == 0)
+        }, logical(1))
+        if (any(rowsum_is_zero)) {
+          message("`mantel_test()` using 'euclidean' dist method for 'spec'.")
+          spec_dist <- dist_func(.FUN = "vegdist", method = "euclidean")
+        } else {
+          message("`mantel_test()` using 'bray' dist method for 'spec'.")
+          spec_dist <- dist_func(.FUN = "vegdist", method = "bray")
+        }
       } else {
-        message("`mantel_test()` using 'bray' dist method for 'spec'.")
-        spec_dist <- dist_func(.FUN = "vegdist", method = "bray")
+        message("`mantel_test()` using 'gower' dist method for 'spec'.")
+        spec_dist <- dist_func(.FUN = "gowdis")
       }
     } else {
-      message("`mantel_test()` using 'gower' dist method for 'spec'.")
-      spec_dist <- dist_func(.FUN = "gowdis")
+      dist_of_spec <- match.arg(spec_dist, all_dist_method)
+      if (spec_dist == "gower") {
+        spec_dist <- dist_func(.FUN = "gowdis")
+      } else if (spec_dist %in% c("manhattan", "euclidean", "canberra",
+                                  "maximum", "binary" ,"minkowski")) {
+        spec_dist <- dist_func(.FUN = "dist", method = dist_of_spec)
+      } else {
+        spec_dist <- dist_func(.FUN = "vegdist", method = dist_of_spec)
+      }
     }
   }
 
-  if(is.null(env_dist)) {
-    all_env_is_numeric <- all(vapply(env, function(x) {
-      all(vapply(x, is.numeric, logical(1)))
-    }, logical(1)))
+  if (!is.function(env_dist)) {
+    if(is.null(env_dist)) {
+      all_env_is_numeric <- all(vapply(env, function(x) {
+        all(vapply(x, is.numeric, logical(1)))
+      }, logical(1)))
 
-    if(all_env_is_numeric) {
-      message("`mantel_test()` using 'euclidean' dist method for 'env'.")
-      env_dist <- dist_func(.FUN = "vegdist", method = "euclidean")
+      if(all_env_is_numeric) {
+        message("`mantel_test()` using 'euclidean' dist method for 'env'.")
+        env_dist <- dist_func(.FUN = "vegdist", method = "euclidean")
+      } else {
+        message("`mantel_test()` using 'gower' dist method for 'env'.")
+        env_dist <- dist_func(.FUN = "gowdis")
+      }
     } else {
-      message("`mantel_test()` using 'gower' dist method for 'env'.")
-      env_dist <- dist_func(.FUN = "gowdis")
+      dist_of_env <- match.arg(env_dist, all_dist_method)
+      if (env_dist == "gower") {
+        env_dist <- dist_func(.FUN = "gowdis")
+      } else if (env_dist %in% c("manhattan", "euclidean", "canberra",
+                                 "maximum", "binary" ,"minkowski")) {
+        env_dist <- dist_func(.FUN = "dist", method = dist_of_env)
+      } else {
+        env_dist <- dist_func(.FUN = "vegdist", method = dist_of_env)
+      }
     }
   }
 
@@ -254,11 +280,25 @@ mantel_test <- function(spec,
     .env <- env[[.y]]
     if(mantel_fun == "mantel.partial") {
       .env_ctrl <- env_ctrl[[.y]]
-      if(is.null(env_ctrl_dist)) {
-        if(all(vapply(.env_ctrl, is.numeric, logical(1)))) {
-          env_ctrl_dist <- dist_func(.FUN = "vegdist", method = "euclidean")
+      if (!is.function(env_ctrl_dist)) {
+        if(is.null(env_ctrl_dist)) {
+          if(all(vapply(.env_ctrl, is.numeric, logical(1)))) {
+            message("`mantel_test()` using 'euclidean' dist method for 'env_ctrl'.")
+            env_ctrl_dist <- dist_func(.FUN = "vegdist", method = "euclidean")
+          } else {
+            message("`mantel_test()` using 'gowdis' dist method for 'env_ctrl'.")
+            env_ctrl_dist <- dist_func(.FUN = "gowdis")
+          }
         } else {
-          env_ctrl_dist <- dist_func(.FUN = "gowdis")
+          dist_of_ctrl <- match.arg(env_ctrl_dist, all_dist_method)
+          if (env_ctrl_dist == "gower") {
+            env_ctrl_dist <- dist_func(.FUN = "gowdis")
+          } else if (env_ctrl_dist %in% c("manhattan", "euclidean", "canberra",
+                                          "maximum", "binary" ,"minkowski")) {
+            env_ctrl_dist <- dist_func(.FUN = "dist", method = dist_of_ctrl)
+          } else {
+            env_ctrl_dist <- dist_func(.FUN = "vegdist", method = dist_of_ctrl)
+          }
         }
       }
     }
@@ -346,6 +386,13 @@ check_env_ctrl <- function(env, env_ctrl, env_select) {
   env_ctrl
 }
 
+#' @noRd
+all_dist_method <- c(
+  "manhattan", "euclidean", "canberra", "clark", "bray", "kulczynski",
+  "jaccard", "gower", "altGower", "morisita", "horn", "mountford", "raup",
+  "binomial", "chao", "cao", "mahalanobis", "chisq", "chord", "hellinger",
+  "aitchison", "robust.aitchison", "maximum", "binary", "minkowski"
+)
 
 #' @title Subset columns using regular expression
 #' Subset columns from a data frame if column names match the regular pattern.
