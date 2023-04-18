@@ -100,18 +100,28 @@ reorder_by.correlate <- function(x,
   is_symmet <- identical(rownames(r), colnames(r))
 
   if (identical(by_rows, "hclust")) {
-    if (is_symmet && is.null(dist_fun)) {
-      by_rows <- stats::as.dist(1 - r)
+    if (is_symmet) {
+      if (is.null(dist_fun)) {
+        by_rows <- stats::as.dist(1 - r)
+      } else {
+        by_rows <- dist_fun(r)
+      }
     } else {
-      by_rows <- dist_fun(r, ...)
+      dist_fun <- dist_fun %||% dist_func()
+      by_rows <- dist_fun(r)
     }
   }
 
   if (identical(by_cols, "hclust")) {
-    if (is_symmet && is.null(dist_fun)) {
-      by_cols <- stats::as.dist(1 - t(r))
+    if (is_symmet) {
+      if (is.null(dist_fun)) {
+        by_cols <- stats::as.dist(1 - t(r))
+      } else {
+        by_cols <- dist_fun(t(r))
+      }
     } else {
-      by_cols <- dist_fun(t(r), ...)
+      dist_fun <- dist_fun %||% dist_func()
+      by_cols <- dist_fun(t(r))
     }
   }
 
