@@ -67,57 +67,12 @@ qcorrplot.cor_md_tbl <- function(data,
   p <- p + theme(panel.background = element_blank(),
                  axis.ticks = element_blank())
 
+  ## check if or not use corrplot-style
+  if (inherits(getOption("linkET.corrplot.style"), "Scale")) {
+    p <- p + getOption("linkET.corrplot.style")
+  }
+
   p
-}
-
-
-#' @rdname qcorrplot
-#' @method qcorrplot matrix
-qcorrplot.matrix <- function(data,
-                             mapping = NULL,
-                             drop = FALSE,
-                             parse = FALSE,
-                             grid_col = "grey50",
-                             grid_size = 0.25,
-                             fixed = TRUE,
-                             facets = list(),
-                             use_md,
-                             ...) {
-  data <- as_correlate(data)
-  qcorrplot(data = data,
-            mapping = mapping,
-            drop = drop,
-            parse = parse,
-            grid_col = grid_col,
-            grid_size = grid_size,
-            fixed = fixed,
-            use_md = use_md,
-            facets = facets,
-            ...)
-}
-
-#' @rdname qcorrplot
-#' @method qcorrplot data.frame
-qcorrplot.data.frame <- function(data,
-                                 mapping = NULL,
-                                 drop = FALSE,
-                                 parse = FALSE,
-                                 grid_col = "grey50",
-                                 grid_size = 0.25,
-                                 fixed = TRUE,
-                                 facets = list(),
-                                 use_md,
-                                 ...) {
-  data <- as_correlate(data)
-  qcorrplot(data = data,
-            mapping = mapping,
-            drop = drop,
-            parse = parse,
-            grid_col = grid_col,
-            grid_size = grid_size,
-            fixed = fixed,
-            facets = facets,
-            ...)
 }
 
 #' @rdname qcorrplot
@@ -133,6 +88,10 @@ qcorrplot.default <- function(data,
                               facets_order = NULL,
                               use_md,
                               ...) {
+  if (is.matrix(data) || is.data.frame(data)) {
+    data <- as_correlate(data)
+  }
+
   data <- as_md_tbl(data, ...)
   qcorrplot(data = data,
             mapping = mapping,

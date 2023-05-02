@@ -18,7 +18,7 @@
   # }
 
   ### register S3 method about qcorrplot
-  for (g in c("cor_md_tbl", "matrix", "data.frame", "default")) {
+  for (g in c("cor_md_tbl", "default")) {
     register_s3_method("linkET", "qcorrplot", g)
   }
 
