@@ -3,6 +3,7 @@
 #' @param x matrix data.
 #' @param by_rows,by_cols method of reorder, default is "hclust".
 #' @param dist_fun a function to calculute distance matrix.
+#' @param order the index of the matrix to be reordered.
 #' @param ... other parameters.
 #' @return same object with `x`.
 #' @author Hou Yun
@@ -16,7 +17,7 @@ reorder_by <- function(x, ...) {
 #' @export
 reorder_by.matrix <- function(x,
                               by_rows = "hclust",
-                              by_cols = by_rows,
+                              by_cols = "hclust",
                               dist_fun = dist_func(),
                               ...) {
   if (identical(by_rows, "none") && identical(by_cols, "none")) {
@@ -78,7 +79,7 @@ reorder_by.matrix <- function(x,
 #' @export
 reorder_by.data.frame <- function(x,
                                   by_rows = "hclust",
-                                  by_cols = by_rows,
+                                  by_cols = "hclust",
                                   dist_fun = dist_func(),
                                   ...) {
   x <- reorder_by(x = as.matrix(x),
@@ -93,7 +94,7 @@ reorder_by.data.frame <- function(x,
 #' @export
 reorder_by.correlate <- function(x,
                                  by_rows = "hclust",
-                                 by_cols = by_rows,
+                                 by_cols = "hclust",
                                  dist_fun = NULL,
                                  ...) {
   r <- x$r
@@ -149,26 +150,27 @@ reorder_by.correlate <- function(x,
 #' @export
 reorder_by.matrix_data <- function(x,
                                    by_rows = "hclust",
-                                   by_cols = by_rows,
+                                   by_cols = "hclust",
                                    dist_fun = dist_func(),
+                                   order = 1,
                                    ...) {
-  first <- reorder_by(x = x[[1]],
-                      by_rows = by_rows,
-                      by_cols = by_cols,
-                      dist_fun = dist_fun,
-                      ...)
-  rnm <- rownames(first)
-  cnm <- colnames(first)
+  mat <- reorder_by(x = x[[order]],
+                    by_rows = by_rows,
+                    by_cols = by_cols,
+                    dist_fun = dist_fun,
+                    ...)
+  rnm <- rownames(mat)
+  cnm <- colnames(mat)
   for (ii in seq_along(x)) {
-    if (ii == 1L) {
-      x[[ii]] <- first
+    if (ii == order) {
+      x[[ii]] <- mat
     } else {
       if (is.null(x[[ii]])) next
       x[[ii]] <- x[[ii]][rnm, cnm, drop = FALSE]
     }
   }
-  attr(x, "row_tree") <- attr(first, "row_tree")
-  attr(x, "col_tree") <- attr(first, "col_tree")
+  attr(x, "row_tree") <- attr(mat, "row_tree")
+  attr(x, "col_tree") <- attr(mat, "col_tree")
   attr(x, "row_names") <- rnm
   attr(x, "col_names") <- cnm
   x

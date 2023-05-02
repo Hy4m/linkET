@@ -14,7 +14,7 @@ reorder_by(x, ...)
 \method{reorder_by}{matrix}(
   x,
   by_rows = "hclust",
-  by_cols = by_rows,
+  by_cols = "hclust",
   dist_fun = dist_func(),
   ...
 )
@@ -22,18 +22,19 @@ reorder_by(x, ...)
 \method{reorder_by}{data.frame}(
   x,
   by_rows = "hclust",
-  by_cols = by_rows,
+  by_cols = "hclust",
   dist_fun = dist_func(),
   ...
 )
 
-\method{reorder_by}{correlate}(x, by_rows = "hclust", by_cols = by_rows, dist_fun = NULL, ...)
+\method{reorder_by}{correlate}(x, by_rows = "hclust", by_cols = "hclust", dist_fun = NULL, ...)
 
 \method{reorder_by}{matrix_data}(
   x,
   by_rows = "hclust",
-  by_cols = by_rows,
+  by_cols = "hclust",
   dist_fun = dist_func(),
+  order = 1,
   ...
 )
 
@@ -47,6 +48,8 @@ reorder_by(x, ...)
 \item{by_rows, by_cols}{method of reorder, default is "hclust".}
 
 \item{dist_fun}{a function to calculute distance matrix.}
+
+\item{order}{the index of the matrix to be reordered.}
 }
 \value{
 same object with `x`.
