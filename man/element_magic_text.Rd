@@ -28,7 +28,7 @@ be parsed into expression.}
 
 \item{face}{Font face ("plain", "italic", "bold", "bold.italic")}
 
-\item{size}{Line/border size in mm; text size in pts.}
+\item{size}{text size in pts.}
 
 \item{colour, color}{Line/border colour. Color is an alias for colour.}
 

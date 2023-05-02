@@ -3,8 +3,6 @@
 \name{qcorrplot}
 \alias{qcorrplot}
 \alias{qcorrplot.cor_md_tbl}
-\alias{qcorrplot.matrix}
-\alias{qcorrplot.data.frame}
 \alias{qcorrplot.default}
 \title{Correlation Plot
 This functions can be used to visualize simply and directly a correlation matrix.}
@@ -21,32 +19,6 @@ qcorrplot(data, ...)
   fixed = TRUE,
   facets = list(),
   facets_order = NULL,
-  use_md,
-  ...
-)
-
-\method{qcorrplot}{matrix}(
-  data,
-  mapping = NULL,
-  drop = FALSE,
-  parse = FALSE,
-  grid_col = "grey50",
-  grid_size = 0.25,
-  fixed = TRUE,
-  facets = list(),
-  use_md,
-  ...
-)
-
-\method{qcorrplot}{data.frame}(
-  data,
-  mapping = NULL,
-  drop = FALSE,
-  parse = FALSE,
-  grid_col = "grey50",
-  grid_size = 0.25,
-  fixed = TRUE,
-  facets = list(),
   use_md,
   ...
 )
