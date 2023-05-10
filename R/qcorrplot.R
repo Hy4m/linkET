@@ -89,7 +89,8 @@ qcorrplot.default <- function(data,
                               use_md,
                               ...) {
   if (is.matrix(data) || is.data.frame(data)) {
-    data <- as_correlate(data)
+    data <- tryCatch(as_correlate(data),
+                     error = function(e) {as_md_tbl(data, ...)})
   }
 
   data <- as_md_tbl(data, ...)
