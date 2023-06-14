@@ -1,4 +1,4 @@
-#' @title Correlation Plot
+#' @title Init Correlation Plot
 #' This functions can be used to visualize simply and directly a correlation matrix.
 #' @param data one of 'correlate', 'rcorr' or 'corr.test' object.
 #' @param mapping default list of aesthetic mappings to use for plot.

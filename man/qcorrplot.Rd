@@ -4,7 +4,7 @@
 \alias{qcorrplot}
 \alias{qcorrplot.cor_md_tbl}
 \alias{qcorrplot.default}
-\title{Correlation Plot
+\title{Init Correlation Plot
 This functions can be used to visualize simply and directly a correlation matrix.}
 \usage{
 qcorrplot(data, ...)
@@ -64,7 +64,7 @@ qcorrplot(data, ...)
 a gg object.
 }
 \description{
-Correlation Plot
+Init Correlation Plot
 This functions can be used to visualize simply and directly a correlation matrix.
 }
 \examples{
