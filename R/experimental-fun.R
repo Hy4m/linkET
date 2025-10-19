@@ -217,9 +217,9 @@ ggplot_add.geom_pairs <- function(object, plot, object_name) {
   if (length(id_bar) > 0) {
     for (i in id_bar) {
       if (type == "dc") {
-        layers[[i]]$mapping <- aes_modify(layers[[i]]$mapping, aes_string(x = "..count.."))
+        layers[[i]]$mapping <- aes_modify(layers[[i]]$mapping, aes(x = `..count..`))
       } else {
-        layers[[i]]$mapping <- aes_modify(layers[[i]]$mapping, aes_string(y = "..count.."))
+        layers[[i]]$mapping <- aes_modify(layers[[i]]$mapping, aes(y = `..count..`))
       }
     }
   }
@@ -252,11 +252,11 @@ register_pairs_plot <- function(...,
                                 scale = list(),
                                 reset = FALSE) {
   layers <- list("point" = ggplot2::geom_point(),
-                 "histogram" = ggplot2::geom_histogram(aes_string(y = "..count..")),
+                 "histogram" = ggplot2::geom_histogram(aes(y = `..count..`)),
                  "bar" = ggplot2::geom_bar(),
                  "boxplot" = ggplot2::geom_boxplot(),
                  "violin" = ggplot2::geom_violin(),
-                 "density" = ggplot2::geom_density(aes_string(y = "..density..")),
+                 "density" = ggplot2::geom_density(aes(y = `..density..`)),
                  "density_2d" = ggplot2::geom_density_2d(),
                  "lm" = ggplot2::geom_smooth(method = "lm"),
                  "smooth" = ggplot2::geom_smooth(),
@@ -480,7 +480,7 @@ plot_type <- function(...) {
     }
   }
   df$.plot <- lapply(seq_len(nrow(df)), function(ii) {
-    mapping2 <- aes_string(x = df$.colnames[ii], y = df$.rownames[ii])
+    mapping2 <- aes(x = !!sym(df$.colnames[ii]), y = !!sym(df$.rownames[ii]))
     mapping <- aes_modify(mapping, mapping2)
     p <- ggplot(data = source_data, mapping = mapping) + ggplot2::theme_void()
     Reduce("+", scale, init = p)

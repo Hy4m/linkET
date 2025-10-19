@@ -150,7 +150,7 @@ gen_tree <- function(hc, side = "t") {
     }
   }
 
-  ggplot(data, aes_string(x = "x", xend = "xend", y = "y", yend = "yend")) +
+  ggplot(data, aes(x = x, xend = xend, y = y, yend = yend)) +
     ggplot2::geom_segment() +
     ggplot2::theme_void()
 }
@@ -178,7 +178,7 @@ gen_hc_bar <- function(hc,
     df <- tibble::tibble(x = names(tree),
                          y = "y",
                          fill = colour[unname(tree)])
-    ggplot(df, aes_string(x = "x", y = "y", fill = "fill")) +
+    ggplot(df, aes(x = x, y = y, fill = fill)) +
       ggplot2::geom_tile(colour = border) +
       ggplot2::scale_fill_identity() +
       ggplot2::scale_x_discrete(limits = names(tree)) +
@@ -188,7 +188,7 @@ gen_hc_bar <- function(hc,
     df <- tibble::tibble(x = "x",
                          y = names(tree),
                          fill = colour[unname(tree)])
-    ggplot(df, aes_string(x = "x", y = "y", fill = "fill")) +
+    ggplot(df, aes(x = x, y = y, fill = fill)) +
       ggplot2::geom_tile(colour = border) +
       ggplot2::scale_fill_identity() +
       ggplot2::scale_y_discrete(limits = names(tree)) +
