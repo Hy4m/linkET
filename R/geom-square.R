@@ -56,7 +56,7 @@ GeomSquare <- ggproto(
   ),
   required_aes = c("x", "y"),
 
-  # ✅ 在 setup_data 阶段生成矩形边界
+  # Generate rectangular boundaries during the setup data phase
   setup_data = function(data, params) {
     if (is.null(data$r0)) data$r0 <- 0.5
     dd <- point_to_square(data$x, data$y, data$r0)
