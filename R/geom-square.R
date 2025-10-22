@@ -50,27 +50,35 @@ geom_square <- function(mapping = NULL,
 #' @export
 GeomSquare <- ggproto(
   "GeomSquare", GeomRect,
-  default_aes = aes(r0 = 0.5, colour = "grey35", fill = NA, size = 0.25, linetype = 1,
-                    alpha = NA),
+  default_aes = aes(
+    r0 = 0.5, colour = "grey35", fill = NA,
+    size = 0.25, linetype = 1, alpha = NA
+  ),
   required_aes = c("x", "y"),
-  draw_panel = function(self, data, panel_params, coord, linejoin = "mitre") {
-    aesthetics <- setdiff(names(data), c("x", "y", "xmin", "ymin", "xmax", "ymax"))
+
+  # Generate rectangular boundaries during the setup data phase
+  setup_data = function(data, params) {
+    if (is.null(data$r0)) data$r0 <- 0.5
     dd <- point_to_square(data$x, data$y, data$r0)
-    data <- cbind(dd, data[, aesthetics, drop = FALSE])
+    cbind(dd, data)
+  },
+
+  draw_panel = function(self, data, panel_params, coord, linejoin = "mitre") {
     GeomRect$draw_panel(data, panel_params, coord)
   },
 
   draw_key = draw_key_polygon
 )
 
+
 #' @noRd
 point_to_square <- function(x, y, r0) {
   r0 <- 0.5 * sign(r0) * sqrt(abs(r0))
-  n <- length(x)
   new_data_frame(list(
-    xmin = - r0 + x,
+    xmin = -r0 + x,
     xmax = r0 + x,
-    ymin = - r0 + y,
-    ymax = r0 + y))
+    ymin = -r0 + y,
+    ymax = r0 + y
+  ))
 }
 

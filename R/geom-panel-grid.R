@@ -3,7 +3,7 @@
 #'     function to add a panel grid line on plot region.
 #' @param colour,color colour of grid lines.
 #' @param size size of grid lines.
-#' @importFrom ggplot2 geom_segment aes_string
+#' @importFrom ggplot2 geom_segment
 #' @rdname geom_panel_grid
 #' @export
 geom_panel_grid <- function(colour = "grey50",
@@ -19,9 +19,9 @@ geom_panel_grid <- function(colour = "grey50",
 #' @importFrom ggplot2 ggplot_add geom_segment
 #' @export
 ggplot_add.geom_panel_grid <- function(object, plot, object_name) {
-  obj <- geom_segment(aes_string(x = "x", y = "y", xend = "xend", yend = "yend"),
+  obj <- geom_segment(aes(x = x, y = y, xend = xend, yend = yend),
                       data = get_grid_data(plot$data),
-                      colour = object$colour, size = object$size,
+                      colour = object$colour, linewidth = object$size,
                       inherit.aes = FALSE)
   ggplot_add(object = obj, plot = plot, object_name = object_name)
 }

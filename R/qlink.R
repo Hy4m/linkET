@@ -200,8 +200,8 @@ qlink <- function(graph,
   graph <- dplyr::bind_rows(graph, nodes)
 
   if (empty_edges) {
-    mapping <- aes_modify(mapping, aes_string(x = ".x", y = ".y",
-                                              xend = ".xend", yend = ".yend"))
+    mapping <- aes_modify(mapping, aes(x = `.x`, y = `.y`,
+                                              xend = `.xend`, yend = `.yend`))
     p <- ggplot(graph, mapping) + ggplot2::theme_void()
   } else {
     graph <- gen_half_circle(graph,
@@ -212,9 +212,9 @@ qlink <- function(graph,
     if (!grepl("geom_", geom, fixed = TRUE)) {
       geom <- paste0("geom_", geom)
     }
-    mapping <- aes_modify(mapping, aes_string(x = ".x",
-                                              y = ".y",
-                                              group = ".group"))
+    mapping <- aes_modify(mapping, aes(x = `.x`,
+                                              y = `.y`,
+                                              group = `.group`))
     data <- function(data) data[data$.isEdges, , drop = FALSE]
     p <- ggplot(graph, mapping) + do.call(geom, c(params, list(data = data)))
     p <- p + ggplot2::scale_x_continuous(limits = rngs$b %||% rngs$t,
