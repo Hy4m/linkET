@@ -1,3 +1,4 @@
+Note：**Due to limited time and energy, development and maintenance of linkET will be discontinued. Anyone interested in taking over the project’s maintenance may reach out to me.**
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
